@@ -11,8 +11,8 @@
 
 "@animoca/ethereum-contracts-core-1.0.0@npm:@animoca/ethereum-contracts-core@1.0.0", "@animoca/ethereum-contracts-core@^1.0.0":
   version "1.0.0"
-  resolved "https://nexus3.animocabrands.com/repository/npm-group/@animoca/ethereum-contracts-core/-/ethereum-contracts-core-1.0.0.tgz#c5eaab1dca0b514904fd8df60a2c6eda8b8d594a"
-  integrity sha512-Z4ctb8Wgwlfr/YgKhgBjqu9TfFoawIj3UHBxdAUq8Pz1FrclLECGmGLnkM4ZTh2EUwmYXh354ep6VmG0pS6MGw==
+  resolved "https://nexus3.animocabrands.com/repository/npm-group/@animoca/ethereum-contracts-core/-/ethereum-contracts-core-1.0.0.tgz#25a2363e7ed39acc0ccfb2167c427ab2f66c4f76"
+  integrity sha512-ktWXrd9J5vIuGgFnp3OQfecJo95P8NQiS7+FC6njOSFVGcf2QsYkYLwjn2AQBVrjLIUp/bH8OinBSUvVcEpEdw==
   dependencies:
     "@nomiclabs/hardhat-truffle5" "^2.0.0"
     "@nomiclabs/hardhat-web3" "^2.0.0"
@@ -36,8 +36,8 @@
 
 "@animoca/ethereum-hardhat-bootstrap@^1.0.0":
   version "1.0.0"
-  resolved "https://nexus3.animocabrands.com/repository/npm-group/@animoca/ethereum-hardhat-bootstrap/-/ethereum-hardhat-bootstrap-1.0.0.tgz#2a05adbaaa183f06e5258c62d4607cc2a5dd3709"
-  integrity sha512-bCUXCWoLUbqNvMPis7w3IiMI33rqOa1N5n2ahc2Dn+p+Dm8s5+5ma/7ouyxTBngLhLUc8OkSa7m4DZ2lNF+EyA==
+  resolved "https://nexus3.animocabrands.com/repository/npm-group/@animoca/ethereum-hardhat-bootstrap/-/ethereum-hardhat-bootstrap-1.0.0.tgz#f6a541a30946e64be5ea3deb557ff0bf2720a5b2"
+  integrity sha512-f5H5dMIfC61LDGuIMfmnMrySPCCenx6fjLrhTLgB+Ketdj1viXRzRxo5950b0wZUvmV5gWXW9cm9MBF2KEN+9Q==
   dependencies:
     commander "^7.2.0"
     eslint "^7.29.0"
@@ -1033,9 +1033,9 @@
     "@types/node" "*"
 
 "@types/chai@^4.2.0":
-  version "4.2.18"
-  resolved "https://registry.yarnpkg.com/@types/chai/-/chai-4.2.18.tgz#0c8e298dbff8205e2266606c1ea5fbdba29b46e4"
-  integrity sha512-rS27+EkB/RE1Iz3u0XtVL5q36MGDWbgYe7zWiodyKNUnthxY0rukK5V36eiUCtCisB7NN8zKYH6DO2M37qxFEQ==
+  version "4.2.19"
+  resolved "https://registry.yarnpkg.com/@types/chai/-/chai-4.2.19.tgz#80f286b515897413c7a35bdda069cc80f2344233"
+  integrity sha512-jRJgpRBuY+7izT7/WNXP/LsMO9YonsstuL+xuvycDyESpoDoIAsMd7suwpB4h9oEWB+ZlPTqJJ8EHomzNhwTPQ==
 
 "@types/concat-stream@^1.6.0":
   version "1.6.0"
@@ -2408,9 +2408,9 @@ copy-descriptor@^0.1.0:
   integrity sha1-Z29us8OZl8LuGsOpJP1hJHSPV40=
 
 core-js-pure@^3.0.1:
-  version "3.14.0"
-  resolved "https://registry.yarnpkg.com/core-js-pure/-/core-js-pure-3.14.0.tgz#72bcfacba74a65ffce04bf94ae91d966e80ee553"
-  integrity sha512-YVh+LN2FgNU0odThzm61BsdkwrbrchumFq3oztnE9vTKC4KS2fvnPmcx8t6jnqAyOTCTF4ZSiuK8Qhh7SNcL4g==
+  version "3.15.0"
+  resolved "https://registry.yarnpkg.com/core-js-pure/-/core-js-pure-3.15.0.tgz#c19349ae0be197b8bcf304acf4d91c5e29ae2091"
+  integrity sha512-RO+LFAso8DB6OeBX9BAcEGvyth36QtxYon1OyVsITNVtSKr/Hos0BXZwnsOJ7o+O6KHtK+O+cJIEj9NGg6VwFA==
 
 core-util-is@1.0.2, core-util-is@~1.0.0:
   version "1.0.2"
