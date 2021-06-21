@@ -6,9 +6,9 @@ import {IERC721} from "./IERC721.sol";
 import {IERC721Receiver} from "./IERC721Receiver.sol";
 import {IERC721Metadata} from "./IERC721Metadata.sol";
 import {IERC721BatchTransfer} from "./IERC721BatchTransfer.sol";
-import {IERC165} from "@animoca/ethereum-contracts-core-1.0.0/contracts/introspection/IERC165.sol";
-import {ManagedIdentity} from "@animoca/ethereum-contracts-core-1.0.0/contracts/metatx/ManagedIdentity.sol";
-import {AddressIsContract} from "@animoca/ethereum-contracts-core-1.0.0/contracts/utils/types/AddressIsContract.sol";
+import {IERC165} from "@animoca/ethereum-contracts-core-1.0.1/contracts/introspection/IERC165.sol";
+import {ManagedIdentity} from "@animoca/ethereum-contracts-core-1.0.1/contracts/metatx/ManagedIdentity.sol";
+import {AddressIsContract} from "@animoca/ethereum-contracts-core-1.0.1/contracts/utils/types/AddressIsContract.sol";
 
 /**
  * @dev Implementation of https://eips.ethereum.org/EIPS/eip-721[ERC721] Non-Fungible Token Standard, including

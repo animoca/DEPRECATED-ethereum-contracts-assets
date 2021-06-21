@@ -2,9 +2,9 @@
 
 pragma solidity >=0.7.6 <0.8.0;
 
-import {Ownable} from "@animoca/ethereum-contracts-core-1.0.0/contracts/access/Ownable.sol";
-import {ITokenPredicate} from "@animoca/ethereum-contracts-core-1.0.0/contracts/bridging/ITokenPredicate.sol";
-import {RLPReader} from "@animoca/ethereum-contracts-core-1.0.0/contracts/utils/RLPReader.sol";
+import {Ownable} from "@animoca/ethereum-contracts-core-1.0.1/contracts/access/Ownable.sol";
+import {ITokenPredicate} from "@animoca/ethereum-contracts-core-1.0.1/contracts/bridging/ITokenPredicate.sol";
+import {RLPReader} from "@animoca/ethereum-contracts-core-1.0.1/contracts/utils/RLPReader.sol";
 
 abstract contract ERC20BasePredicate is ITokenPredicate, Ownable {
     using RLPReader for bytes;

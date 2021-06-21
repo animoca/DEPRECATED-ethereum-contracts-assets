@@ -4,15 +4,15 @@
 
 "@animoca/blockchain-inventory_metadata@^0.1.0":
   version "0.1.0"
-  resolved "https://nexus3.animocabrands.com/repository/npm-group/@animoca/blockchain-inventory_metadata/-/blockchain-inventory_metadata-0.1.0.tgz#fddcc64e8af3ecb4246160a4547e14db7bec629f"
+  resolved "https://registry.yarnpkg.com/@animoca/blockchain-inventory_metadata/-/blockchain-inventory_metadata-0.1.0.tgz#fddcc64e8af3ecb4246160a4547e14db7bec629f"
   integrity sha512-dSaTxsMv9uZlwqfFwEwwKFBPaBYbOdklNm/TgUEJ8AvHgMLtvgJdBabjTbFDmtxREVCm4l2Zu6G7UUO3/izeew==
   dependencies:
     big-integer "^1.6.48"
 
-"@animoca/ethereum-contracts-core-1.0.0@npm:@animoca/ethereum-contracts-core@1.0.0", "@animoca/ethereum-contracts-core@^1.0.0":
-  version "1.0.0"
-  resolved "https://nexus3.animocabrands.com/repository/npm-group/@animoca/ethereum-contracts-core/-/ethereum-contracts-core-1.0.0.tgz#25a2363e7ed39acc0ccfb2167c427ab2f66c4f76"
-  integrity sha512-ktWXrd9J5vIuGgFnp3OQfecJo95P8NQiS7+FC6njOSFVGcf2QsYkYLwjn2AQBVrjLIUp/bH8OinBSUvVcEpEdw==
+"@animoca/ethereum-contracts-core-1.0.1@npm:@animoca/ethereum-contracts-core@1.0.1", "@animoca/ethereum-contracts-core@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@animoca/ethereum-contracts-core/-/ethereum-contracts-core-1.0.1.tgz#8677761e017ff079ca3d1c14d614c2de114c0d07"
+  integrity sha512-Mc0Uhebk/lIdwaJXzuIHBVkPChnJ9Jy8XMWOa8eTkzdzyWlvUDIEzKL0tzjKC3ezYL/TGozlygXF4s9vrWie4Q==
   dependencies:
     "@nomiclabs/hardhat-truffle5" "^2.0.0"
     "@nomiclabs/hardhat-web3" "^2.0.0"
@@ -36,7 +36,7 @@
 
 "@animoca/ethereum-hardhat-bootstrap@^1.0.0":
   version "1.0.0"
-  resolved "https://nexus3.animocabrands.com/repository/npm-group/@animoca/ethereum-hardhat-bootstrap/-/ethereum-hardhat-bootstrap-1.0.0.tgz#f6a541a30946e64be5ea3deb557ff0bf2720a5b2"
+  resolved "https://registry.yarnpkg.com/@animoca/ethereum-hardhat-bootstrap/-/ethereum-hardhat-bootstrap-1.0.0.tgz#f6a541a30946e64be5ea3deb557ff0bf2720a5b2"
   integrity sha512-f5H5dMIfC61LDGuIMfmnMrySPCCenx6fjLrhTLgB+Ketdj1viXRzRxo5950b0wZUvmV5gWXW9cm9MBF2KEN+9Q==
   dependencies:
     commander "^7.2.0"
@@ -9295,9 +9295,9 @@ yargs-parser@^2.4.1:
     lodash.assign "^4.0.6"
 
 yargs-parser@^20.2.2:
-  version "20.2.7"
-  resolved "https://registry.yarnpkg.com/yargs-parser/-/yargs-parser-20.2.7.tgz#61df85c113edfb5a7a4e36eb8aa60ef423cbc90a"
-  integrity sha512-FiNkvbeHzB/syOjIUxFDCnhSfzAL8R5vs40MgLFBorXACCOAEaWu0gRZl14vG8MR9AOJIZbmkjhusqBYZ3HTHw==
+  version "20.2.9"
+  resolved "https://registry.yarnpkg.com/yargs-parser/-/yargs-parser-20.2.9.tgz#2eb7dc3b0289718fc295f362753845c41a0c94ee"
+  integrity sha512-y11nGElTIV+CT3Zv9t7VKl+Q3hTQoT9a1Qzezhhl6Rp21gJ/IVTW7Z3y9EWXhuUBC2Shnf+DX0antecpAwSP8w==
 
 yargs-parser@^7.0.0:
   version "7.0.0"
