@@ -1,6 +1,6 @@
 {
   "name": "@animoca/ethereum-contracts-assets",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Base assets contracts",
   "author": "Animoca Brands",
   "license": "MIT",
@@ -64,7 +64,7 @@
     "run-all": "run-s run-all:contracts",
     "run-all:contracts": "run-s format fix clean:contracts clean:artifacts:hard compile flatten smartcheck test coverage doc",
     "prepack": "run-s prepack:contracts",
-    "prepack:contracts": "run-s clean:artifacts:hard compile clean",
+    "prepack:contracts": "run-s compile clean",
     "release:private": "animoca-release-package private",
     "release:public": "animoca-release-package public"
   },
