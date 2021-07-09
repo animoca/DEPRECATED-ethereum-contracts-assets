@@ -3,7 +3,7 @@
 pragma solidity >=0.7.6 <0.8.0;
 
 import {IERC721Receiver} from "./IERC721Receiver.sol";
-import {IERC165} from "@animoca/ethereum-contracts-core-1.0.1/contracts/introspection/IERC165.sol";
+import {IERC165} from "@animoca/ethereum-contracts-core-1.1.0/contracts/introspection/IERC165.sol";
 
 abstract contract ERC721Receiver is IERC721Receiver, IERC165 {
     bytes4 private constant _ERC165_INTERFACE_ID = type(IERC165).interfaceId;

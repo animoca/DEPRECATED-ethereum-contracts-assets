@@ -3,7 +3,7 @@
 pragma solidity >=0.7.6 <0.8.0;
 
 import {ERC1155InventoryIdentifiersLib, ERC1155InventoryBase} from "./ERC1155InventoryBase.sol";
-import {AddressIsContract} from "@animoca/ethereum-contracts-core-1.0.1/contracts/utils/types/AddressIsContract.sol";
+import {AddressIsContract} from "@animoca/ethereum-contracts-core-1.1.0/contracts/utils/types/AddressIsContract.sol";
 
 /**
  * @title ERC1155Inventory, a contract which manages up to multiple Collections of Fungible and Non-Fungible Tokens

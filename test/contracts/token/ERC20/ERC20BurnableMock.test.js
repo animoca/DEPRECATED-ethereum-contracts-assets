@@ -25,6 +25,10 @@ const implementation = {
     TransferRefused: 'ERC20: transfer refused',
     MintToZero: 'ERC20: zero address',
     BatchMintValuesOverflow: 'ERC20: values overflow',
+    BurnFromZero: 'ERC20: insufficient balance',
+    BurnExceedsBalance: 'ERC20: insufficient balance',
+    BurnExceedsAllowance: 'ERC20: insufficient allowance',
+    BatchBurnValuesOverflow: 'ERC20: insufficient balance',
     SupplyOverflow: 'ERC20: supply overflow',
     PermitFromZero: 'ERC20: zero address owner',
     PermitExpired: 'ERC20: expired permit',
@@ -57,7 +61,7 @@ const implementation = {
       return contract.burnFrom(from, value, overrides);
     },
     'batchBurnFrom(address[],uint256[])': async (contract, owners, values, overrides) => {
-      return contract.burnFrom(owners, values, overrides);
+      return contract.batchBurnFrom(owners, values, overrides);
     },
 
     // ERC20Mintable
@@ -69,9 +73,9 @@ const implementation = {
     },
   },
   deploy: async function (initialHolders, initialBalances, deployer) {
-    const forwarder = await artifacts.require('UniversalForwarder').new({from: deployer});
     const registry = await artifacts.require('ForwarderRegistry').new({from: deployer});
-    return artifacts.require('ERC20BurnableMock').new(initialHolders, initialBalances, forwarder.address, registry.address, {from: deployer});
+    const forwarder = await artifacts.require('UniversalForwarder').new({from: deployer});
+    return artifacts.require('ERC20BurnableMock').new(initialHolders, initialBalances, registry.address, forwarder.address, {from: deployer});
   },
 };
 

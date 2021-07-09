@@ -211,7 +211,147 @@ function shouldBehaveLikeERC20Burnable(implementation) {
     });
 
     describe('batchBurnFrom(address[],uint256[])', function () {
-      // TODO
+      if (batchBurnFrom === undefined) {
+        return;
+      }
+
+      context('Pre-conditions', function () {
+        it('reverts with inconsistent arrays', async function () {
+          await expectRevert(batchBurnFrom(this.token, [spender, spender], [One], {from: spender}), revertMessages.InconsistentArrays);
+          await expectRevert(batchBurnFrom(this.token, [spender], [One, One], {from: spender}), revertMessages.InconsistentArrays);
+        });
+
+        it('reverts when one of the owners is the zero address', async function () {
+          await expectRevert(batchBurnFrom(this.token, [ZeroAddress], [One], {from: spender}), revertMessages.BurnFromZero);
+          await expectRevert(batchBurnFrom(this.token, [spender, ZeroAddress], [One, One], {from: spender}), revertMessages.BurnFromZero);
+        });
+
+        it('reverts with an insufficient balance', async function () {
+          await expectRevert(batchBurnFrom(this.token, [owner], [initialSupply.add(One)], {from: owner}), revertMessages.BurnExceedsBalance);
+          await expectRevert(batchBurnFrom(this.token, [owner, owner], [initialSupply, One], {from: owner}), revertMessages.BurnExceedsBalance);
+        });
+
+        it('reverts with an insufficient allowance', async function () {
+          await expectRevert(batchBurnFrom(this.token, [owner], [initialAllowance.add(One)], {from: spender}), revertMessages.BurnExceedsAllowance);
+          await expectRevert(
+            batchBurnFrom(this.token, [owner, owner], [initialAllowance, One], {from: spender}),
+            revertMessages.BurnExceedsAllowance
+          );
+        });
+
+        it('reverts when values overflow', async function () {
+          await expectRevert(
+            batchBurnFrom(this.token, [owner, owner], [initialAllowance, MaxUInt256], {from: spender}),
+            revertMessages.BatchBurnValuesOverflow
+          );
+          await expectRevert(
+            batchBurnFrom(this.token, [owner, owner], [initialAllowance, MaxUInt256], {from: maxSpender}),
+            revertMessages.BatchBurnValuesOverflow
+          );
+        });
+      });
+
+      const burnWasSuccessful = function (owners, values, options, withEIP717) {
+        let totalValue = Zero;
+        let aggregatedValues = {};
+        for (let i = 0; i < owners.length; ++i) {
+          const from = owners[i];
+          const value = values[i];
+          totalValue = totalValue.add(value);
+
+          it('emits a Transfer event', function () {
+            expectEventWithParamsOverride(
+              this.receipt,
+              'Transfer',
+              {
+                _from: from,
+                _to: ZeroAddress,
+                _value: value,
+              },
+              eventParamsOverrides
+            );
+          });
+
+          aggregatedValues[from] = aggregatedValues[from] ? aggregatedValues[from].add(value) : value;
+        }
+
+        for (const from of Object.keys(aggregatedValues)) {
+          it('decreases the owners balance', async function () {
+            (await this.token.balanceOf(from)).should.be.bignumber.equal(this.fromBalances[from].sub(aggregatedValues[from]));
+          });
+
+          if (from != options.from) {
+            if (withEIP717) {
+              it('[EIP717] keeps allowance at max ', async function () {
+                (await this.token.allowance(from, options.from)).should.be.bignumber.equal(MaxUInt256);
+              });
+            } else {
+              it('decreases the spender allowance', async function () {
+                (await this.token.allowance(from, options.from)).should.be.bignumber.equal(this.fromAllowances[from].sub(aggregatedValues[from]));
+              });
+            }
+
+            if (features.AllowanceTracking) {
+              it('emits an Approval event', function () {
+                expectEventWithParamsOverride(
+                  this.receipt,
+                  'Approval',
+                  {
+                    _owner: from,
+                    _spender: options.from,
+                    _value: withEIP717 ? MaxUInt256 : this.fromAllowances[from].sub(aggregatedValues[from]),
+                  },
+                  eventParamsOverrides
+                );
+              });
+            }
+          }
+        }
+
+        it('decreases the token(s) total supply', async function () {
+          (await this.token.totalSupply()).should.be.bignumber.equal(initialSupply.sub(totalValue));
+        });
+      };
+
+      const shouldBurnTokens = function (owners, values, options, withEIP717 = false) {
+        beforeEach(async function () {
+          this.fromAllowances = {};
+          this.fromBalances = {};
+          for (const from of owners) {
+            this.fromAllowances[from] = await this.token.allowance(from, options.from);
+            this.fromBalances[from] = await this.token.balanceOf(from);
+          }
+          this.receipt = await this.token.batchBurnFrom(owners, values, options);
+        });
+        burnWasSuccessful(owners, values, options, withEIP717);
+      };
+
+      const shouldBurnTokensBySender = function (owners, values) {
+        context('when burn started by the owner', function () {
+          shouldBurnTokens(owners, values, {from: owner});
+        });
+
+        context('when burn started by an approved sender', function () {
+          shouldBurnTokens(owners, values, {from: spender});
+        });
+
+        context('when burn started by a sender with max approval', function () {
+          shouldBurnTokens(owners, values, {from: maxSpender}, features.EIP717);
+        });
+      };
+
+      context('when burning an empty list', function () {
+        shouldBurnTokensBySender([], []);
+      });
+
+      context('when burning zero values', function () {
+        shouldBurnTokensBySender([owner, owner, owner], [Zero, One, Zero]);
+      });
+
+      context('when burning the full allowance', function () {
+        shouldBurnTokensBySender([owner], [initialAllowance]);
+        shouldBurnTokensBySender([owner, owner], [initialAllowance.sub(One), One]);
+      });
     });
   });
 }

@@ -2,11 +2,13 @@
 
 pragma solidity >=0.7.6 <0.8.0;
 
-import {Ownable} from "@animoca/ethereum-contracts-core-1.0.1/contracts/access/Ownable.sol";
-import {ITokenPredicate} from "@animoca/ethereum-contracts-core-1.0.1/contracts/bridging/ITokenPredicate.sol";
-import {RLPReader} from "@animoca/ethereum-contracts-core-1.0.1/contracts/utils/RLPReader.sol";
+import {ITokenPredicate} from "@animoca/ethereum-contracts-core-1.1.0/contracts/bridging/ITokenPredicate.sol";
+import {RLPReader} from "@animoca/ethereum-contracts-core-1.1.0/contracts/utils/RLPReader.sol";
 
-abstract contract ERC20BasePredicate is ITokenPredicate, Ownable {
+/**
+ * Polygon (MATIC) bridging base ERC20 predicate to be deployed on the root chain (Ethereum mainnet).
+ */
+abstract contract ERC20BasePredicate is ITokenPredicate {
     using RLPReader for bytes;
     using RLPReader for RLPReader.RLPItem;
 
@@ -14,15 +16,19 @@ abstract contract ERC20BasePredicate is ITokenPredicate, Ownable {
 
     bytes32 public constant WITHDRAWN_EVENT_SIG = 0x7084f5476618d8e60b11ef0d7d3f06914655adb8793e28ff7f018d4c76d505d5;
 
-    address public manager;
+    // see https://github.com/maticnetwork/pos-portal/blob/master/contracts/root/RootChainManager/RootChainManager.sol
+    address public rootChainManager;
 
-    function setManager(address rootChainManager) external {
-        _requireOwnership(_msgSender());
-        manager = rootChainManager;
+    /**
+     * Constructor
+     * @param rootChainManager_ the Polygon/MATIC RootChainManager proxy address.
+     */
+    constructor(address rootChainManager_) {
+        rootChainManager = rootChainManager_;
     }
 
     function _requireManagerRole(address account) internal view {
-        require(account == manager, "Predicate: only manager");
+        require(account == rootChainManager, "Predicate: only manager");
     }
 
     function _verifyWithdrawalLog(bytes memory log) internal pure returns (address withdrawer, uint256 amount) {

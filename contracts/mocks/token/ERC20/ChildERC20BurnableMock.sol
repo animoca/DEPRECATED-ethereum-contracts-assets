@@ -2,7 +2,7 @@
 
 pragma solidity >=0.7.6 <0.8.0;
 
-import {ManagedIdentity, Ownable, Recoverable} from "@animoca/ethereum-contracts-core-1.0.1/contracts/utils/Recoverable.sol";
+import {ManagedIdentity, Ownable, Recoverable} from "@animoca/ethereum-contracts-core-1.1.0/contracts/utils/Recoverable.sol";
 import {IForwarderRegistry, UsingUniversalForwarding} from "ethereum-universal-forwarder/src/solc_0.7/ERC2771/UsingUniversalForwarding.sol";
 import {ChildERC20Burnable} from "../../../token/ERC20/ChildERC20Burnable.sol";
 import {IERC20Mintable} from "../../../token/ERC20/IERC20Mintable.sol";
@@ -11,9 +11,14 @@ contract ChildERC20BurnableMock is Recoverable, UsingUniversalForwarding, ChildE
     constructor(
         address[] memory recipients,
         uint256[] memory values,
+        address childChainManager,
         IForwarderRegistry forwarderRegistry,
         address universalForwarder
-    ) ChildERC20Burnable("Child ERC20 Mock", "CE20", 18, "uri") Ownable(msg.sender) UsingUniversalForwarding(forwarderRegistry, universalForwarder) {
+    )
+        ChildERC20Burnable("Child ERC20 Mock", "CE20", 18, "uri", childChainManager)
+        Ownable(msg.sender)
+        UsingUniversalForwarding(forwarderRegistry, universalForwarder)
+    {
         _batchMint(recipients, values);
     }
 
@@ -28,6 +33,11 @@ contract ChildERC20BurnableMock is Recoverable, UsingUniversalForwarding, ChildE
 
     function _msgData() internal view virtual override(ManagedIdentity, UsingUniversalForwarding) returns (bytes memory ret) {
         return UsingUniversalForwarding._msgData();
+    }
+
+    function setTokenURI(string calldata tokenURI_) external {
+        _requireOwnership(_msgSender());
+        _tokenURI = tokenURI_;
     }
 
     /**

@@ -2,25 +2,27 @@
 
 pragma solidity >=0.7.6 <0.8.0;
 
-import {Ownable} from "@animoca/ethereum-contracts-core-1.0.1/contracts/access/Ownable.sol";
-import {IChildToken} from "@animoca/ethereum-contracts-core-1.0.1/contracts/bridging/IChildToken.sol";
+import {IChildToken} from "@animoca/ethereum-contracts-core-1.1.0/contracts/bridging/IChildToken.sol";
 import {ERC20Receiver} from "../token/ERC20/ERC20Receiver.sol";
 
-abstract contract ChildERC20Base is IChildToken, Ownable, ERC20Receiver {
+/**
+ * Polygon (MATIC) bridging base child ERC20 for deployment on the child chain (Polygon/MATIC).
+ */
+abstract contract ChildERC20Base is IChildToken, ERC20Receiver {
     event Withdrawn(address account, uint256 value);
 
-    address public depositor;
+    // see https://github.com/maticnetwork/pos-portal/blob/master/contracts/child/ChildChainManager/ChildChainManager.sol
+    address public childChainManager;
 
-    function setDepositor(address childChainManager) external {
-        _requireOwnership(_msgSender());
-        depositor = childChainManager;
+    /**
+     * Constructor
+     * @param childChainManager_ the Polygon/MATIC ChildChainManager proxy address.
+     */
+    constructor(address childChainManager_) {
+        childChainManager = childChainManager_;
     }
 
     function _requireDepositorRole(address account) internal view {
-        require(account == depositor, "ChildERC20: only depositor");
-    }
-
-    function test() public {
-        emit Withdrawn(address(0), 0);
+        require(account == childChainManager, "ChildERC20: only depositor");
     }
 }

@@ -10,10 +10,9 @@ abstract contract ChildERC20 is ERC20, ChildERC20Base {
         string memory name_,
         string memory symbol_,
         uint8 decimals_,
-        string memory tokenURI_
-    ) ERC20(name_, symbol_, decimals_, tokenURI_) {
-        // _initializeEIP712(name_);
-    }
+        string memory tokenURI_,
+        address childChainManager
+    ) ERC20(name_, symbol_, decimals_, tokenURI_) ChildERC20Base(childChainManager) {}
 
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC20, ERC20Receiver) returns (bool) {
         return ERC20.supportsInterface(interfaceId) || ERC20Receiver.supportsInterface(interfaceId);
@@ -47,6 +46,7 @@ abstract contract ChildERC20 is ERC20, ChildERC20Base {
     /**
      * Called when user wants to withdraw tokens back to the root chain (no pre-approval required).
      * @dev Should escrow user's tokens. This transaction will be verified when exiting on root chain.
+     * @dev Reverts if the sender is not this contract.
      * @dev Emits a {Withdrawn} event.
      * _param operator The initiator of the transfer.
      * @param from The address which transferred the tokens.
@@ -60,6 +60,7 @@ abstract contract ChildERC20 is ERC20, ChildERC20Base {
         uint256 amount,
         bytes calldata /*data*/
     ) public virtual override returns (bytes4) {
+        require(_msgSender() == address(this), "ChildERC20: wrong sender");
         emit Withdrawn(from, amount);
         return _ERC20_RECEIVED;
     }

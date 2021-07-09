@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.1.0
+
+### Improvements
+ * Updated dependency version `@animoca/ethereum-contracts-core@1.1.0`.
+ * Increased tests coverage for the bridging setup and the function `batchBurnFrom`.
+ * Removed the possibility to update the manager's address in the ERC20 predicates and ERC20 child tokens to improve decentralisation.
+
+### Fixes
+ * Usage of `ERC20Wrapper` in `ERC20EscrowPredicate.sol`.
+ * Fixed and optimised the implementation of `batchBurnFrom` to correctly update the supply.
+ * Verify who is the caller of `onERC20Received` in the ERC20 predicates.
 
 ## 1.0.2
 

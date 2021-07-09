@@ -7,6 +7,7 @@ const {shouldBehaveLikeERC20BatchTransfers} = require('./ERC20.batchtransfers.be
 const {shouldBehaveLikeERC20Permit} = require('./ERC20.permit.behavior');
 const {shouldBehaveLikeERC20Safe} = require('./ERC20.safe.behavior');
 const {shouldBehaveLikeERC20Standard} = require('./ERC20.standard.behavior');
+const {shouldBehaveLikeChildERC20} = require('./ERC20.child.behavior');
 
 function shouldBehaveLikeERC20(implementation) {
   describe('like an ERC20', function () {
@@ -36,6 +37,10 @@ function shouldBehaveLikeERC20(implementation) {
 
     if (implementation.interfaces.ERC20Safe) {
       shouldBehaveLikeERC20Safe(implementation);
+    }
+
+    if (implementation.interfaces.ChildToken) {
+      shouldBehaveLikeChildERC20(implementation);
     }
 
     shouldBehaveLikeERC20Burnable(implementation);

@@ -2,9 +2,9 @@
 
 pragma solidity >=0.7.6 <0.8.0;
 
-import {ManagedIdentity} from "@animoca/ethereum-contracts-core-1.0.1/contracts/metatx/ManagedIdentity.sol";
-import {IERC165} from "@animoca/ethereum-contracts-core-1.0.1/contracts/introspection/IERC165.sol";
-import {AddressIsContract} from "@animoca/ethereum-contracts-core-1.0.1/contracts/utils/types/AddressIsContract.sol";
+import {ManagedIdentity} from "@animoca/ethereum-contracts-core-1.1.0/contracts/metatx/ManagedIdentity.sol";
+import {IERC165} from "@animoca/ethereum-contracts-core-1.1.0/contracts/introspection/IERC165.sol";
+import {AddressIsContract} from "@animoca/ethereum-contracts-core-1.1.0/contracts/utils/types/AddressIsContract.sol";
 import {IERC20} from "./IERC20.sol";
 import {IERC20Detailed} from "./IERC20Detailed.sol";
 import {IERC20Allowance} from "./IERC20Allowance.sol";
@@ -451,7 +451,6 @@ abstract contract ERC20 is
         }
     }
 
-    // TODO to be tested
     function _batchBurnFrom(address[] memory owners, uint256[] memory values) internal virtual {
         uint256 length = owners.length;
         require(length == values.length, "ERC20: inconsistent arrays");
@@ -474,13 +473,10 @@ abstract contract ERC20 is
             if (from != sender) {
                 _decreaseAllowance(from, sender, value);
             }
+        }
 
-            if (totalValue != 0) {
-                uint256 supply = _totalSupply;
-                uint256 newSupply = supply - totalValue;
-                require(newSupply < supply, "ERC20: supply overflow");
-                _totalSupply = newSupply;
-            }
+        if (totalValue != 0) {
+            _totalSupply -= totalValue; // _totalSupply cannot underfow as balances do not underflow
         }
     }
 }

@@ -55,9 +55,9 @@ const implementation = {
     },
   },
   deploy: async function (initialHolders, initialBalances, deployer) {
-    const forwarder = await artifacts.require('UniversalForwarder').new({from: deployer});
     const registry = await artifacts.require('ForwarderRegistry').new({from: deployer});
-    return artifacts.require('ERC20Mock').new(initialHolders, initialBalances, forwarder.address, registry.address, {from: deployer});
+    const forwarder = await artifacts.require('UniversalForwarder').new({from: deployer});
+    return artifacts.require('ERC20Mock').new(initialHolders, initialBalances, registry.address, forwarder.address, {from: deployer});
   },
 };
 

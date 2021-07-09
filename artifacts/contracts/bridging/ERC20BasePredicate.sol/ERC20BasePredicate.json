@@ -35,25 +35,6 @@
       "type": "event"
     },
     {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": true,
-          "internalType": "address",
-          "name": "previousOwner",
-          "type": "address"
-        },
-        {
-          "indexed": true,
-          "internalType": "address",
-          "name": "newOwner",
-          "type": "address"
-        }
-      ],
-      "name": "OwnershipTransferred",
-      "type": "event"
-    },
-    {
       "inputs": [],
       "name": "WITHDRAWN_EVENT_SIG",
       "outputs": [
@@ -64,6 +45,19 @@
         }
       ],
       "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "c__0x92cbea31",
+          "type": "bytes32"
+        }
+      ],
+      "name": "c_0x92cbea31",
+      "outputs": [],
+      "stateMutability": "pure",
       "type": "function"
     },
     {
@@ -119,7 +113,7 @@
     },
     {
       "inputs": [],
-      "name": "manager",
+      "name": "rootChainManager",
       "outputs": [
         {
           "internalType": "address",
@@ -128,45 +122,6 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "owner",
-      "outputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "rootChainManager",
-          "type": "address"
-        }
-      ],
-      "name": "setManager",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "newOwner",
-          "type": "address"
-        }
-      ],
-      "name": "transferOwnership",
-      "outputs": [],
-      "stateMutability": "nonpayable",
       "type": "function"
     }
   ],

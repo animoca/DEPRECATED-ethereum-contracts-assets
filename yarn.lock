@@ -9,10 +9,10 @@
   dependencies:
     big-integer "^1.6.48"
 
-"@animoca/ethereum-contracts-core-1.0.1@npm:@animoca/ethereum-contracts-core@1.0.1", "@animoca/ethereum-contracts-core@^1.0.1":
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/@animoca/ethereum-contracts-core/-/ethereum-contracts-core-1.0.1.tgz#8677761e017ff079ca3d1c14d614c2de114c0d07"
-  integrity sha512-Mc0Uhebk/lIdwaJXzuIHBVkPChnJ9Jy8XMWOa8eTkzdzyWlvUDIEzKL0tzjKC3ezYL/TGozlygXF4s9vrWie4Q==
+"@animoca/ethereum-contracts-core-1.1.0@npm:@animoca/ethereum-contracts-core@1.1.0", "@animoca/ethereum-contracts-core@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@animoca/ethereum-contracts-core/-/ethereum-contracts-core-1.1.0.tgz#ed02a2b857d9281094c3884a3eaf62996fb35781"
+  integrity sha512-VWeOc9tDOSMNO3ZQ4T55l5V66rI5YTwg2Rov4R3yhREkc3fEH0WaIXf6MRKp9YCxJP9BCGgjAxVOrDfnup+vew==
   dependencies:
     "@nomiclabs/hardhat-truffle5" "^2.0.0"
     "@nomiclabs/hardhat-web3" "^2.0.0"

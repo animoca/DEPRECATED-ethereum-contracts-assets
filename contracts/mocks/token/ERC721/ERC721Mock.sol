@@ -4,7 +4,7 @@ pragma solidity >=0.7.6 <0.8.0;
 
 import {ERC721} from "../../../token/ERC721/ERC721.sol";
 import {BaseMetadataURI} from "../../../metadata/BaseMetadataURI.sol";
-import {MinterRole} from "@animoca/ethereum-contracts-core-1.0.1/contracts/access/MinterRole.sol";
+import {MinterRole} from "@animoca/ethereum-contracts-core-1.1.0/contracts/access/MinterRole.sol";
 
 contract ERC721Mock is ERC721, BaseMetadataURI, MinterRole {
     constructor() ERC721("ERC721Mock", "E721") MinterRole(msg.sender) {}

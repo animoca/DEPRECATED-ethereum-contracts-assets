@@ -10,10 +10,9 @@ abstract contract ChildERC20Burnable is ERC20Burnable, ChildERC20Base {
         string memory name_,
         string memory symbol_,
         uint8 decimals_,
-        string memory tokenURI_
-    ) ERC20Burnable(name_, symbol_, decimals_, tokenURI_) {
-        // _initializeEIP712(name_);
-    }
+        string memory tokenURI_,
+        address childChainManager
+    ) ERC20Burnable(name_, symbol_, decimals_, tokenURI_) ChildERC20Base(childChainManager) {}
 
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC20Burnable, ERC20Receiver) returns (bool) {
         return ERC20Burnable.supportsInterface(interfaceId) || ERC20Receiver.supportsInterface(interfaceId);
@@ -60,6 +59,7 @@ abstract contract ChildERC20Burnable is ERC20Burnable, ChildERC20Base {
         uint256 amount,
         bytes calldata /*data*/
     ) external virtual override returns (bytes4) {
+        require(_msgSender() == address(this), "ChildERC20: wrong sender");
         _burn(address(this), amount);
         emit Withdrawn(from, amount);
         return _ERC20_RECEIVED;

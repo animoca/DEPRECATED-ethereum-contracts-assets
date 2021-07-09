@@ -2,11 +2,18 @@
 
 pragma solidity >=0.7.6 <0.8.0;
 
-import {IERC20} from "../token/ERC20/IERC20.sol";
-import {Ownable, ERC20BasePredicate} from "./ERC20BasePredicate.sol";
+import {IWrappedERC20, ERC20Wrapper} from "@animoca/ethereum-contracts-core-1.1.0/contracts/utils/ERC20Wrapper.sol";
+import {ManagedIdentity} from "@animoca/ethereum-contracts-core-1.1.0/contracts/metatx/ManagedIdentity.sol";
+import {ERC20BasePredicate} from "./ERC20BasePredicate.sol";
 
-contract ERC20EscrowPredicate is ERC20BasePredicate {
-    constructor() Ownable(msg.sender) {}
+/**
+ * Polygon (MATIC) bridging ERC20 escrowing predicate to be deployed on the root chain (Ethereum mainnet).
+ * This predicate must be used for non-mintable/non-burnable tokens.
+ */
+contract ERC20EscrowPredicate is ERC20BasePredicate, ManagedIdentity {
+    using ERC20Wrapper for IWrappedERC20;
+
+    constructor(address rootChainManager_) ERC20BasePredicate(rootChainManager_) {}
 
     /**
      * Locks ERC20 tokens for deposit.
@@ -25,7 +32,7 @@ contract ERC20EscrowPredicate is ERC20BasePredicate {
         _requireManagerRole(_msgSender());
         uint256 amount = abi.decode(depositData, (uint256));
         emit LockedERC20(depositor, depositReceiver, rootToken, amount);
-        IERC20(rootToken).transferFrom(depositor, address(this), amount);
+        IWrappedERC20(rootToken).wrappedTransferFrom(depositor, address(this), amount);
     }
 
     /**
@@ -41,6 +48,6 @@ contract ERC20EscrowPredicate is ERC20BasePredicate {
     ) public override {
         _requireManagerRole(_msgSender());
         (address withdrawer, uint256 amount) = _verifyWithdrawalLog(log);
-        require(IERC20(rootToken).transfer(withdrawer, amount), "Predicate: transfer failed");
+        IWrappedERC20(rootToken).wrappedTransfer(withdrawer, amount);
     }
 }

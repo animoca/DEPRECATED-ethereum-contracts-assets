@@ -2,10 +2,15 @@
 
 pragma solidity >=0.7.6 <0.8.0;
 
-import {Ownable, ERC20BasePredicate} from "./ERC20BasePredicate.sol";
+import {ERC20BasePredicate} from "./ERC20BasePredicate.sol";
+import {ManagedIdentity} from "@animoca/ethereum-contracts-core-1.1.0/contracts/metatx/ManagedIdentity.sol";
 
-contract ERC20MintBurnPredicate is ERC20BasePredicate {
-    constructor() Ownable(msg.sender) {}
+/**
+ * Polygon (MATIC) bridging ERC20 minting/burning predicate to be deployed on the root chain (Ethereum mainnet).
+ * This predicate must be used for mintable/burnable tokens.
+ */
+contract ERC20MintBurnPredicate is ERC20BasePredicate, ManagedIdentity {
+    constructor(address rootChainManager_) ERC20BasePredicate(rootChainManager_) {}
 
     /**
      * Burns ERC20 tokens for deposit.
