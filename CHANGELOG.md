@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.1
+
+### Fixes
+ * Updated artifacts.
+
 ## 1.1.0
 
 ### Improvements
