@@ -40,19 +40,6 @@
       ],
       "name": "CollectionsUnpaused",
       "type": "event"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "bytes32",
-          "name": "c__0x0cf5bac4",
-          "type": "bytes32"
-        }
-      ],
-      "name": "c_0x0cf5bac4",
-      "outputs": [],
-      "stateMutability": "pure",
-      "type": "function"
     }
   ],
   "bytecode": "0x",

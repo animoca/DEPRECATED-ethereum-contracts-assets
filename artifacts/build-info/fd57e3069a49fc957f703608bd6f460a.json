@@ -1,0 +1,224 @@
+{
+  "id": "fd57e3069a49fc957f703608bd6f460a",
+  "_format": "hh-sol-build-info-1",
+  "solcVersion": "0.7.6",
+  "solcLongVersion": "0.7.6+commit.7338295f",
+  "input": {
+    "language": "Solidity",
+    "sources": {
+      "contracts/token/ERC721/IERC721Exists.sol": {
+        "content": "// SPDX-License-Identifier: MIT\n\npragma solidity >=0.7.6 <0.8.0;\n\n/**\n * @title ERC721 Non-Fungible Token Standard, optional exists extension\n * @dev See https://eips.ethereum.org/EIPS/eip-721\n * Note: The ERC-165 identifier for this interface is 0x4f558e79.\n */\ninterface IERC721Exists {\n    /**\n     * @dev Checks the existence of an Non-Fungible Token\n     * @param tokenId the token identifier to check the existence of.\n     * @return bool true if the token belongs to a non-zero address, false otherwise\n     */\n    function exists(uint256 tokenId) external view returns (bool);\n}\n"
+      }
+    },
+    "settings": {
+      "optimizer": {
+        "enabled": true,
+        "runs": 2000
+      },
+      "outputSelection": {
+        "*": {
+          "*": [
+            "abi",
+            "evm.bytecode",
+            "evm.deployedBytecode",
+            "evm.methodIdentifiers"
+          ],
+          "": [
+            "ast"
+          ]
+        }
+      }
+    }
+  },
+  "output": {
+    "contracts": {
+      "contracts/token/ERC721/IERC721Exists.sol": {
+        "IERC721Exists": {
+          "abi": [
+            {
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "tokenId",
+                  "type": "uint256"
+                }
+              ],
+              "name": "exists",
+              "outputs": [
+                {
+                  "internalType": "bool",
+                  "name": "",
+                  "type": "bool"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            }
+          ],
+          "evm": {
+            "bytecode": {
+              "generatedSources": [],
+              "linkReferences": {},
+              "object": "",
+              "opcodes": "",
+              "sourceMap": ""
+            },
+            "deployedBytecode": {
+              "generatedSources": [],
+              "immutableReferences": {},
+              "linkReferences": {},
+              "object": "",
+              "opcodes": "",
+              "sourceMap": ""
+            },
+            "methodIdentifiers": {
+              "exists(uint256)": "4f558e79"
+            }
+          }
+        }
+      }
+    },
+    "sources": {
+      "contracts/token/ERC721/IERC721Exists.sol": {
+        "ast": {
+          "absolutePath": "contracts/token/ERC721/IERC721Exists.sol",
+          "exportedSymbols": {
+            "IERC721Exists": [
+              11
+            ]
+          },
+          "id": 12,
+          "license": "MIT",
+          "nodeType": "SourceUnit",
+          "nodes": [
+            {
+              "id": 1,
+              "literals": [
+                "solidity",
+                ">=",
+                "0.7",
+                ".6",
+                "<",
+                "0.8",
+                ".0"
+              ],
+              "nodeType": "PragmaDirective",
+              "src": "33:31:0"
+            },
+            {
+              "abstract": false,
+              "baseContracts": [],
+              "contractDependencies": [],
+              "contractKind": "interface",
+              "documentation": {
+                "id": 2,
+                "nodeType": "StructuredDocumentation",
+                "src": "66:196:0",
+                "text": " @title ERC721 Non-Fungible Token Standard, optional exists extension\n @dev See https://eips.ethereum.org/EIPS/eip-721\n Note: The ERC-165 identifier for this interface is 0x4f558e79."
+              },
+              "fullyImplemented": false,
+              "id": 11,
+              "linearizedBaseContracts": [
+                11
+              ],
+              "name": "IERC721Exists",
+              "nodeType": "ContractDefinition",
+              "nodes": [
+                {
+                  "documentation": {
+                    "id": 3,
+                    "nodeType": "StructuredDocumentation",
+                    "src": "293:224:0",
+                    "text": " @dev Checks the existence of an Non-Fungible Token\n @param tokenId the token identifier to check the existence of.\n @return bool true if the token belongs to a non-zero address, false otherwise"
+                  },
+                  "functionSelector": "4f558e79",
+                  "id": 10,
+                  "implemented": false,
+                  "kind": "function",
+                  "modifiers": [],
+                  "name": "exists",
+                  "nodeType": "FunctionDefinition",
+                  "parameters": {
+                    "id": 6,
+                    "nodeType": "ParameterList",
+                    "parameters": [
+                      {
+                        "constant": false,
+                        "id": 5,
+                        "mutability": "mutable",
+                        "name": "tokenId",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 10,
+                        "src": "538:15:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "typeName": {
+                          "id": 4,
+                          "name": "uint256",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "538:7:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "visibility": "internal"
+                      }
+                    ],
+                    "src": "537:17:0"
+                  },
+                  "returnParameters": {
+                    "id": 9,
+                    "nodeType": "ParameterList",
+                    "parameters": [
+                      {
+                        "constant": false,
+                        "id": 8,
+                        "mutability": "mutable",
+                        "name": "",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 10,
+                        "src": "578:4:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        },
+                        "typeName": {
+                          "id": 7,
+                          "name": "bool",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "578:4:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_bool",
+                            "typeString": "bool"
+                          }
+                        },
+                        "visibility": "internal"
+                      }
+                    ],
+                    "src": "577:6:0"
+                  },
+                  "scope": 11,
+                  "src": "522:62:0",
+                  "stateMutability": "view",
+                  "virtual": false,
+                  "visibility": "external"
+                }
+              ],
+              "scope": 12,
+              "src": "263:323:0"
+            }
+          ],
+          "src": "33:554:0"
+        },
+        "id": 0
+      }
+    }
+  }
+}

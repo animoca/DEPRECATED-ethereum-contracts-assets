@@ -49,19 +49,6 @@
       "type": "function"
     },
     {
-      "inputs": [
-        {
-          "internalType": "bytes32",
-          "name": "c__0x31017afb",
-          "type": "bytes32"
-        }
-      ],
-      "name": "c_0x31017afb",
-      "outputs": [],
-      "stateMutability": "pure",
-      "type": "function"
-    },
-    {
       "inputs": [],
       "name": "owner",
       "outputs": [
