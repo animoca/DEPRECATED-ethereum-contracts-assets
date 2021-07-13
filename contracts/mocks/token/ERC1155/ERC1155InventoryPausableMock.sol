@@ -3,7 +3,7 @@
 pragma solidity >=0.7.6 <0.8.0;
 
 import {ERC1155InventoryBurnableMock} from "./ERC1155InventoryBurnableMock.sol";
-import {Pausable} from "@animoca/ethereum-contracts-core-1.1.0/contracts/lifecycle/Pausable.sol";
+import {Pausable} from "@animoca/ethereum-contracts-core-1.1.1/contracts/lifecycle/Pausable.sol";
 
 contract ERC1155InventoryPausableMock is Pausable, ERC1155InventoryBurnableMock {
     constructor() Pausable(false) {}

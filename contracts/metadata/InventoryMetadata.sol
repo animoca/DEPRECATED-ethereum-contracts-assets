@@ -2,9 +2,9 @@
 
 pragma solidity >=0.7.6 <0.8.0;
 
-// import "@animoca/ethereum-contracts-core-1.1.0/contracts/introspection/IERC165.sol";
-// import "@animoca/ethereum-contracts-core-1.1.0/contracts/utils/types/UInt256Extract.sol";
-// import "@animoca/ethereum-contracts-core-1.1.0/contracts/algo/EnumMap.sol";
+// import "@animoca/ethereum-contracts-core-1.1.1/contracts/introspection/IERC165.sol";
+// import "@animoca/ethereum-contracts-core-1.1.1/contracts/utils/types/UInt256Extract.sol";
+// import "@animoca/ethereum-contracts-core-1.1.1/contracts/algo/EnumMap.sol";
 // import "./../token/ERC1155/IERC1155Inventory.sol";
 // import "./ICoreMetadata.sol";
 // import "./IInventoryMetadata.sol";

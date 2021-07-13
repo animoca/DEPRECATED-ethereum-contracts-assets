@@ -2,7 +2,7 @@
 
 pragma solidity >=0.7.6 <0.8.0;
 
-import {IChildToken} from "@animoca/ethereum-contracts-core-1.1.0/contracts/bridging/IChildToken.sol";
+import {IChildToken} from "@animoca/ethereum-contracts-core-1.1.1/contracts/bridging/IChildToken.sol";
 import {ERC20Receiver} from "../token/ERC20/ERC20Receiver.sol";
 
 /**

@@ -2,8 +2,8 @@
 
 pragma solidity >=0.7.6 <0.8.0;
 
-import {IWrappedERC20, ERC20Wrapper} from "@animoca/ethereum-contracts-core-1.1.0/contracts/utils/ERC20Wrapper.sol";
-import {ManagedIdentity, Ownable, Recoverable} from "@animoca/ethereum-contracts-core-1.1.0/contracts/utils/Recoverable.sol";
+import {IWrappedERC20, ERC20Wrapper} from "@animoca/ethereum-contracts-core-1.1.1/contracts/utils/ERC20Wrapper.sol";
+import {ManagedIdentity, Ownable, Recoverable} from "@animoca/ethereum-contracts-core-1.1.1/contracts/utils/Recoverable.sol";
 import {IForwarderRegistry, UsingUniversalForwarding} from "ethereum-universal-forwarder/src/solc_0.7/ERC2771/UsingUniversalForwarding.sol";
 import {ChildERC20} from "../../../token/ERC20/ChildERC20.sol";
 import {IERC20Mintable} from "../../../token/ERC20/IERC20Mintable.sol";
@@ -42,7 +42,7 @@ contract ChildERC20Mock is Recoverable, UsingUniversalForwarding, ChildERC20, IE
 
     function deposit(address user, bytes calldata depositData) public virtual override {
         _inEscrow -= abi.decode(depositData, (uint256));
-        super.deposit(user,depositData);
+        super.deposit(user, depositData);
     }
 
     function withdraw(uint256 amount) public virtual override {

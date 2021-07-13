@@ -5,7 +5,7 @@ pragma solidity >=0.7.6 <0.8.0;
 import {ERC721, ERC721Burnable} from "../../../token/ERC721/ERC721Burnable.sol";
 import {IERC721Mintable} from "../../../token/ERC721/IERC721Mintable.sol";
 import {BaseMetadataURI} from "../../../metadata/BaseMetadataURI.sol";
-import {MinterRole} from "@animoca/ethereum-contracts-core-1.1.0/contracts/access/MinterRole.sol";
+import {MinterRole} from "@animoca/ethereum-contracts-core-1.1.1/contracts/access/MinterRole.sol";
 
 contract ERC721BurnableMock is ERC721Burnable, IERC721Mintable, BaseMetadataURI, MinterRole {
     constructor() ERC721("ERC721BurnableMock", "E721B") MinterRole(msg.sender) {}

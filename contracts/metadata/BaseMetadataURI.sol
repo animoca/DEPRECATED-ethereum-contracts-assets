@@ -2,8 +2,8 @@
 
 pragma solidity >=0.7.6 <0.8.0;
 
-import {ManagedIdentity, Ownable} from "@animoca/ethereum-contracts-core-1.1.0/contracts/access/Ownable.sol";
-import {UInt256ToDecimalString} from "@animoca/ethereum-contracts-core-1.1.0/contracts/utils/types/UInt256ToDecimalString.sol";
+import {ManagedIdentity, Ownable} from "@animoca/ethereum-contracts-core-1.1.1/contracts/access/Ownable.sol";
+import {UInt256ToDecimalString} from "@animoca/ethereum-contracts-core-1.1.1/contracts/utils/types/UInt256ToDecimalString.sol";
 
 abstract contract BaseMetadataURI is ManagedIdentity, Ownable {
     using UInt256ToDecimalString for uint256;
