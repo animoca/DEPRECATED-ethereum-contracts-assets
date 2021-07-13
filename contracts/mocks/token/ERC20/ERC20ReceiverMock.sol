@@ -2,15 +2,18 @@
 
 pragma solidity >=0.7.6 <0.8.0;
 
+import {ManagedIdentity} from "@animoca/ethereum-contracts-core-1.1.1/contracts/metatx/ManagedIdentity.sol";
 import {ERC20Receiver} from "../../../token/ERC20/ERC20Receiver.sol";
 
-contract ERC20ReceiverMock is ERC20Receiver {
+contract ERC20ReceiverMock is ERC20Receiver, ManagedIdentity {
     event ERC20Received(address sender, address from, uint256 value, bytes data, uint256 gas);
 
-    bool internal _accept20;
+    bool internal _accept;
+    address internal _tokenAddress;
 
-    constructor(bool accept20) {
-        _accept20 = accept20;
+    constructor(bool accept, address tokenAddress) {
+        _accept = accept;
+        _tokenAddress = tokenAddress;
     }
 
     function onERC20Received(
@@ -19,7 +22,8 @@ contract ERC20ReceiverMock is ERC20Receiver {
         uint256 value,
         bytes memory data
     ) public virtual override returns (bytes4) {
-        if (_accept20) {
+        require(_msgSender() == _tokenAddress, "ERC20Receiver: wrong token");
+        if (_accept) {
             emit ERC20Received(sender, from, value, data, gasleft());
             return _ERC20_RECEIVED;
         } else {

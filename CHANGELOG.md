@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.1.3
+
+### Improvements
+ * `ERC20ReceiverMock.sol` now has an approved token address and reverts if the call originates from another address.
+ ## 1.1.2
+
+### Fixes
+ * Updated dependencies for fixing yarn audit warnings and warning messages during tests.
+
 ## 1.1.1
 
 ### Fixes

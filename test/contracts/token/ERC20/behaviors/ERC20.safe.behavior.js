@@ -22,8 +22,9 @@ function shouldBehaveLikeERC20Safe(implementation) {
       await this.token.approve(spender, initialAllowance, {from: owner});
       await this.token.approve(maxSpender, MaxUInt256, {from: owner});
       this.nonReceiver = await artifacts.require('ERC20Mock').new([], [], ZeroAddress, ZeroAddress);
-      this.receiver = await artifacts.require('ERC20ReceiverMock').new(true);
-      this.refusingReceiver = await artifacts.require('ERC20ReceiverMock').new(false);
+      this.receiver = await artifacts.require('ERC20ReceiverMock').new(true, this.token.address);
+      this.refusingReceiver = await artifacts.require('ERC20ReceiverMock').new(false, this.token.address);
+      this.wrongTokenReceiver = await artifacts.require('ERC20ReceiverMock').new(false, ZeroAddress);
     };
 
     beforeEach(async function () {
@@ -46,6 +47,10 @@ function shouldBehaveLikeERC20Safe(implementation) {
 
         it('reverts when sent to a refusing receiver contract', async function () {
           await expectRevert(this.token.safeTransfer(this.refusingReceiver.address, One, data, {from: owner}), revertMessages.TransferRefused);
+        });
+
+        it('reverts when sent to a receiver contract receiving another token', async function () {
+          await expectRevert(this.token.safeTransfer(this.wrongTokenReceiver.address, One, data, {from: owner}), 'ERC20Receiver: wrong token');
         });
       });
 
