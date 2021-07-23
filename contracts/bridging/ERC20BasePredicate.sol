@@ -40,7 +40,7 @@ abstract contract ERC20BasePredicate is ITokenPredicate {
             "Predicate: invalid signature"
         );
 
-        withdrawer = logRLPList[2].toAddress();
-        amount = logRLPList[3].toUint();
+        bytes memory logData = logRLPList[2].toBytes();
+        (withdrawer, amount) = abi.decode(logData, (address, uint256));
     }
 }

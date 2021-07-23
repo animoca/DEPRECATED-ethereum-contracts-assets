@@ -3,6 +3,7 @@ const {createFixtureLoader} = require('@animoca/ethereum-contracts-core/test/uti
 const {constants} = require('@animoca/ethereum-contracts-core');
 const {expectRevert, expectEvent} = require('@openzeppelin/test-helpers');
 const {Zero, One, Two, MaxUInt256, ZeroAddress} = constants;
+const {Withdrawn_EventSig} = require('../../../src/constants');
 const {AbiCoder, RLP} = require('ethers/utils');
 
 const abi = new AbiCoder();
@@ -77,7 +78,7 @@ describe('ERC20MintBurnPredicate', function () {
   });
 
   describe('exitTokens(address,address,bytes)', function () {
-    const eventLog = RLP.encode(['0x0', ['0x7084f5476618d8e60b11ef0d7d3f06914655adb8793e28ff7f018d4c76d505d5'], holder, '0x' + One.toString(16)]);
+    const eventLog = RLP.encode(['0x0', [Withdrawn_EventSig], abi.encode(['address', 'uint256'], [holder, '0x' + One.toString(16)])]);
 
     it('reverts if the sender is not the rootChainManager', async function () {
       await expectRevert(this.predicate.exitTokens(ZeroAddress, this.token.address, eventLog, {from: holder}), 'Predicate: only manager');
@@ -92,8 +93,7 @@ describe('ERC20MintBurnPredicate', function () {
       const wrongEventLog = RLP.encode([
         '0x0',
         ['0x7084f5476618d8e60b11ef0d7d3f06914655adb8793e28ff7f018d4c76d50000'],
-        holder,
-        '0x' + One.toString(16),
+        abi.encode(['address', 'uint256'], [holder, '0x' + One.toString(16)]),
       ]);
       await expectRevert(
         this.predicate.exitTokens(ZeroAddress, this.token.address, wrongEventLog, {from: rootChainManager}),

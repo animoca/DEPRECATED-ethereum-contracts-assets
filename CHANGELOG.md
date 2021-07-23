@@ -1,9 +1,15 @@
 # Changelog
 
+ ## 1.1.4
+
+### Fixes
+ * Fixed the decoding of the Withdrawn event log in the ERC20 bridging predicates.
+
 ## 1.1.3
 
 ### Improvements
  * `ERC20ReceiverMock.sol` now has an approved token address and reverts if the call originates from another address.
+
  ## 1.1.2
 
 ### Fixes

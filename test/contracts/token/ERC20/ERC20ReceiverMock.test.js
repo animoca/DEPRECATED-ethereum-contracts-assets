@@ -1,6 +1,6 @@
 const {artifacts, accounts} = require('hardhat');
 const interfaces20 = require('../../../../src/interfaces/ERC165/ERC20');
-const {behaviors} = require('@animoca/ethereum-contracts-core');
+const {constants, behaviors} = require('@animoca/ethereum-contracts-core');
 const {ZeroAddress} = constants;
 
 describe('ERC20ReceiverMock', function () {
