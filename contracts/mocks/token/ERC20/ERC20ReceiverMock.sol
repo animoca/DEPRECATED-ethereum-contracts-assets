@@ -2,7 +2,7 @@
 
 pragma solidity >=0.7.6 <0.8.0;
 
-import {ManagedIdentity} from "@animoca/ethereum-contracts-core-1.1.1/contracts/metatx/ManagedIdentity.sol";
+import {ManagedIdentity} from "@animoca/ethereum-contracts-core-1.1.2/contracts/metatx/ManagedIdentity.sol";
 import {ERC20Receiver} from "../../../token/ERC20/ERC20Receiver.sol";
 
 contract ERC20ReceiverMock is ERC20Receiver, ManagedIdentity {

@@ -137,7 +137,7 @@ function shouldBehaveLikeERC1155Burnable({nfMaskLength, contractName, revertMess
 
         if (nonFungibleTokens.length != 0) {
           if (interfaces.ERC721 || interfaces.ERC1155Inventory) {
-            it('[ERC721/ERC1155inventory] removes the ownership of the Non-Fungible Token(s)', async function () {
+            it('[ERC721/ERC1155Inventory] removes the ownership of the Non-Fungible Token(s)', async function () {
               for (const [id, _value] of nonFungibleTokens) {
                 await expectRevert(this.token.ownerOf(id), revertMessages.NonExistingNFT);
               }

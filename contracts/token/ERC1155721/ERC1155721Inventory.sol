@@ -8,7 +8,7 @@ import {IERC721BatchTransfer} from "./../ERC721/IERC721BatchTransfer.sol";
 import {IERC721Receiver} from "./../ERC721/IERC721Receiver.sol";
 import {IERC1155721Inventory} from "./IERC1155721Inventory.sol";
 import {IERC165, IERC1155TokenReceiver, ERC1155InventoryIdentifiersLib, ERC1155InventoryBase} from "./../ERC1155/ERC1155InventoryBase.sol";
-import {AddressIsContract} from "@animoca/ethereum-contracts-core-1.1.1/contracts/utils/types/AddressIsContract.sol";
+import {AddressIsContract} from "@animoca/ethereum-contracts-core-1.1.2/contracts/utils/types/AddressIsContract.sol";
 
 /**
  * @title ERC1155721Inventory, an ERC1155Inventory with additional support for ERC721.

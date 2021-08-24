@@ -316,13 +316,13 @@ function shouldBehaveLikeERC1155Standard({nfMaskLength, revertMessages, eventPar
           if (nonFungibleTokens.length != 0) {
             if (interfaces.ERC721 || interfaces.ERC1155Inventory) {
               if (selfTransfer) {
-                it('[ERC721/ERC1155inventory] does not affect the Non-Fungible Token(s) ownership', async function () {
+                it('[ERC721/ERC1155Inventory] does not affect the Non-Fungible Token(s) ownership', async function () {
                   for (const [id, _value] of nonFungibleTokens) {
                     (await this.token.ownerOf(id)).should.be.equal(owner);
                   }
                 });
               } else {
-                it('[ERC721/ERC1155inventory] gives the ownership of the Non-Fungible Token(s) to the recipient', async function () {
+                it('[ERC721/ERC1155Inventory] gives the ownership of the Non-Fungible Token(s) to the recipient', async function () {
                   for (const [id, _value] of nonFungibleTokens) {
                     (await this.token.ownerOf(id)).should.be.equal(this.toWhom);
                   }

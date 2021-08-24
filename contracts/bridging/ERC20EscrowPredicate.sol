@@ -2,8 +2,8 @@
 
 pragma solidity >=0.7.6 <0.8.0;
 
-import {IWrappedERC20, ERC20Wrapper} from "@animoca/ethereum-contracts-core-1.1.1/contracts/utils/ERC20Wrapper.sol";
-import {ManagedIdentity} from "@animoca/ethereum-contracts-core-1.1.1/contracts/metatx/ManagedIdentity.sol";
+import {IWrappedERC20, ERC20Wrapper} from "@animoca/ethereum-contracts-core-1.1.2/contracts/utils/ERC20Wrapper.sol";
+import {ManagedIdentity} from "@animoca/ethereum-contracts-core-1.1.2/contracts/metatx/ManagedIdentity.sol";
 import {ERC20BasePredicate} from "./ERC20BasePredicate.sol";
 
 /**

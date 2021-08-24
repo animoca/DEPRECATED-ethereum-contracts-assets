@@ -1,5 +1,10 @@
 # Changelog
 
+ ## 1.1.5
+
+### Improvements
+ * Updated dependencies to the latest versions.
+
  ## 1.1.4
 
 ### Fixes

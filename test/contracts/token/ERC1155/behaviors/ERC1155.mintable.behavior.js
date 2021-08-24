@@ -95,7 +95,7 @@ function shouldBehaveLikeERC1155Mintable({contractName, nfMaskLength, revertMess
 
         if (nonFungibleTokens.length != 0) {
           if (interfaces.ERC721 || interfaces.ERC1155Inventory) {
-            it('[ERC721/ERC1155inventory] gives the ownership of the Non-Fungible Token(s) to the recipient', async function () {
+            it('[ERC721/ERC1155Inventory] gives the ownership of the Non-Fungible Token(s) to the recipient', async function () {
               for (const [id, _value] of nonFungibleTokens) {
                 (await this.token.ownerOf(id)).should.be.equal(this.toWhom);
               }

@@ -2,8 +2,8 @@
 
 pragma solidity >=0.7.6 <0.8.0;
 
-import {ITokenPredicate} from "@animoca/ethereum-contracts-core-1.1.1/contracts/bridging/ITokenPredicate.sol";
-import {RLPReader} from "@animoca/ethereum-contracts-core-1.1.1/contracts/utils/RLPReader.sol";
+import {ITokenPredicate} from "@animoca/ethereum-contracts-core-1.1.2/contracts/bridging/ITokenPredicate.sol";
+import {RLPReader} from "@animoca/ethereum-contracts-core-1.1.2/contracts/utils/RLPReader.sol";
 
 /**
  * Polygon (MATIC) bridging base ERC20 predicate to be deployed on the root chain (Ethereum mainnet).

@@ -6,7 +6,7 @@ import {ERC1155Inventory} from "../../../token/ERC1155/ERC1155Inventory.sol";
 import {IERC1155InventoryMintable} from "../../../token/ERC1155/IERC1155InventoryMintable.sol";
 import {IERC1155InventoryCreator} from "../../../token/ERC1155/IERC1155InventoryCreator.sol";
 import {BaseMetadataURI} from "../../../metadata/BaseMetadataURI.sol";
-import {MinterRole} from "@animoca/ethereum-contracts-core-1.1.1/contracts/access/MinterRole.sol";
+import {MinterRole} from "@animoca/ethereum-contracts-core-1.1.2/contracts/access/MinterRole.sol";
 
 contract ERC1155InventoryMock is ERC1155Inventory, IERC1155InventoryMintable, IERC1155InventoryCreator, BaseMetadataURI, MinterRole {
     constructor() MinterRole(msg.sender) {}

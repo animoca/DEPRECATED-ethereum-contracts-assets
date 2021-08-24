@@ -7,8 +7,8 @@ import {IERC1155MetadataURI} from "./../ERC1155/IERC1155MetadataURI.sol";
 import {IERC1155Inventory} from "./../ERC1155/IERC1155Inventory.sol";
 import {IERC1155InventoryTotalSupply} from "./../ERC1155/IERC1155InventoryTotalSupply.sol";
 import {IERC1155TokenReceiver} from "./../ERC1155/IERC1155TokenReceiver.sol";
-import {IERC165} from "@animoca/ethereum-contracts-core-1.1.1/contracts/introspection/IERC165.sol";
-import {ManagedIdentity} from "@animoca/ethereum-contracts-core-1.1.1/contracts/metatx/ManagedIdentity.sol";
+import {IERC165} from "@animoca/ethereum-contracts-core-1.1.2/contracts/introspection/IERC165.sol";
+import {ManagedIdentity} from "@animoca/ethereum-contracts-core-1.1.2/contracts/metatx/ManagedIdentity.sol";
 
 /**
  * @title ERC1155InventoryIdentifiersLib, a library to introspect inventory identifiers.

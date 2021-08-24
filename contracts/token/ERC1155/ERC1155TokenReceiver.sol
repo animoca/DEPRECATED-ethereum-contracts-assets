@@ -3,7 +3,7 @@
 pragma solidity >=0.7.6 <0.8.0;
 
 import {IERC1155TokenReceiver} from "./IERC1155TokenReceiver.sol";
-import {IERC165} from "@animoca/ethereum-contracts-core-1.1.1/contracts/introspection/IERC165.sol";
+import {IERC165} from "@animoca/ethereum-contracts-core-1.1.2/contracts/introspection/IERC165.sol";
 
 abstract contract ERC1155TokenReceiver is IERC1155TokenReceiver, IERC165 {
     bytes4 private constant _ERC165_INTERFACE_ID = type(IERC165).interfaceId;
