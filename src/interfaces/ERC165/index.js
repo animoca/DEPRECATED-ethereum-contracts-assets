@@ -11,4 +11,3 @@ module.exports = {
   ...ERC1155721Interfaces,
   ...MetadataInterfaces,
 };
-console.log(module.exports);
