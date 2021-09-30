@@ -14,11 +14,7 @@ const ERC721_Functions = [
 
 const ERC721Metadata_Functions = ['name()', 'symbol()', 'tokenURI(uint256)'];
 
-// const ERC721Enumerable_Functions = ['totalSupply()', 'tokenOfOwnerByIndex(address,uint256)', 'tokenByIndex(uint256)'];
-
 const ERC721BatchTransfer_Functions = ['batchTransferFrom(address,address,uint256[])'];
-
-const ERC721Exists_Functions = ['exists(uint256)'];
 
 const ERC721Burnable_Functions = ['burnFrom(address,uint256)', 'batchBurnFrom(address,uint256[])'];
 
@@ -37,29 +33,17 @@ module.exports = {
     id: makeInterfaceId.ERC165(ERC721Metadata_Functions),
   }, // 0x5b5e139f
 
-  // ERC721Enumerable: {
-  //   name: 'ERC721Enumerable',
-  //   functions: ERC721Enumerable_Functions,
-  //   id: makeInterfaceId.ERC165(ERC721Enumerable_Functions),
-  // }, // 0x780e9d63
-
-  ERC721Exists: {
-    name: 'ERC721Exists',
-    functions: ERC721Exists_Functions,
-    id: makeInterfaceId.ERC165(ERC721Exists_Functions),
-  }, // 0x4f558e79
-
   ERC721BatchTransfer: {
     name: 'ERC721Burnable',
     functions: ERC721BatchTransfer_Functions,
     id: makeInterfaceId.ERC165(ERC721BatchTransfer_Functions),
-  }, // 0xTODO
+  }, // 0xf3993d11
 
   ERC721Burnable: {
     name: 'ERC721Burnable',
     functions: ERC721Burnable_Functions,
     id: makeInterfaceId.ERC165(ERC721Burnable_Functions),
-  }, // 0xTODO
+  }, // 0x8b8b4ef5
 
   ERC721Receiver: {
     name: 'ERC721Receiver',

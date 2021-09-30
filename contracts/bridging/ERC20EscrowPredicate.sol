@@ -2,18 +2,22 @@
 
 pragma solidity >=0.7.6 <0.8.0;
 
-import {IWrappedERC20, ERC20Wrapper} from "@animoca/ethereum-contracts-core-1.1.2/contracts/utils/ERC20Wrapper.sol";
 import {ManagedIdentity} from "@animoca/ethereum-contracts-core-1.1.2/contracts/metatx/ManagedIdentity.sol";
+import {IWrappedERC20, ERC20Wrapper} from "@animoca/ethereum-contracts-core-1.1.2/contracts/utils/ERC20Wrapper.sol";
 import {ERC20BasePredicate} from "./ERC20BasePredicate.sol";
 
 /**
- * Polygon (MATIC) bridging ERC20 escrowing predicate to be deployed on the root chain (Ethereum mainnet).
- * This predicate must be used for non-mintable/non-burnable tokens.
+ * @title ERC20 Escrow Predicate (for Polygon).
+ * Polygon bridging ERC20 escrowing predicate which works with a `Withdrawn(address account, uint256 value)` event.
+ * @dev This contract should be deployed on the Root Chain (Ethereum).
  */
-contract ERC20EscrowPredicate is ERC20BasePredicate, ManagedIdentity {
+contract ERC20EscrowPredicate is ManagedIdentity, ERC20BasePredicate {
     using ERC20Wrapper for IWrappedERC20;
 
+    // @inheritdoc ERC20BasePredicate
     constructor(address rootChainManager_) ERC20BasePredicate(rootChainManager_) {}
+
+    //==================================================== TokenPredicate ===================================================//
 
     /**
      * Locks ERC20 tokens for deposit.
@@ -38,8 +42,8 @@ contract ERC20EscrowPredicate is ERC20BasePredicate, ManagedIdentity {
     /**
      * Validates the {Withdrawn} log signature, then sends the correct amount to withdrawer.
      * @dev Reverts if not called only by the manager (RootChainManager).
-     * @param rootToken Token which gets withdrawn
-     * @param log Valid ERC20 burn log from child chain
+     * @param rootToken Token which gets withdrawn.
+     * @param log Valid ERC20 burn log from child chain.
      */
     function exitTokens(
         address,

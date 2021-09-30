@@ -4,9 +4,9 @@ pragma solidity >=0.7.6 <0.8.0;
 
 /**
  * @title ERC20 Token Standard, ERC2612 optional extension: permit – 712-signed approvals
- * @dev Interface for allowing ERC20 approvals to be made via ECDSA `secp256k1` signatures.
- * See https://eips.ethereum.org/EIPS/eip-2612
- * Note: the ERC-165 identifier for this interface is 0x9d8ff7da.
+ * Interface for allowing ERC20 approvals to be made via ECDSA `secp256k1` signatures.
+ * @dev See https://eips.ethereum.org/EIPS/eip-2612
+ * @dev Note: the ERC-165 identifier for this interface is 0x9d8ff7da.
  */
 interface IERC20Permit {
     /**

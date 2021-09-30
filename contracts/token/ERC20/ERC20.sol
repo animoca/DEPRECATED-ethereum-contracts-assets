@@ -2,9 +2,9 @@
 
 pragma solidity >=0.7.6 <0.8.0;
 
+import {AddressIsContract} from "@animoca/ethereum-contracts-core-1.1.2/contracts/utils/types/AddressIsContract.sol";
 import {ManagedIdentity} from "@animoca/ethereum-contracts-core-1.1.2/contracts/metatx/ManagedIdentity.sol";
 import {IERC165} from "@animoca/ethereum-contracts-core-1.1.2/contracts/introspection/IERC165.sol";
-import {AddressIsContract} from "@animoca/ethereum-contracts-core-1.1.2/contracts/utils/types/AddressIsContract.sol";
 import {IERC20} from "./IERC20.sol";
 import {IERC20Detailed} from "./IERC20Detailed.sol";
 import {IERC20Allowance} from "./IERC20Allowance.sol";
@@ -17,7 +17,7 @@ import {IERC20Receiver} from "./IERC20Receiver.sol";
 /**
  * @title ERC20 Fungible Token Contract.
  */
-abstract contract ERC20 is
+contract ERC20 is
     ManagedIdentity,
     IERC165,
     IERC20,
@@ -38,6 +38,7 @@ abstract contract ERC20 is
     // solhint-disable-next-line var-name-mixedcase
     bytes32 internal immutable _DOMAIN_SEPARATOR;
 
+    /// @inheritdoc IERC20Permit
     mapping(address => uint256) public override nonces;
 
     string internal _name;
@@ -52,13 +53,11 @@ abstract contract ERC20 is
     constructor(
         string memory name_,
         string memory symbol_,
-        uint8 decimals_,
-        string memory tokenURI_
+        uint8 decimals_
     ) {
         _name = name_;
         _symbol = symbol_;
         _decimals = decimals_;
-        _tokenURI = tokenURI_;
 
         uint256 chainId;
         assembly {
@@ -68,32 +67,9 @@ abstract contract ERC20 is
         _DOMAIN_SEPARATOR = _calculateDomainSeparator(chainId, bytes(name_));
     }
 
-    // solhint-disable-next-line func-name-mixedcase
-    function DOMAIN_SEPARATOR() public view override returns (bytes32) {
-        uint256 chainId;
-        assembly {
-            chainId := chainid()
-        }
-        // recompute the domain separator in case of fork and chainid update
-        return chainId == deploymentChainId ? _DOMAIN_SEPARATOR : _calculateDomainSeparator(chainId, bytes(_name));
-    }
+    //======================================================= ERC165 ========================================================//
 
-    function _calculateDomainSeparator(uint256 chainId, bytes memory name_) private view returns (bytes32) {
-        return
-            keccak256(
-                abi.encode(
-                    keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
-                    keccak256(name_),
-                    keccak256("1"),
-                    chainId,
-                    address(this)
-                )
-            );
-    }
-
-    /////////////////////////////////////////// ERC165 ///////////////////////////////////////
-
-    /// @dev See {IERC165-supportsInterface}.
+    /// @inheritdoc IERC165
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
         return
             interfaceId == type(IERC165).interfaceId ||
@@ -106,56 +82,72 @@ abstract contract ERC20 is
             interfaceId == type(IERC20Permit).interfaceId;
     }
 
-    /////////////////////////////////////////// ERC20Detailed ///////////////////////////////////////
+    //======================================================== ERC20 ========================================================//
 
-    /// @dev See {IERC20Detailed-name}.
-    function name() external view override returns (string memory) {
-        return _name;
-    }
-
-    /// @dev See {IERC20Detailed-symbol}.
-    function symbol() external view override returns (string memory) {
-        return _symbol;
-    }
-
-    /// @dev See {IERC20Detailed-decimals}.
-    function decimals() external view override returns (uint8) {
-        return _decimals;
-    }
-
-    /////////////////////////////////////////// ERC20Metadata ///////////////////////////////////////
-
-    /// @dev See {IERC20Metadata-tokenURI}.
-    function tokenURI() external view override returns (string memory) {
-        return _tokenURI;
-    }
-
-    /////////////////////////////////////////// ERC20 ///////////////////////////////////////
-
-    /// @dev See {IERC20-totalSupply}.
+    /// @inheritdoc IERC20
     function totalSupply() external view override returns (uint256) {
         return _totalSupply;
     }
 
-    /// @dev See {IERC20-balanceOf}.
+    /// @inheritdoc IERC20
     function balanceOf(address account) external view override returns (uint256) {
         return _balances[account];
     }
 
-    /// @dev See {IERC20-allowance}.
+    /// @inheritdoc IERC20
     function allowance(address owner, address spender) public view virtual override returns (uint256) {
         return _allowances[owner][spender];
     }
 
-    /// @dev See {IERC20-approve}.
+    /// @inheritdoc IERC20
     function approve(address spender, uint256 value) external virtual override returns (bool) {
         _approve(_msgSender(), spender, value);
         return true;
     }
 
-    /////////////////////////////////////////// ERC20 Allowance ///////////////////////////////////////
+    /// @inheritdoc IERC20
+    function transfer(address to, uint256 value) external virtual override returns (bool) {
+        _transfer(_msgSender(), to, value);
+        return true;
+    }
 
-    /// @dev See {IERC20Allowance-increaseAllowance}.
+    /// @inheritdoc IERC20
+    function transferFrom(
+        address from,
+        address to,
+        uint256 value
+    ) external virtual override returns (bool) {
+        _transferFrom(_msgSender(), from, to, value);
+        return true;
+    }
+
+    //==================================================== ERC20Detailed ====================================================//
+
+    /// @inheritdoc IERC20Detailed
+    function name() external view override returns (string memory) {
+        return _name;
+    }
+
+    /// @inheritdoc IERC20Detailed
+    function symbol() external view override returns (string memory) {
+        return _symbol;
+    }
+
+    /// @inheritdoc IERC20Detailed
+    function decimals() external view override returns (uint8) {
+        return _decimals;
+    }
+
+    //==================================================== ERC20Metadata ====================================================//
+
+    /// @inheritdoc IERC20Metadata
+    function tokenURI() external view override returns (string memory) {
+        return _tokenURI;
+    }
+
+    //=================================================== ERC20Allowance ====================================================//
+
+    /// @inheritdoc IERC20Allowance
     function increaseAllowance(address spender, uint256 addedValue) external virtual override returns (bool) {
         require(spender != address(0), "ERC20: zero address spender");
         address owner = _msgSender();
@@ -171,32 +163,16 @@ abstract contract ERC20 is
         return true;
     }
 
-    /// @dev See {IERC20Allowance-decreaseAllowance}.
+    /// @inheritdoc IERC20Allowance
     function decreaseAllowance(address spender, uint256 subtractedValue) external virtual override returns (bool) {
         require(spender != address(0), "ERC20: zero address spender");
         _decreaseAllowance(_msgSender(), spender, subtractedValue);
         return true;
     }
 
-    /// @dev See {IERC20-transfer}.
-    function transfer(address to, uint256 value) external virtual override returns (bool) {
-        _transfer(_msgSender(), to, value);
-        return true;
-    }
+    //================================================= ERC20BatchTransfers =================================================//
 
-    /// @dev See {IERC20-transferFrom}.
-    function transferFrom(
-        address from,
-        address to,
-        uint256 value
-    ) external virtual override returns (bool) {
-        _transferFrom(_msgSender(), from, to, value);
-        return true;
-    }
-
-    /////////////////////////////////////////// ERC20MultiTransfer ///////////////////////////////////////
-
-    /// @dev See {IERC20MultiTransfer-multiTransfer(address[],uint256[])}.
+    /// @inheritdoc IERC20BatchTransfers
     function batchTransfer(address[] calldata recipients, uint256[] calldata values) external virtual override returns (bool) {
         uint256 length = recipients.length;
         require(length == values.length, "ERC20: inconsistent arrays");
@@ -232,7 +208,7 @@ abstract contract ERC20 is
         return true;
     }
 
-    /// @dev See {IERC20MultiTransfer-multiTransferFrom(address,address[],uint256[])}.
+    /// @inheritdoc IERC20BatchTransfers
     function batchTransferFrom(
         address from,
         address[] calldata recipients,
@@ -280,9 +256,9 @@ abstract contract ERC20 is
         return true;
     }
 
-    /////////////////////////////////////////// ERC20SafeTransfers ///////////////////////////////////////
+    //================================================= ERC20SafeTransfers ==================================================//
 
-    /// @dev See {IERC20Safe-safeTransfer(address,uint256,bytes)}.
+    /// @inheritdoc IERC20SafeTransfers
     function safeTransfer(
         address to,
         uint256 amount,
@@ -296,7 +272,7 @@ abstract contract ERC20 is
         return true;
     }
 
-    /// @dev See {IERC20Safe-safeTransferFrom(address,address,uint256,bytes)}.
+    /// @inheritdoc IERC20SafeTransfers
     function safeTransferFrom(
         address from,
         address to,
@@ -311,9 +287,20 @@ abstract contract ERC20 is
         return true;
     }
 
-    /////////////////////////////////////////// ERC20Permit ///////////////////////////////////////
+    //===================================================== ERC20Permit =====================================================//
 
-    /// @dev See {IERC2612-permit(address,address,uint256,uint256,uint8,bytes32,bytes32)}.
+    /// @inheritdoc IERC20Permit
+    // solhint-disable-next-line func-name-mixedcase
+    function DOMAIN_SEPARATOR() public view override returns (bytes32) {
+        uint256 chainId;
+        assembly {
+            chainId := chainid()
+        }
+        // recompute the domain separator in case of fork and chainid update
+        return chainId == deploymentChainId ? _DOMAIN_SEPARATOR : _calculateDomainSeparator(chainId, bytes(_name));
+    }
+
+    /// @inheritdoc IERC20Permit
     function permit(
         address owner,
         address spender,
@@ -332,7 +319,7 @@ abstract contract ERC20 is
         _approve(owner, spender, value);
     }
 
-    /////////////////////////////////////////// Internal Functions ///////////////////////////////////////
+    //============================================ High-level Internal Functions ============================================//
 
     function _approve(
         address owner,
@@ -478,5 +465,20 @@ abstract contract ERC20 is
         if (totalValue != 0) {
             _totalSupply -= totalValue; // _totalSupply cannot underfow as balances do not underflow
         }
+    }
+
+    //============================================== Helper Internal Functions ==============================================//
+
+    function _calculateDomainSeparator(uint256 chainId, bytes memory name_) private view returns (bytes32) {
+        return
+            keccak256(
+                abi.encode(
+                    keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"), // todo
+                    keccak256(name_),
+                    keccak256("1"),
+                    chainId,
+                    address(this)
+                )
+            );
     }
 }

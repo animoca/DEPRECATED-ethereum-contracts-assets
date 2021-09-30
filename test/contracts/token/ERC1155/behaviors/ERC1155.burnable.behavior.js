@@ -6,6 +6,7 @@ const {makeFungibleCollectionId, makeNonFungibleCollectionId, makeNonFungibleTok
   require('@animoca/blockchain-inventory_metadata').inventoryIds;
 const {Zero, One, ZeroAddress} = require('@animoca/ethereum-contracts-core').constants;
 const interfaces1155 = require('../../../../../src/interfaces/ERC165/ERC1155');
+const interfaces1155721 = require('../../../../../src/interfaces/ERC165/ERC1155721');
 const {behaviors} = require('@animoca/ethereum-contracts-core');
 
 function shouldBehaveLikeERC1155Burnable({nfMaskLength, contractName, revertMessages, eventParamsOverrides, interfaces, methods, deploy, mint}) {
@@ -73,10 +74,12 @@ function shouldBehaveLikeERC1155Burnable({nfMaskLength, contractName, revertMess
         this.nftBalance = await this.token.balanceOf(owner);
       }
       if (interfaces.ERC1155Inventory) {
-        this.nfcSupply = await this.token.totalSupply(nfCollection);
-        this.otherNFCSupply = await this.token.totalSupply(nfCollectionOther);
         this.nfcBalance = await this.token.balanceOf(owner, nfCollection);
         this.otherNFCBalance = await this.token.balanceOf(owner, nfCollectionOther);
+        if (interfaces.ERC1155InventoryTotalSupply) {
+          this.nfcSupply = await this.token.totalSupply(nfCollection);
+          this.otherNFCSupply = await this.token.totalSupply(nfCollectionOther);
+        }
       }
     };
 
@@ -114,8 +117,8 @@ function shouldBehaveLikeERC1155Burnable({nfMaskLength, contractName, revertMess
           }
         });
 
-        if (interfaces.ERC1155Inventory) {
-          it('[ERC1155Inventory] decreases the token(s) total supply', async function () {
+        if (interfaces.ERC1155InventoryTotalSupply) {
+          it('[ERC1155InventoryTotalSupply] decreases the token(s) total supply', async function () {
             for (const [id, value] of tokens) {
               let supply;
               if (isNonFungibleToken(id, nfMaskLength)) {
@@ -153,16 +156,18 @@ function shouldBehaveLikeERC1155Burnable({nfMaskLength, contractName, revertMess
               (await this.token.balanceOf(owner, nfCollectionOther)).should.be.bignumber.equal(this.otherNFCBalance.subn(nbOtherCollectionNFTs));
             });
 
-            it('[ERC1155Inventory] decreases the Non-Fungible Collection(s) total supply', async function () {
-              (await this.token.totalSupply(nfCollection)).should.be.bignumber.equal(this.nfcSupply.subn(nbCollectionNFTs));
-              (await this.token.totalSupply(nfCollectionOther)).should.be.bignumber.equal(this.otherNFCSupply.subn(nbOtherCollectionNFTs));
-            });
+            if (interfaces.ERC1155InventoryTotalSupply) {
+              it('[ERC1155InventoryTotalSupply] decreases the Non-Fungible Collection(s) total supply', async function () {
+                (await this.token.totalSupply(nfCollection)).should.be.bignumber.equal(this.nfcSupply.subn(nbCollectionNFTs));
+                (await this.token.totalSupply(nfCollectionOther)).should.be.bignumber.equal(this.otherNFCSupply.subn(nbOtherCollectionNFTs));
+              });
 
-            it('[ERC1155Inventory] sets the Non-Fungible Token(s) total supply to 0', async function () {
-              for (const [id, _value] of nonFungibleTokens) {
-                (await this.token.totalSupply(id)).should.be.bignumber.equal('0');
-              }
-            });
+              it('[ERC1155InventoryTotalSupply] sets the Non-Fungible Token(s) total supply to 0', async function () {
+                for (const [id, _value] of nonFungibleTokens) {
+                  (await this.token.totalSupply(id)).should.be.bignumber.equal('0');
+                }
+              });
+            }
           }
 
           if (interfaces.ERC721) {
@@ -237,18 +242,6 @@ function shouldBehaveLikeERC1155Burnable({nfMaskLength, contractName, revertMess
         });
         burnWasSuccessful(tokenIds, values, options);
       });
-
-      if (interfaces.Pausable) {
-        context('[Pausable] when called after unpausing', function () {
-          const options = {from: owner};
-          beforeEach(async function () {
-            await this.token.pause({from: deployer});
-            await this.token.unpause({from: deployer});
-            receipt = await burnFunction.call(this, owner, tokenIds, values, options);
-          });
-          burnWasSuccessful(tokenIds, values, options);
-        });
-      }
 
       if (interfaces.ERC721) {
         const ids = Array.isArray(tokenIds) ? tokenIds : [tokenIds];
@@ -396,6 +389,8 @@ function shouldBehaveLikeERC1155Burnable({nfMaskLength, contractName, revertMess
 
     if (interfaces.ERC1155InventoryBurnable) {
       behaviors.shouldSupportInterfaces([interfaces1155.ERC1155InventoryBurnable]);
+    } else if (interfaces.ERC1155721InventoryBurnable) {
+      behaviors.shouldSupportInterfaces([interfaces1155721.ERC1155721InventoryBurnable]);
     }
   });
 }

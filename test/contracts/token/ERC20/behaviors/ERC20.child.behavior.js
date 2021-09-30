@@ -10,7 +10,7 @@ const {AbiCoder} = require('ethers/utils');
 const abi = new AbiCoder();
 
 function shouldBehaveLikeChildERC20(implementation) {
-  const {revertMessages, deploy} = implementation;
+  const {revertMessages, deploy, features} = implementation;
   const [deployer, owner, spender] = accounts;
 
   const initialSupply = new BN(100);
@@ -138,6 +138,35 @@ function shouldBehaveLikeChildERC20(implementation) {
         });
       });
     });
+
+    if (implementation.methods['burnFrom(address,uint256)'] == undefined && features.Recoverable) {
+      describe('recoverERC20s()', function () {
+        it('reverts if not sent by the contract owner', async function () {
+          await expectRevert(this.token.recoverERC20s([], [this.token.address], [One], {from: owner}), revertMessages.NotContractOwner);
+        });
+        it('reverts with inconsistent arrays', async function () {
+          await expectRevert(this.token.recoverERC20s([], [this.token.address], [One], {from: deployer}), revertMessages.RecovInconsistentArrays);
+          await expectRevert(
+            this.token.recoverERC20s([deployer], [this.token.address], [], {from: deployer}),
+            revertMessages.RecovInconsistentArrays
+          );
+          await expectRevert(this.token.recoverERC20s([deployer], [], [One], {from: deployer}), revertMessages.RecovInconsistentArrays);
+        });
+        it('reverts if trying to recover escrowed token', async function () {
+          await this.token.safeTransfer(this.token.address, One, '0x00', {from: owner});
+          await expectRevert(
+            this.token.recoverERC20s([deployer], [this.token.address], [One], {from: deployer}),
+            revertMessages.RecovInsufficientBalance
+          );
+        });
+        it('recovers ERC20s sent accidentally to this contract', async function () {
+          await this.token.transfer(this.token.address, One, {from: owner});
+          const otherToken = await deploy([owner], [initialSupply], deployer);
+          await otherToken.transfer(this.token.address, One, {from: owner});
+          await this.token.recoverERC20s([deployer, deployer], [this.token.address, otherToken.address], [One, One], {from: deployer});
+        });
+      });
+    }
 
     behaviors.shouldSupportInterfaces([interfaces20.ERC20Receiver]);
   });

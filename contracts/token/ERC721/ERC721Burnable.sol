@@ -3,27 +3,23 @@
 pragma solidity >=0.7.6 <0.8.0;
 
 import {IERC721Burnable} from "./IERC721Burnable.sol";
-import {ERC721} from "./ERC721.sol";
+import {IERC165, IERC721, IERC721Metadata, IERC721BatchTransfer, ERC721} from "./ERC721.sol";
 
 /**
- * @title ERC721Burnable, a burnable ERC721.
+ * @title ERC721 Non Fungible Token Contract, burnable version.
+ * @dev The function `tokenURI(uin256)` needs to be implemented by a child contract, for example with the help of `BaseMetadataURI`.
  */
 abstract contract ERC721Burnable is IERC721Burnable, ERC721 {
-    //================================== ERC165 =======================================/
+    //======================================================= ERC165 ========================================================//
 
-    /**
-     * @dev See {IERC165-supportsInterface}.
-     */
+    /// @inheritdoc IERC165
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
         return interfaceId == type(IERC721Burnable).interfaceId || super.supportsInterface(interfaceId);
     }
 
-    //============================== ERC721Burnable =======================================/
+    //=================================================== ERC721Burnable ====================================================//
 
-    /**
-     * Burns an NFT (ERC721-compatible).
-     * @dev See {IERC721Burnable-burnFrom(address,uint256)}.
-     */
+    /// @inheritdoc IERC721Burnable
     function burnFrom(address from, uint256 tokenId) public virtual override {
         address sender = _msgSender();
         bool operatable = _isOperatable(from, sender);
@@ -32,10 +28,7 @@ abstract contract ERC721Burnable is IERC721Burnable, ERC721 {
         emit Transfer(from, address(0), tokenId);
     }
 
-    /**
-     * Burns a batch of token (ERC721-compatible).
-     * @dev See {IERC721Burnable-batchBurnFrom(address,uint256[])}.
-     */
+    /// @inheritdoc IERC721Burnable
     function batchBurnFrom(address from, uint256[] memory tokenIds) public virtual override {
         address sender = _msgSender();
         bool operatable = _isOperatable(from, sender);
@@ -53,7 +46,7 @@ abstract contract ERC721Burnable is IERC721Burnable, ERC721 {
         }
     }
 
-    //============================== Internal Helper Functions =======================================/
+    //============================================== Helper Internal Functions ==============================================//
 
     function _burnNFT(
         address from,

@@ -3,9 +3,9 @@
 pragma solidity >=0.7.6 <0.8.0;
 
 /**
- * @title ERC721 Non-Fungible Token Standard, optional burning interface
+ * @title ERC721 Non-Fungible Token Standard, optional extension: Burnable.
  * @dev See https://eips.ethereum.org/EIPS/eip-721
- * Note: The ERC-165 identifier for this interface is.
+ * @dev Note: The ERC-165 identifier for this interface is 0x8b8b4ef5.
  */
 interface IERC721Burnable {
     /**

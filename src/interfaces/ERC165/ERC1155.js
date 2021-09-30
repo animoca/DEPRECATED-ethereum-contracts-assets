@@ -9,8 +9,6 @@ const ERC1155_Functions = [
   'isApprovedForAll(address,address)',
 ];
 
-// const ERC1155AssetCollections_Functions = ['isFungible(uint256)', 'collectionOf(uint256)', 'ownerOf(uint256)', 'exists(uint256)'];
-
 const ERC1155MetadataURI_Functions = ['uri(uint256)'];
 
 const ERC1155Inventory_Functions = ['isFungible(uint256)', 'collectionOf(uint256)', 'ownerOf(uint256)'];
@@ -43,25 +41,25 @@ module.exports = {
     name: 'ERC1155Inventory',
     functions: ERC1155Inventory_Functions,
     id: makeInterfaceId.ERC165(ERC1155Inventory_Functions),
-  }, // 0xTODO
+  }, // 0x09ce5c46
 
   ERC1155InventoryTotalSupply: {
     name: 'ERC1155InventoryTotalSupply',
     functions: ERC1155InventoryTotalSupply_Functions,
     id: makeInterfaceId.ERC165(ERC1155InventoryTotalSupply_Functions),
-  }, // 0xTODO
+  }, // 0xbd85b039
 
   ERC1155InventoryCreator: {
     name: 'ERC1155InventoryCreator',
     functions: ERC1155InventoryCreator_Functions,
     id: makeInterfaceId.ERC165(ERC1155InventoryCreator_Functions),
-  }, // 0xTODO
+  }, // 0x510b5158
 
   ERC1155InventoryBurnable: {
     name: 'ERC1155InventoryBurnable',
     functions: ERC1155InventoryBurnable_Functions,
     id: makeInterfaceId.ERC165(ERC1155InventoryBurnable_Functions),
-  }, // 0xTODO
+  }, // 0x921ed8d1
 
   ERC1155TokenReceiver: {
     name: 'ERC1155TokenReceiver',

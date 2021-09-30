@@ -172,18 +172,6 @@ function shouldBehaveLikeERC721Burnable({nfMaskLength, contractName, revertMessa
         });
         burnWasSuccessful(ids, options);
       });
-
-      if (interfaces.Pausable) {
-        context('[Pausable] when called after unpausing', function () {
-          const options = {from: owner};
-          beforeEach(async function () {
-            await this.token.pause({from: deployer});
-            await this.token.unpause({from: deployer});
-            receipt = await burnFunction.call(this, owner, ids, options);
-          });
-          burnWasSuccessful(ids, options);
-        });
-      }
     };
 
     const shouldRevertOnPreconditions = function (burnFunction) {

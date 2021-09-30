@@ -3,8 +3,9 @@
 pragma solidity >=0.7.6 <0.8.0;
 
 /**
- * @title ERC-1155 Inventory, additional creator interface
+ * @title ERC1155 Inventory, optional extension: Creator.
  * @dev See https://eips.ethereum.org/EIPS/eip-1155
+ * @dev Note: The ERC-165 identifier for this interface is 0x510b5158.
  */
 interface IERC1155InventoryCreator {
     /**

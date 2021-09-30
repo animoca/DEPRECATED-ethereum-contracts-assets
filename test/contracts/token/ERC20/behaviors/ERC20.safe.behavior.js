@@ -309,7 +309,7 @@ function shouldBehaveLikeERC20Safe(implementation) {
     });
 
     if (features.ERC165) {
-      behaviors.shouldSupportInterfaces([interfaces20.ERC20SafeTransfers_Experimental]);
+      behaviors.shouldSupportInterfaces([interfaces20.ERC20SafeTransfers]);
     }
   });
 }

@@ -3,7 +3,7 @@
 pragma solidity >=0.7.6 <0.8.0;
 
 /**
- * @title ERC721 Non-Fungible Token Standard, additional minting interface
+ * @title ERC721 Non-Fungible Token Standard, optional extension: Mintable.
  * @dev See https://eips.ethereum.org/EIPS/eip-721
  */
 interface IERC721Mintable {
@@ -31,7 +31,7 @@ interface IERC721Mintable {
      * Safely mints a token.
      * @dev Reverts if `to` is the zero address.
      * @dev Reverts if `tokenId` has already ben minted.
-     * @dev Reverts if `to` is a contract and the call to {IERC721TokenReceiver-onERC721Received} fails or is refused.
+     * @dev Reverts if `to` is a contract and the call to {IERC721Receiver-onERC721Received} fails or is refused.
      * @dev Emits an {IERC721-Transfer} event from the zero address.
      * @param to Address of the new token owner.
      * @param tokenId Identifier of the token to mint.

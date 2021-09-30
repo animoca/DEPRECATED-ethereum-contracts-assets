@@ -1,4 +1,4 @@
-const {artifacts} = require('hardhat');
+const {artifacts, accounts} = require('hardhat');
 const {shouldBehaveLikeERC1155} = require('./behaviors/ERC1155.behavior');
 
 const implementation = {
@@ -16,7 +16,6 @@ const implementation = {
     InsufficientBalance: 'Inventory: not enough balance',
     TransferRejected: 'Inventory: transfer refused',
     SupplyOverflow: 'Inventory: supply overflow',
-    NotMinter: 'MinterRole: not a Minter',
 
     // ERC1155Inventory
     ExistingCollection: 'Inventory: existing collection',
@@ -31,7 +30,11 @@ const implementation = {
     // Pausable
     AlreadyPaused: 'Pausable: paused',
     AlreadyUnpaused: 'Pausable: not paused',
+
+    // Admin
+    NotMinter: 'MinterRole: not a Minter',
     NotPauser: 'Ownable: not the owner',
+    NotContractOwner: 'Ownable: not the owner',
   },
   interfaces: {
     ERC1155: true,
@@ -42,6 +45,7 @@ const implementation = {
     ERC1155InventoryBurnable: true,
     Pausable: true,
   },
+  features: {BaseMetadataURI: true},
   methods: {
     'safeMint(address,uint256,uint256,bytes)': async function (contract, to, id, value, data, overrides) {
       return contract.safeMint(to, id, value, data, overrides);
@@ -60,14 +64,26 @@ const implementation = {
     },
   },
   deploy: async function (deployer) {
-    return artifacts.require('ERC1155InventoryPausableMock').new({from: deployer});
+    const registry = await artifacts.require('ForwarderRegistry').new({from: deployer});
+    const forwarder = await artifacts.require('UniversalForwarder').new({from: deployer});
+    return artifacts.require('ERC1155InventoryPausableMock').new(registry.address, forwarder.address, {from: deployer});
   },
   mint: async function (contract, to, id, value, overrides) {
     return contract.methods['safeMint(address,uint256,uint256,bytes)'](to, id, value, '0x', overrides);
   },
 };
 
+const [deployer] = accounts;
+
 describe('ERC1155InventoryPausableMock', function () {
   this.timeout(0);
+
+  context('_msgData()', function () {
+    it('it is called for 100% coverage', async function () {
+      const token = await implementation.deploy(deployer);
+      await token.msgData();
+    });
+  });
+
   shouldBehaveLikeERC1155(implementation);
 });

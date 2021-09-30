@@ -3,9 +3,9 @@
 pragma solidity >=0.7.6 <0.8.0;
 
 /**
- * @title ERC20 Token Standard, optional extension: Detailed
- * See https://eips.ethereum.org/EIPS/eip-20
- * Note: the ERC-165 identifier for this interface is 0xa219a025.
+ * @title ERC20 Token Standard, optional extension: Detailed.
+ * @dev See https://eips.ethereum.org/EIPS/eip-20
+ * @dev Note: the ERC-165 identifier for this interface is 0xa219a025.
  */
 interface IERC20Detailed {
     /**
@@ -27,7 +27,7 @@ interface IERC20Detailed {
      *
      * Tokens usually opt for a value of 18, imitating the relationship between Ether and Wei.
      *
-     * NOTE: This information is only used for _display_ purposes: it does  not impact the arithmetic of the contract.
+     * @dev Note: This information is only used for _display_ purposes: it does  not impact the arithmetic of the contract.
      * @return The number of decimals used to display the balances.
      */
     function decimals() external view returns (uint8);

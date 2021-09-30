@@ -3,7 +3,7 @@
 pragma solidity >=0.7.6 <0.8.0;
 
 /**
- * @title ERC-1155 Inventory, additional minting interface
+ * @title ERC1155 Inventory, optional extension: Mintable.
  * @dev See https://eips.ethereum.org/EIPS/eip-1155
  */
 interface IERC1155InventoryMintable {
@@ -11,10 +11,10 @@ interface IERC1155InventoryMintable {
      * Safely mints some token.
      * @dev Reverts if `to` is the zero address.
      * @dev Reverts if `id` is not a token.
-     * @dev Reverts if `id` represents a non-fungible token and `value` is not 1.
-     * @dev Reverts if `id` represents a non-fungible token which has already been minted.
-     * @dev Reverts if `id` represents a fungible token and `value` is 0.
-     * @dev Reverts if `id` represents a fungible token and there is an overflow of supply.
+     * @dev Reverts if `id` represents a Non-Fungible Token and `value` is not 1.
+     * @dev Reverts if `id` represents a Non-Fungible Token which has already been minted.
+     * @dev Reverts if `id` represents a Fungible Token and `value` is 0.
+     * @dev Reverts if `id` represents a Fungible Token and there is an overflow of supply.
      * @dev Reverts if `to` is a contract and the call to {IERC1155TokenReceiver-onERC1155Received} fails or is refused.
      * @dev Emits an {IERC1155-TransferSingle} event.
      * @param to Address of the new token owner.
@@ -34,10 +34,10 @@ interface IERC1155InventoryMintable {
      * @dev Reverts if `ids` and `values` have different lengths.
      * @dev Reverts if `to` is the zero address.
      * @dev Reverts if one of `ids` is not a token.
-     * @dev Reverts if one of `ids` represents a non-fungible token and its paired value is not 1.
-     * @dev Reverts if one of `ids` represents a non-fungible token which has already been minted.
-     * @dev Reverts if one of `ids` represents a fungible token and its paired value is 0.
-     * @dev Reverts if one of `ids` represents a fungible token and there is an overflow of supply.
+     * @dev Reverts if one of `ids` represents a Non-Fungible Token and its paired value is not 1.
+     * @dev Reverts if one of `ids` represents a Non-Fungible Token which has already been minted.
+     * @dev Reverts if one of `ids` represents a Fungible Token and its paired value is 0.
+     * @dev Reverts if one of `ids` represents a Fungible Token and there is an overflow of supply.
      * @dev Reverts if `to` is a contract and the call to {IERC1155TokenReceiver-onERC1155batchReceived} fails or is refused.
      * @dev Emits an {IERC1155-TransferBatch} event.
      * @param to Address of the new tokens owner.

@@ -3,8 +3,9 @@
 pragma solidity >=0.7.6 <0.8.0;
 
 /**
- * @title ERC20 Token Standard, optional extension: Burnable
- * Note: the ERC-165 identifier for this interface is 0x3b5a0bf8.
+ * @title ERC20 Token Standard, optional extension: Burnable.
+ * @dev See https://eips.ethereum.org/EIPS/eip-20
+ * @dev Note: the ERC-165 identifier for this interface is 0x3b5a0bf8.
  */
 interface IERC20Burnable {
     /**

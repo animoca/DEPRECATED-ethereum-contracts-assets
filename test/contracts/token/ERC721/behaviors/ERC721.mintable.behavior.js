@@ -52,10 +52,12 @@ function shouldBehaveLikeERC721Mintable({nfMaskLength, contractName, revertMessa
     const fixture = async function () {
       this.token = await deploy(deployer);
       await this.token.addMinter(minter, {from: deployer});
-      this.receiver721 = await ERC721ReceiverMock.new(true);
-      this.refusingReceiver721 = await ERC721ReceiverMock.new(false);
-      this.receiver1155 = await ERC1155TokenReceiverMock.new(true);
-      this.refusingReceiver1155 = await ERC1155TokenReceiverMock.new(false);
+      this.receiver721 = await ERC721ReceiverMock.new(true, this.token.address);
+      this.refusingReceiver721 = await ERC721ReceiverMock.new(false, this.token.address);
+      this.wrongTokenReceiver721 = await ERC721ReceiverMock.new(false, ZeroAddress);
+      this.receiver1155 = await ERC1155TokenReceiverMock.new(true, this.token.address);
+      this.refusingReceiver1155 = await ERC1155TokenReceiverMock.new(false, this.token.address);
+      this.wrongTokenReceiver1155 = await ERC1155TokenReceiverMock.new(false, ZeroAddress);
     };
 
     beforeEach(async function () {
@@ -205,9 +207,15 @@ function shouldBehaveLikeERC721Mintable({nfMaskLength, contractName, revertMessa
           it('reverts when sent to an ERC721Receiver which refuses the transfer', async function () {
             await expectRevert(mintFunction.call(this, this.refusingReceiver721.address, nft1, data, options), revertMessages.TransferRejected);
           });
+          it('reverts when sent to an ERC721Receiver which accepts another token', async function () {
+            await expectRevert.unspecified(mintFunction.call(this, this.wrongTokenReceiver721.address, nft1, data, options));
+          });
           if (interfaces.ERC1155) {
             it('reverts when sent to an ERC1155TokenReceiver which refuses the transfer', async function () {
               await expectRevert(mintFunction.call(this, this.refusingReceiver1155.address, nft1, data, options), revertMessages.TransferRejected);
+            });
+            it('reverts when sent to an ERC1155TokenReceiver which accepts another token', async function () {
+              await expectRevert.unspecified(mintFunction.call(this, this.wrongTokenReceiver1155.address, nft1, data, options));
             });
           } else {
             it('reverts when sent to an ERC1155TokenReceiver', async function () {
@@ -240,18 +248,6 @@ function shouldBehaveLikeERC721Mintable({nfMaskLength, contractName, revertMessa
         });
         mintWasSuccessful(ids, data, options, safe, ReceiverType.WALLET);
       });
-
-      if (interfaces.Pausable) {
-        context('[Pausable] when called after unpausing', function () {
-          beforeEach(async function () {
-            await this.token.pause({from: deployer});
-            await this.token.unpause({from: deployer});
-            this.toWhom = owner;
-            receipt = await mintFunction.call(this, this.toWhom, ids, data, options);
-          });
-          mintWasSuccessful(ids, data, options, safe, ReceiverType.WALLET);
-        });
-      }
 
       context('when sent to an ERC721Receiver contract', function () {
         beforeEach(async function () {

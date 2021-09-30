@@ -3,4 +3,5 @@ module.exports = {
   NON_RECEIVER: 1,
   ERC721_RECEIVER: 2,
   ERC1155_RECEIVER: 3,
+  ERC1155721_RECEIVER: 4,
 };

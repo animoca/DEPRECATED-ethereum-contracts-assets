@@ -3,10 +3,10 @@
 pragma solidity >=0.7.6 <0.8.0;
 
 /**
- * @title ERC-1155 Multi Token Standard, token receiver
- * @dev See https://eips.ethereum.org/EIPS/eip-1155
+ * @title ERC1155 Multi Token Standard, Tokens Receiver.
  * Interface for any contract that wants to support transfers from ERC1155 asset contracts.
- * Note: The ERC-165 identifier for this interface is 0x4e2312e0.
+ * @dev See https://eips.ethereum.org/EIPS/eip-1155
+ * @dev Note: The ERC-165 identifier for this interface is 0x4e2312e0.
  */
 interface IERC1155TokenReceiver {
     /**

@@ -120,9 +120,7 @@ function shouldBehaveLikeERC1155InventoryCreator(implementation) {
       });
     });
 
-    if (interfaces.ERC1155InventoryBurnable) {
-      behaviors.shouldSupportInterfaces([interfaces1155.ERC1155InventoryBurnable]);
-    }
+    behaviors.shouldSupportInterfaces([interfaces1155.ERC1155InventoryCreator]);
   });
 }
 

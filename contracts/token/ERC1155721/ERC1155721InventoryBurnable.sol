@@ -3,29 +3,25 @@
 pragma solidity >=0.7.6 <0.8.0;
 
 import {IERC1155721InventoryBurnable} from "./IERC1155721InventoryBurnable.sol";
-import {ERC1155InventoryIdentifiersLib, ERC1155721Inventory} from "./ERC1155721Inventory.sol";
+import {IERC165, IERC1155721Inventory, IERC1155MetadataURI, ERC1155InventoryIdentifiersLib, ERC1155721Inventory} from "./ERC1155721Inventory.sol";
 
 /**
- * @title ERC1155721InventoryBurnable, a burnable ERC1155721Inventory.
+ * @title ERC1155721Inventory, an ERC1155Inventory with additional support for ERC721, burnable version.
+ * @dev The function `uri(uint256)` needs to be implemented by a child contract, for example with the help of `BaseMetadataURI`.
  */
 abstract contract ERC1155721InventoryBurnable is IERC1155721InventoryBurnable, ERC1155721Inventory {
     using ERC1155InventoryIdentifiersLib for uint256;
 
-    //================================== ERC165 =======================================/
+    //======================================================= ERC165 ========================================================//
 
-    /**
-     * @dev See {IERC165-supportsInterface}.
-     */
+    /// @inheritdoc IERC165
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
         return interfaceId == type(IERC1155721InventoryBurnable).interfaceId || super.supportsInterface(interfaceId);
     }
 
-    //============================== ERC1155721InventoryBurnable =======================================/
+    //============================================= ERC1155721InventoryBurnable =============================================//
 
-    /**
-     * Burns some token (ERC1155-compatible).
-     * @dev See {IERC1155721InventoryBurnable-burnFrom(address,uint256,uint256)}.
-     */
+    /// @inheritdoc IERC1155721InventoryBurnable
     function burnFrom(
         address from,
         uint256 id,
@@ -46,10 +42,7 @@ abstract contract ERC1155721InventoryBurnable is IERC1155721InventoryBurnable, E
         emit TransferSingle(sender, from, address(0), id, value);
     }
 
-    /**
-     * Burns a batch of token (ERC1155-compatible).
-     * @dev See {IERC1155721InventoryBurnable-batchBurnFrom(address,uint256[],uint256[])}.
-     */
+    /// @inheritdoc IERC1155721InventoryBurnable
     function batchBurnFrom(
         address from,
         uint256[] memory ids,
@@ -100,10 +93,7 @@ abstract contract ERC1155721InventoryBurnable is IERC1155721InventoryBurnable, E
         emit TransferBatch(sender, from, address(0), ids, values);
     }
 
-    /**
-     * Burns a batch of token (ERC721-compatible).
-     * @dev See {IERC1155721InventoryBurnable-batchBurnFrom(address,uint256[])}.
-     */
+    /// @inheritdoc IERC1155721InventoryBurnable
     function batchBurnFrom(address from, uint256[] memory nftIds) public virtual override {
         address sender = _msgSender();
         bool operatable = _isOperatable(from, sender);
@@ -141,7 +131,7 @@ abstract contract ERC1155721InventoryBurnable is IERC1155721InventoryBurnable, E
         emit TransferBatch(sender, from, address(0), nftIds, values);
     }
 
-    //============================== Internal Helper Functions =======================================/
+    //============================================== Helper Internal Functions ==============================================//
 
     function _burnFungible(
         address from,

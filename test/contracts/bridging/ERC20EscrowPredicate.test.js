@@ -14,11 +14,6 @@ describe('ERC20EscrowPredicate', function () {
   const fixtureLoader = createFixtureLoader(accounts, web3.eth.currentProvider);
 
   const fixture = async function () {
-    // const rootChainManager = await artifacts.require('RootChainManager').new();
-    // const rootChainManagerProxy = await artifacts.require('RootChainManagerProxy').new('0x0000000000000000000000000000000000000000');
-    // await rootChainManagerProxy.updateAndCall(rootChainManager.address, rootChainManager.contract.methods.initialize(accounts[0]).encodeABI());
-    // this.rootChainManager = await artifacts.require('RootChainManager').at(rootChainManagerProxy.address);
-    // this.predicate = await artifacts.require('ERC20EscrowPredicate').new(this.rootChainManager.address, {from: deployer});
     this.predicate = await artifacts.require('ERC20EscrowPredicate').new(rootChainManager, {from: deployer});
 
     const forwarder = await artifacts.require('UniversalForwarder').new();

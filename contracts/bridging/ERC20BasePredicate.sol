@@ -6,7 +6,10 @@ import {ITokenPredicate} from "@animoca/ethereum-contracts-core-1.1.2/contracts/
 import {RLPReader} from "@animoca/ethereum-contracts-core-1.1.2/contracts/utils/RLPReader.sol";
 
 /**
- * Polygon (MATIC) bridging base ERC20 predicate to be deployed on the root chain (Ethereum mainnet).
+ * @title ERC20 Base Predicate (for Polygon).
+ * Polygon bridging ERC20 predicate which works with a `Withdrawn(address account, uint256 value)` event.
+ * @dev This contract should be deployed on the Root Chain (Ethereum).
+ * @dev The functions `lockTokens(address,address,address,bytes)` and `exitTokens(address,address,byte)` need to be implemented by a child contract.
  */
 abstract contract ERC20BasePredicate is ITokenPredicate {
     using RLPReader for bytes;
@@ -14,6 +17,7 @@ abstract contract ERC20BasePredicate is ITokenPredicate {
 
     event LockedERC20(address indexed depositor, address indexed depositReceiver, address indexed rootToken, uint256 amount);
 
+    // keccak256("Withdrawn(address account, uint256 value)");
     bytes32 public constant WITHDRAWN_EVENT_SIG = 0x7084f5476618d8e60b11ef0d7d3f06914655adb8793e28ff7f018d4c76d505d5;
 
     // see https://github.com/maticnetwork/pos-portal/blob/master/contracts/root/RootChainManager/RootChainManager.sol
@@ -26,6 +30,8 @@ abstract contract ERC20BasePredicate is ITokenPredicate {
     constructor(address rootChainManager_) {
         rootChainManager = rootChainManager_;
     }
+
+    //============================================== Helper Internal Functions ==============================================//
 
     function _requireManagerRole(address account) internal view {
         require(account == rootChainManager, "Predicate: only manager");

@@ -37,7 +37,7 @@ function shouldBehaveLikeERC20Detailed(implementation) {
       });
     });
 
-    behaviors.shouldSupportInterfaces([interfaces20.ERC20Detailed_Experimental]);
+    behaviors.shouldSupportInterfaces([interfaces20.ERC20Detailed]);
   });
 }
 

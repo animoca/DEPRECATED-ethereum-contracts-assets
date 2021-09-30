@@ -2,27 +2,27 @@
 
 pragma solidity >=0.7.6 <0.8.0;
 
+import {AddressIsContract} from "@animoca/ethereum-contracts-core-1.1.2/contracts/utils/types/AddressIsContract.sol";
+import {ManagedIdentity} from "@animoca/ethereum-contracts-core-1.1.2/contracts/metatx/ManagedIdentity.sol";
+import {IERC165} from "@animoca/ethereum-contracts-core-1.1.2/contracts/introspection/IERC165.sol";
 import {IERC721} from "./IERC721.sol";
+import {IERC721Events} from "./IERC721Events.sol";
 import {IERC721Receiver} from "./IERC721Receiver.sol";
 import {IERC721Metadata} from "./IERC721Metadata.sol";
 import {IERC721BatchTransfer} from "./IERC721BatchTransfer.sol";
-import {IERC165} from "@animoca/ethereum-contracts-core-1.1.2/contracts/introspection/IERC165.sol";
-import {ManagedIdentity} from "@animoca/ethereum-contracts-core-1.1.2/contracts/metatx/ManagedIdentity.sol";
-import {AddressIsContract} from "@animoca/ethereum-contracts-core-1.1.2/contracts/utils/types/AddressIsContract.sol";
 
 /**
- * @dev Implementation of https://eips.ethereum.org/EIPS/eip-721[ERC721] Non-Fungible Token Standard, including
- * the Metadata extension, but not including the Enumerable extension, which is available separately as
- * {ERC721Enumerable}.
+ * @title ERC721 Non Fungible Token Contract.
+ * @dev The function `tokenURI(uint256)` needs to be implemented by a child contract, for example with the help of `BaseMetadataURI`.
  */
-abstract contract ERC721 is ManagedIdentity, IERC165, IERC721, IERC721Metadata, IERC721BatchTransfer {
+abstract contract ERC721 is ManagedIdentity, IERC165, IERC721, IERC721Events, IERC721Metadata, IERC721BatchTransfer {
     using AddressIsContract for address;
 
     bytes4 internal constant _ERC721_RECEIVED = type(IERC721Receiver).interfaceId;
 
     uint256 internal constant _APPROVAL_BIT_TOKEN_OWNER_ = 1 << 160;
 
-    // Burnt non-fungible token owner's magic value
+    // Burnt Non-Fungible Token owner's magic value
     uint256 internal constant _BURNT_NFT_OWNER = 0xdead000000000000000000000000000000000000000000000000000000000000;
 
     string internal _name;
@@ -43,16 +43,15 @@ abstract contract ERC721 is ManagedIdentity, IERC165, IERC721, IERC721Metadata, 
     /**
      * @dev Initializes the contract by setting a `name` and a `symbol` to the token collection.
      */
+    // todo
     constructor(string memory name_, string memory symbol_) {
         _name = name_;
         _symbol = symbol_;
     }
 
-    //================================== ERC165 =======================================/
+    //======================================================= ERC165 ========================================================//
 
-    /**
-     * @dev See {IERC165-supportsInterface}.
-     */
+    /// @inheritdoc IERC165
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
         return
             interfaceId == type(IERC165).interfaceId ||
@@ -61,69 +60,68 @@ abstract contract ERC721 is ManagedIdentity, IERC165, IERC721, IERC721Metadata, 
             interfaceId == type(IERC721BatchTransfer).interfaceId;
     }
 
-    //================================== ERC721Metadata =======================================/
+    //=================================================== ERC721Metadata ====================================================//
 
-    /**
-     * @dev See {IERC721Metadata-name}.
-     */
+    /// @inheritdoc IERC721Metadata
     function name() public view virtual override returns (string memory) {
         return _name;
     }
 
-    /**
-     * @dev See {IERC721Metadata-symbol}.
-     */
+    /// @inheritdoc IERC721Metadata
     function symbol() public view virtual override returns (string memory) {
         return _symbol;
     }
 
-    //================================== ERC721 =======================================/
+    //======================================================= ERC721 ========================================================//
 
-    /**
-     * @dev See {IERC721-balanceOf}.
-     */
+    /// @inheritdoc IERC721
     function balanceOf(address owner) public view virtual override returns (uint256) {
         require(owner != address(0), "ERC721: zero address");
         return _nftBalances[owner];
     }
 
-    /**
-     * @dev See {IERC721-ownerOf}.
-     */
+    /// @inheritdoc IERC721
     function ownerOf(uint256 tokenId) public view virtual override returns (address) {
         address owner = address(uint160(_owners[tokenId]));
         require(owner != address(0), "ERC721: non-existing NFT");
         return owner;
     }
 
-    /**
-     * @dev See {IERC721-approve}.
-     */
+    /// @inheritdoc IERC721
     function approve(address to, uint256 tokenId) public virtual override {
-        address tokenOwner = ownerOf(tokenId);
-        require(to != tokenOwner, "ERC721: self-approval");
-        require(_isOperatable(tokenOwner, _msgSender()), "ERC721: non-approved sender");
-        _owners[tokenId] = uint256(uint160(tokenOwner)) | _APPROVAL_BIT_TOKEN_OWNER_;
-        _nftApprovals[tokenId] = to;
-        emit Approval(tokenOwner, to, tokenId);
+        uint256 owner = _owners[tokenId];
+        require(owner != 0, "ERC721: non-existing NFT");
+        address ownerAddress = address(uint160(owner));
+        require(to != ownerAddress, "ERC721: self-approval");
+        require(_isOperatable(ownerAddress, _msgSender()), "ERC721: non-approved sender");
+        if (to == address(0)) {
+            if (owner & _APPROVAL_BIT_TOKEN_OWNER_ != 0) {
+                // remove the approval bit if it is present
+                _owners[tokenId] = uint256(ownerAddress);
+            }
+        } else {
+            uint256 ownerWithApprovalBit = owner | _APPROVAL_BIT_TOKEN_OWNER_;
+            if (owner != ownerWithApprovalBit) {
+                // add the approval bit if it is not present
+                _owners[tokenId] = ownerWithApprovalBit;
+            }
+            _nftApprovals[tokenId] = to;
+        }
+        emit Approval(ownerAddress, to, tokenId);
     }
 
-    /**
-     * @dev See {IERC721-getApproved}.
-     */
+    /// @inheritdoc IERC721
     function getApproved(uint256 tokenId) public view virtual override returns (address) {
-        uint256 tokenOwner = _owners[tokenId];
-        require(address(uint160(tokenOwner)) != address(0), "ERC721: non-existing NFT");
-        if (tokenOwner & _APPROVAL_BIT_TOKEN_OWNER_ != 0) {
+        uint256 owner = _owners[tokenId];
+        require(address(uint160(owner)) != address(0), "ERC721: non-existing NFT");
+        if (owner & _APPROVAL_BIT_TOKEN_OWNER_ != 0) {
             return _nftApprovals[tokenId];
         } else {
             return address(0);
         }
     }
 
-    /**
-     * @dev See {IERC721-setApprovalForAll}.
-     */
+    /// @inheritdoc IERC721
     function setApprovalForAll(address operator, bool approved) public virtual override {
         address sender = _msgSender();
         require(operator != sender, "ERC721: self-approval");
@@ -131,17 +129,12 @@ abstract contract ERC721 is ManagedIdentity, IERC165, IERC721, IERC721Metadata, 
         emit ApprovalForAll(sender, operator, approved);
     }
 
-    /**
-     * @dev See {IERC721-isApprovedForAll}.
-     */
+    /// @inheritdoc IERC721
     function isApprovedForAll(address owner, address operator) public view virtual override returns (bool) {
         return _operators[owner][operator];
     }
 
-    /**
-     * Unsafely transfers a Non-Fungible Token (ERC721-compatible).
-     * @dev See {IERC721-transferFrom(address,address,uint256)}.
-     */
+    /// @inheritdoc IERC721
     function transferFrom(
         address from,
         address to,
@@ -157,10 +150,7 @@ abstract contract ERC721 is ManagedIdentity, IERC165, IERC721, IERC721Metadata, 
         );
     }
 
-    /**
-     * Safely transfers a Non-Fungible Token (ERC721-compatible).
-     * @dev See {IERC721-safeTransferFrom(address,address,uint256)}.
-     */
+    /// @inheritdoc IERC721
     function safeTransferFrom(
         address from,
         address to,
@@ -176,10 +166,7 @@ abstract contract ERC721 is ManagedIdentity, IERC165, IERC721, IERC721Metadata, 
         );
     }
 
-    /**
-     * Safely transfers a Non-Fungible Token (ERC721-compatible).
-     * @dev See {IERC721-safeTransferFrom(address,address,uint256,bytes)}.
-     */
+    /// @inheritdoc IERC721
     function safeTransferFrom(
         address from,
         address to,
@@ -196,10 +183,9 @@ abstract contract ERC721 is ManagedIdentity, IERC165, IERC721, IERC721Metadata, 
         );
     }
 
-    /**
-     * Unsafely transfers a batch of Non-Fungible Tokens (ERC721-compatible).
-     * @dev See {IERC721BatchTransfer-batchTransferFrom(address,address,uint256[])}.
-     */
+    //================================================= ERC721BatchTransfer =================================================//
+
+    /// @inheritdoc IERC721BatchTransfer
     function batchTransferFrom(
         address from,
         address to,
@@ -221,6 +207,8 @@ abstract contract ERC721 is ManagedIdentity, IERC165, IERC721, IERC721Metadata, 
             _transferNFTUpdateBalances(from, to, length);
         }
     }
+
+    //============================================ High-level Internal Functions ============================================//
 
     /**
      * Safely or unsafely mints some token (ERC721-compatible).
@@ -251,11 +239,8 @@ abstract contract ERC721 is ManagedIdentity, IERC165, IERC721, IERC721Metadata, 
         require(to != address(0), "ERC721: mint to zero");
 
         uint256 length = tokenIds.length;
-        uint256[] memory values = new uint256[](length);
-
         for (uint256 i; i != length; ++i) {
             uint256 tokenId = tokenIds[i];
-            values[i] = 1;
             _mintNFT(to, tokenId, true);
             emit Transfer(address(0), to, tokenId);
         }
@@ -286,6 +271,8 @@ abstract contract ERC721 is ManagedIdentity, IERC165, IERC721, IERC721Metadata, 
             _callOnERC721Received(from, to, tokenId, data);
         }
     }
+
+    //============================================== Helper Internal Functions ==============================================//
 
     function _transferNFT(
         address from,
@@ -328,7 +315,7 @@ abstract contract ERC721 is ManagedIdentity, IERC165, IERC721, IERC721Metadata, 
         _owners[id] = uint256(uint160(to));
 
         if (!isBatch) {
-            // overflows due to the cost of minting individual tokens
+            // cannot overflow due to the cost of minting individual tokens
             ++_nftBalances[to];
         }
     }

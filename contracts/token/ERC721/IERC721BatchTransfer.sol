@@ -3,14 +3,13 @@
 pragma solidity >=0.7.6 <0.8.0;
 
 /**
- * @title ERC721 Non-Fungible Token Standard, optional unsafe batchTransfer interface
+ * @title ERC721 Non-Fungible Token Standard, optional extension: Batch Transfer.
  * @dev See https://eips.ethereum.org/EIPS/eip-721
- * Note: The ERC-165 identifier for this interface is.
+ * @dev Note: The ERC-165 identifier for this interface is 0xf3993d11.
  */
 interface IERC721BatchTransfer {
     /**
      * Unsafely transfers a batch of tokens.
-     * @dev Usage of this method is discouraged, use `safeTransferFrom` whenever possible
      * @dev Reverts if `to` is the zero address.
      * @dev Reverts if the sender is not approved.
      * @dev Reverts if one of `tokenIds` is not owned by `from`.
