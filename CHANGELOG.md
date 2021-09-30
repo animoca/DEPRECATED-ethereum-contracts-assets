@@ -14,11 +14,13 @@
 - Removed the `tokenURI` argument from the `ERC20` constructor to avoid "stack too deep" errors in the constructor when building a full-featured contract.
 - Added `Recoverable` and `UsingUniversalForwarding` features to mocks based on ERC721 and ERC1155.
 - Added `MinterRole` feature to mocks based on ERC20.
+- Some testing behaviors have been updated which may require some changes in the `implementation` object.
 - Removed obsolete ERC165 interfaces and abis and added missing ones in javascript module exports. Renamed some of them to remove `_experimental`.
 - Removed ERC165 interfaces from `constants` javascript module exports.
 
 ### New Features
 
+- Added contract `ERC1155VouchersRedeemer.sol`.
 - Added GitHub scripts for CI tests and coverage, with codecov integration.
 - Added markdown linting.
 

@@ -3,6 +3,7 @@
 pragma solidity >=0.7.6 <0.8.0;
 
 import {IForwarderRegistry, UsingUniversalForwarding} from "ethereum-universal-forwarder/src/solc_0.7/ERC2771/UsingUniversalForwarding.sol";
+// solhint-disable-next-line max-line-length
 import {IERC1155721Inventory, IERC1155721InventoryBurnable, ManagedIdentity, ERC1155721InventoryBurnableMock} from "./ERC1155721InventoryBurnableMock.sol";
 import {Pausable} from "@animoca/ethereum-contracts-core-1.1.2/contracts/lifecycle/Pausable.sol";
 
