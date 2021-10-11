@@ -1,6 +1,6 @@
 {
   "name": "@animoca/ethereum-contracts-assets",
-  "version": "2.0.0-pre.1",
+  "version": "2.0.0",
   "description": "Base assets contracts",
   "author": "Animoca Brands",
   "license": "MIT",
@@ -81,7 +81,7 @@
     "@animoca/ethereum-contracts-core-1.1.2": "npm:@animoca/ethereum-contracts-core@1.1.2",
     "@animoca/ethereum-hardhat-bootstrap": "^1.0.1",
     "bip39": "^3.0.4",
-    "ethereum-universal-forwarder": "=0.1.4",
+    "ethereum-universal-forwarder-1.0.0": "git+https://github.com/animoca/universal-forwarder.git",
     "ethereumjs-util": "^7.1.0",
     "ethereumjs-wallet": "^1.0.1",
     "hardhat": "^2.6.1"
@@ -90,7 +90,7 @@
     "@animoca/ethereum-contracts-core": "^1.1.2",
     "@animoca/ethereum-contracts-core-1.1.2": "npm:@animoca/ethereum-contracts-core@1.1.2",
     "@animoca/ethereum-hardhat-bootstrap": "^1.0.1",
-    "ethereum-universal-forwarder": "=0.1.4",
+    "ethereum-universal-forwarder-1.0.0": "git+https://github.com/animoca/universal-forwarder.git",
     "hardhat": "^2.6.1"
   },
   "engines": {

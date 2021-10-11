@@ -3,7 +3,7 @@
 pragma solidity >=0.7.6 <0.8.0;
 
 import {ManagedIdentity, Recoverable} from "@animoca/ethereum-contracts-core-1.1.2/contracts/utils/Recoverable.sol";
-import {IForwarderRegistry, UsingUniversalForwarding} from "ethereum-universal-forwarder/src/solc_0.7/ERC2771/UsingUniversalForwarding.sol";
+import {IForwarderRegistry, UsingUniversalForwarding} from "ethereum-universal-forwarder-1.0.0/src/solc_0.7/ERC2771/UsingUniversalForwarding.sol";
 // solhint-disable-next-line max-line-length
 import {IERC165, IERC1155MetadataURI, IERC1155721Inventory, IERC1155721InventoryBurnable, ERC1155721Inventory, ERC1155721InventoryBurnable} from "../../../token/ERC1155721/ERC1155721InventoryBurnable.sol";
 import {IERC1155721InventoryMintable} from "../../../token/ERC1155721/IERC1155721InventoryMintable.sol";

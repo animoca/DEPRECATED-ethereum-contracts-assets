@@ -96,7 +96,7 @@ const implementation = {
     const childChainManager = deployer;
     return artifacts
       .require('ChildERC20BurnableMock')
-      .new(initialHolders, initialBalances, childChainManager, registry.address, forwarder.address, {from: deployer});
+      .new(initialHolders, initialBalances, childChainManager, registry.address, ZeroAddress, {from: deployer});
   },
 };
 

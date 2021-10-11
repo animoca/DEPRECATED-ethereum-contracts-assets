@@ -2,7 +2,7 @@
 
 pragma solidity >=0.7.6 <0.8.0;
 
-import {IForwarderRegistry, UsingUniversalForwarding} from "ethereum-universal-forwarder/src/solc_0.7/ERC2771/UsingUniversalForwarding.sol";
+import {IForwarderRegistry, UsingUniversalForwarding} from "ethereum-universal-forwarder-1.0.0/src/solc_0.7/ERC2771/UsingUniversalForwarding.sol";
 import {IERC721, IERC721Burnable, IERC721BatchTransfer, ManagedIdentity, ERC721BurnableMock} from "./ERC721BurnableMock.sol";
 import {Pausable} from "@animoca/ethereum-contracts-core-1.1.2/contracts/lifecycle/Pausable.sol";
 

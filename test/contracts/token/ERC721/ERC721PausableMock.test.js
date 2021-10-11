@@ -1,4 +1,6 @@
 const {artifacts, accounts} = require('hardhat');
+const {constants} = require('@animoca/ethereum-contracts-core');
+const {ZeroAddress} = constants;
 const {shouldBehaveLikeERC721} = require('./behaviors/ERC721.behavior');
 
 const implementation = {
@@ -55,7 +57,7 @@ const implementation = {
   deploy: async function (deployer) {
     const registry = await artifacts.require('ForwarderRegistry').new({from: deployer});
     const forwarder = await artifacts.require('UniversalForwarder').new({from: deployer});
-    return artifacts.require('ERC721PausableMock').new(registry.address, forwarder.address, {from: deployer});
+    return artifacts.require('ERC721PausableMock').new(registry.address, ZeroAddress, {from: deployer});
   },
   mint: async function (contract, to, id, _value, overrides) {
     return contract.methods['safeMint(address,uint256,bytes)'](to, id, '0x', overrides);

@@ -18,7 +18,7 @@ describe('ERC20MintBurnPredicate', function () {
 
     const forwarder = await artifacts.require('UniversalForwarder').new();
     const registry = await artifacts.require('ForwarderRegistry').new();
-    this.token = await artifacts.require('ERC20BurnableMock').new([holder], [One], registry.address, forwarder.address, {from: deployer});
+    this.token = await artifacts.require('ERC20BurnableMock').new([holder], [One], registry.address, ZeroAddress, {from: deployer});
   };
 
   beforeEach(async function () {
