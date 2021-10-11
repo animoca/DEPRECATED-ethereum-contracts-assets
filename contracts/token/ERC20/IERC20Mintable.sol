@@ -3,7 +3,8 @@
 pragma solidity >=0.7.6 <0.8.0;
 
 /**
- * @title ERC20 Token Standard, optional extension: Mintable
+ * @title ERC20 Token Standard, optional extension: Mintable.
+ * @dev See https://eips.ethereum.org/EIPS/eip-20
  */
 interface IERC20Mintable {
     /**

@@ -2,19 +2,21 @@
 
 pragma solidity >=0.7.6 <0.8.0;
 
-import {ERC1155InventoryIdentifiersLib, ERC1155InventoryBase} from "./ERC1155InventoryBase.sol";
 import {AddressIsContract} from "@animoca/ethereum-contracts-core-1.1.2/contracts/utils/types/AddressIsContract.sol";
+// solhint-disable-next-line max-line-length
+import {IERC165, IERC1155, IERC1155Inventory, IERC1155MetadataURI, ERC1155InventoryIdentifiersLib, ERC1155InventoryBase} from "./ERC1155InventoryBase.sol";
 
 /**
- * @title ERC1155Inventory, a contract which manages up to multiple Collections of Fungible and Non-Fungible Tokens
+ * @title ERC1155Inventory, a contract which manages up to multiple Collections of Fungible and Non-Fungible Tokens.
+ * @dev The function `uri(uint256)` needs to be implemented by a child contract, for example with the help of `BaseMetadataURI`.
  */
 abstract contract ERC1155Inventory is ERC1155InventoryBase {
     using AddressIsContract for address;
     using ERC1155InventoryIdentifiersLib for uint256;
 
-    //================================== ERC1155 =======================================/
+    //======================================================= ERC1155 =======================================================//
 
-    /// @dev See {IERC1155Inventory-safeTransferFrom(address,address,uint256,uint256,bytes)}.
+    /// @inheritdoc IERC1155Inventory
     function safeTransferFrom(
         address from,
         address to,
@@ -40,7 +42,7 @@ abstract contract ERC1155Inventory is ERC1155InventoryBase {
         }
     }
 
-    /// @dev See {IERC1155Inventory-safeBatchTransferFrom(address,address,uint256,uint256,bytes)}.
+    /// @inheritdoc IERC1155Inventory
     function safeBatchTransferFrom(
         address from,
         address to,
@@ -52,9 +54,8 @@ abstract contract ERC1155Inventory is ERC1155InventoryBase {
         _safeBatchTransferFrom(from, to, ids, values, data);
     }
 
-    //============================== ABI-level Internal Functions ====================================/
+    //============================================ High-level Internal Functions ============================================//
 
-    /// @dev See {IERC1155Inventory-safeBatchTransferFrom(address,address,uint256,uint256,bytes)}.
     function _safeBatchTransferFrom(
         address from,
         address to,
@@ -105,7 +106,6 @@ abstract contract ERC1155Inventory is ERC1155InventoryBase {
         }
     }
 
-    /// @dev See {IERC1155InventoryMintable-safeMint(address,uint256,uint256,bytes)}.
     function _safeMint(
         address to,
         uint256 id,
@@ -128,7 +128,6 @@ abstract contract ERC1155Inventory is ERC1155InventoryBase {
         }
     }
 
-    /// @dev See {IERC1155InventoryMintable-safeBatchMint(address,uint256[],uint256[],bytes)}.
     function _safeBatchMint(
         address to,
         uint256[] memory ids,
@@ -178,7 +177,7 @@ abstract contract ERC1155Inventory is ERC1155InventoryBase {
         }
     }
 
-    //============================== Internal Helper Functions =================================/
+    //============================================== Helper Internal Functions ==============================================//
 
     function _mintFungible(
         address to,
@@ -207,7 +206,7 @@ abstract contract ERC1155Inventory is ERC1155InventoryBase {
 
         if (!isBatch) {
             uint256 collectionId = id.getNonFungibleCollection();
-            // it is virtually impossible that a non-fungible collection supply
+            // it is virtually impossible that a Non-Fungible Collection supply
             // overflows due to the cost of minting individual tokens
             ++_supplies[collectionId];
             // cannot overflow as supply cannot overflow

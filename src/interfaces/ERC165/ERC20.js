@@ -11,19 +11,13 @@ const ERC20_Functions = [
 
 const ERC20Burnable_Functions = ['burn(uint256)', 'burnFrom(address,uint256)'];
 
-const ERC20Name_Functions = ['name()'];
-
-const ERC20Symbol_Functions = ['symbol()'];
-
-const ERC20Decimals_Functions = ['decimals()'];
-
 const ERC20Detailed_Functions = ['name()', 'symbol()', 'decimals()'];
 
 const ERC20Metadata_Functions = ['tokenURI()'];
 
 const ERC20Allowance_Functions = ['increaseAllowance(address,uint256)', 'decreaseAllowance(address,uint256)'];
 
-const ERC20BatchTransfer_Functions = ['batchTransfer(address[],uint256[])', 'batchTransferFrom(address,address[],uint256[])'];
+const ERC20BatchTransfers_Functions = ['batchTransfer(address[],uint256[])', 'batchTransferFrom(address,address[],uint256[])'];
 
 const ERC20Receiver_Functions = ['onERC20Received(address,address,uint256,bytes)'];
 
@@ -42,23 +36,8 @@ module.exports = {
     functions: ERC20Burnable_Functions,
     id: makeInterfaceId.ERC165(ERC20Burnable_Functions),
   }, // '0x3b5a0bf8'
-  ERC20Name: {
-    name: 'ERC20Name',
-    functions: ERC20Name_Functions,
-    id: makeInterfaceId.ERC165(ERC20Name_Functions),
-  }, // '0x06fdde03'
-  ERC20Symbol: {
-    name: 'ERC20Symbol',
-    functions: ERC20Symbol_Functions,
-    id: makeInterfaceId.ERC165(ERC20Symbol_Functions),
-  }, // '0x95d89b41'
-  ERC20Decimals: {
-    name: 'ERC20Decimals',
-    functions: ERC20Decimals_Functions,
-    id: makeInterfaceId.ERC165(ERC20Decimals_Functions),
-  }, // '0x313ce567'
-  ERC20Detailed_Experimental: {
-    name: 'ERC20Detailed_Experimental',
+  ERC20Detailed: {
+    name: 'ERC20Detailed',
     functions: ERC20Detailed_Functions,
     id: makeInterfaceId.ERC165(ERC20Detailed_Functions),
   }, // '0xa219a025'
@@ -67,18 +46,18 @@ module.exports = {
     functions: ERC20Metadata_Functions,
     id: makeInterfaceId.ERC165(ERC20Metadata_Functions),
   }, // '0x3c130d90'
-  ERC20Allowance_Experimental: {
-    name: 'ERC20Allowance_Experimental',
+  ERC20Allowance: {
+    name: 'ERC20Allowance',
     functions: ERC20Allowance_Functions,
     id: makeInterfaceId.ERC165(ERC20Allowance_Functions),
   }, // '0x9d075186'
-  ERC20BatchTransfers_Experimental: {
-    name: 'ERC20BatchTransfers_Experimental',
-    functions: ERC20BatchTransfer_Functions,
-    id: makeInterfaceId.ERC165(ERC20BatchTransfer_Functions),
-  }, // '0xd5b86388'
-  ERC20SafeTransfers_Experimental: {
-    name: 'ERC20SafeTransfers_Experimental',
+  ERC20BatchTransfers: {
+    name: 'ERC20BatchTransfers',
+    functions: ERC20BatchTransfers_Functions,
+    id: makeInterfaceId.ERC165(ERC20BatchTransfers_Functions),
+  }, // '0xc05327e6'
+  ERC20SafeTransfers: {
+    name: 'ERC20SafeTransfers',
     functions: ERC20Safe_Functions,
     id: makeInterfaceId.ERC165(ERC20Safe_Functions),
   }, // '0x53f41a97'

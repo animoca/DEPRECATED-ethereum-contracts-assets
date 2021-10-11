@@ -48,7 +48,7 @@ function shouldBehaveLikeERC1155Inventory({nfMaskLength, revertMessages, interfa
     });
 
     describe('like an ERC1155Inventory', function () {
-      describe('isFungible()', function () {
+      describe('isFungible(uint256)', function () {
         context('when id is a Fungible Token', function () {
           it('returns true', async function () {
             (await this.token.isFungible(fCollection1.id)).should.be.equal(true);
@@ -71,7 +71,7 @@ function shouldBehaveLikeERC1155Inventory({nfMaskLength, revertMessages, interfa
         });
       });
 
-      describe('collectionOf()', function () {
+      describe('collectionOf(uint256)', function () {
         context('when id is a Fungible Token', function () {
           it('throws', async function () {
             await expectRevert(this.token.collectionOf(fCollection1.id), revertMessages.NotNFT);
@@ -94,7 +94,7 @@ function shouldBehaveLikeERC1155Inventory({nfMaskLength, revertMessages, interfa
         });
       });
 
-      describe('ownerOf()', function () {
+      describe('ownerOf(uint256)', function () {
         context('when id is a Fungible Token', function () {
           it('throws', async function () {
             await expectRevert(this.token.ownerOf(fCollection1.id), revertMessages.NonExistingNFT);
@@ -117,35 +117,37 @@ function shouldBehaveLikeERC1155Inventory({nfMaskLength, revertMessages, interfa
         });
       });
 
-      describe('totalSupply()', function () {
-        context('for an Non-Fungible Token', function () {
-          it('returns 1 for an existing Non-Fungible Token id', async function () {
-            (await this.token.totalSupply(nft1)).should.be.bignumber.equal('1');
+      if (interfaces.ERC1155InventoryTotalSupply) {
+        describe('[ERC1155InventoryTotalSupply] totalSupply(uint256)', function () {
+          context('for an Non-Fungible Token', function () {
+            it('returns 1 for an existing Non-Fungible Token id', async function () {
+              (await this.token.totalSupply(nft1)).should.be.bignumber.equal('1');
+            });
+            it('returns 0 for a non-existing Non-Fungible Token id', async function () {
+              (await this.token.totalSupply(unknownNft)).should.be.bignumber.equal('0');
+            });
           });
-          it('returns 0 for a non-existing Non-Fungible Token id', async function () {
-            (await this.token.totalSupply(unknownNft)).should.be.bignumber.equal('0');
+
+          context('for a Non-Fungible Collection', function () {
+            it('returns the Non-Fungible Collection total supply', async function () {
+              (await this.token.totalSupply(nfCollection)).should.be.bignumber.equal('2');
+              (await this.token.totalSupply(nfCollectionOther)).should.be.bignumber.equal('1');
+            });
+          });
+
+          context('for a Fungible Token', function () {
+            it('returns the Fungible Token total supply', async function () {
+              (await this.token.totalSupply(fCollection1.id)).should.be.bignumber.equal(fCollection1.supply.toString());
+            });
           });
         });
+      }
 
-        context('for a Non-Fungible Collection', function () {
-          it('returns the Non-Fungible Collection total supply', async function () {
-            (await this.token.totalSupply(nfCollection)).should.be.bignumber.equal('2');
-            (await this.token.totalSupply(nfCollectionOther)).should.be.bignumber.equal('1');
-          });
-        });
+      behaviors.shouldSupportInterfaces([interfaces1155.ERC1155Inventory]);
 
-        context('for a Fungible Token', function () {
-          it('returns the Fungible Token total supply', async function () {
-            (await this.token.totalSupply(fCollection1.id)).should.be.bignumber.equal(fCollection1.supply.toString());
-          });
-        });
-      });
-
-      behaviors.shouldSupportInterfaces([
-        interfaces1155.ERC1155Inventory,
-        interfaces1155.ERC1155InventoryCreator,
-        interfaces1155.ERC1155InventoryTotalSupply,
-      ]);
+      if (interfaces.ERC1155InventoryTotalSupply) {
+        behaviors.shouldSupportInterfaces([interfaces1155.ERC1155InventoryTotalSupply]);
+      }
     });
   });
 }

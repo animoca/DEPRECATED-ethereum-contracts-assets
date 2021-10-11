@@ -2,18 +2,18 @@
 
 pragma solidity >=0.7.6 <0.8.0;
 
-import {IERC721} from "./../ERC721/IERC721.sol";
+import {IERC1155Inventory, IERC721, IERC721BatchTransfer, IERC1155721Inventory} from "./IERC1155721Inventory.sol";
+// solhint-disable-next-line max-line-length
+import {IERC165, IERC1155MetadataURI, IERC1155TokenReceiver, ERC1155InventoryIdentifiersLib, ERC1155InventoryBase} from "./../ERC1155/ERC1155InventoryBase.sol";
 import {IERC721Metadata} from "./../ERC721/IERC721Metadata.sol";
-import {IERC721BatchTransfer} from "./../ERC721/IERC721BatchTransfer.sol";
 import {IERC721Receiver} from "./../ERC721/IERC721Receiver.sol";
-import {IERC1155721Inventory} from "./IERC1155721Inventory.sol";
-import {IERC165, IERC1155TokenReceiver, ERC1155InventoryIdentifiersLib, ERC1155InventoryBase} from "./../ERC1155/ERC1155InventoryBase.sol";
 import {AddressIsContract} from "@animoca/ethereum-contracts-core-1.1.2/contracts/utils/types/AddressIsContract.sol";
 
 /**
  * @title ERC1155721Inventory, an ERC1155Inventory with additional support for ERC721.
+ * @dev The function `uri(uint256)` needs to be implemented by a child contract, for example with the help of `BaseMetadataURI`.
  */
-abstract contract ERC1155721Inventory is IERC1155721Inventory, IERC721Metadata, IERC721BatchTransfer, ERC1155InventoryBase {
+abstract contract ERC1155721Inventory is IERC1155721Inventory, IERC721Metadata, ERC1155InventoryBase {
     using ERC1155InventoryIdentifiersLib for uint256;
     using AddressIsContract for address;
 
@@ -33,68 +33,83 @@ abstract contract ERC1155721Inventory is IERC1155721Inventory, IERC721Metadata, 
         _symbol = symbol_;
     }
 
-    /// @dev See {IERC165-supportsInterface(bytes4)}.
+    //======================================================= ERC165 ========================================================//
+
+    /// @inheritdoc IERC165
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
         return
             interfaceId == type(IERC721).interfaceId ||
             interfaceId == type(IERC721Metadata).interfaceId ||
             interfaceId == type(IERC721BatchTransfer).interfaceId ||
             super.supportsInterface(interfaceId);
-        // return interfaceId == type(IERC721Metadata).interfaceId || super.supportsInterface(interfaceId);
     }
 
-    //===================================== ERC721 ==========================================/
+    //=================================================== ERC721Metadata ====================================================//
 
-    /**
-     * @dev See {IERC721Metadata-name}.
-     */
+    /// @inheritdoc IERC721Metadata
     function name() public view virtual override returns (string memory) {
         return _name;
     }
 
-    /**
-     * @dev See {IERC721Metadata-symbol}.
-     */
+    /// @inheritdoc IERC721Metadata
     function symbol() public view virtual override returns (string memory) {
         return _symbol;
     }
 
-    /// @dev See {IERC721-balanceOf(address)}.
+    /// @inheritdoc IERC721Metadata
+    function tokenURI(uint256 nftId) external view virtual override returns (string memory) {
+        require(address(uint160(_owners[nftId])) != address(0), "Inventory: non-existing NFT");
+        return uri(nftId);
+    }
+
+    //================================================= ERC1155MetadataURI ==================================================//
+
+    /// @inheritdoc IERC1155MetadataURI
+    function uri(uint256) public view virtual override returns (string memory);
+
+    //======================================================= ERC721 ========================================================//
+
+    /// @inheritdoc IERC721
     function balanceOf(address tokenOwner) external view virtual override returns (uint256) {
         require(tokenOwner != address(0), "Inventory: zero address");
         return _nftBalances[tokenOwner];
     }
 
-    /// @dev See {IERC721-ownerOf(uint256)} and {IERC1155Inventory-ownerOf(uint256)}.
-    function ownerOf(uint256 nftId) public view virtual override(IERC1155721Inventory, ERC1155InventoryBase) returns (address) {
-        return super.ownerOf(nftId);
+    /// @inheritdoc IERC721
+    function approve(address to, uint256 tokenId) public virtual override {
+        uint256 owner = _owners[tokenId];
+        require(owner != 0, "Inventory: non-existing NFT");
+        address ownerAddress = address(uint160(owner));
+        require(to != ownerAddress, "Inventory: self-approval");
+        require(_isOperatable(ownerAddress, _msgSender()), "Inventory: non-approved sender");
+        if (to == address(0)) {
+            if (owner & _APPROVAL_BIT_TOKEN_OWNER_ != 0) {
+                // remove the approval bit if it is present
+                _owners[tokenId] = uint256(ownerAddress);
+            }
+        } else {
+            uint256 ownerWithApprovalBit = owner | _APPROVAL_BIT_TOKEN_OWNER_;
+            if (owner != ownerWithApprovalBit) {
+                // add the approval bit if it is not present
+                _owners[tokenId] = ownerWithApprovalBit;
+            }
+            _nftApprovals[tokenId] = to;
+        }
+        emit Approval(ownerAddress, to, tokenId);
     }
 
-    /// @dev See {IERC721-approve(address,uint256)}.
-    function approve(address to, uint256 nftId) external virtual override {
-        address tokenOwner = ownerOf(nftId);
-        require(to != tokenOwner, "Inventory: self-approval");
-        require(_isOperatable(tokenOwner, _msgSender()), "Inventory: non-approved sender");
-        _owners[nftId] = uint256(uint160(tokenOwner)) | _APPROVAL_BIT_TOKEN_OWNER_;
-        _nftApprovals[nftId] = to;
-        emit Approval(tokenOwner, to, nftId);
-    }
-
-    /// @dev See {IERC721-getApproved(uint256)}.
-    function getApproved(uint256 nftId) external view virtual override returns (address) {
-        uint256 tokenOwner = _owners[nftId];
-        require(address(uint160(tokenOwner)) != address(0), "Inventory: non-existing NFT");
-        if (tokenOwner & _APPROVAL_BIT_TOKEN_OWNER_ != 0) {
-            return _nftApprovals[nftId];
+    /// @inheritdoc IERC721
+    function getApproved(uint256 tokenId) public view virtual override returns (address) {
+        uint256 owner = _owners[tokenId];
+        require(address(uint160(owner)) != address(0), "Inventory: non-existing NFT");
+        if (owner & _APPROVAL_BIT_TOKEN_OWNER_ != 0) {
+            return _nftApprovals[tokenId];
         } else {
             return address(0);
         }
     }
 
-    /**
-     * Unsafely transfers a Non-Fungible Token (ERC721-compatible).
-     * @dev See {IERC1155721Inventory-transferFrom(address,address,uint256)}.
-     */
+    /// @inheritdoc IERC1155721Inventory
     function transferFrom(
         address from,
         address to,
@@ -110,10 +125,7 @@ abstract contract ERC1155721Inventory is IERC1155721Inventory, IERC721Metadata, 
         );
     }
 
-    /**
-     * Safely transfers a Non-Fungible Token (ERC721-compatible).
-     * @dev See {IERC1155721Inventory-safeTransferFrom(address,address,uint256)}.
-     */
+    /// @inheritdoc IERC1155721Inventory
     function safeTransferFrom(
         address from,
         address to,
@@ -129,10 +141,7 @@ abstract contract ERC1155721Inventory is IERC1155721Inventory, IERC721Metadata, 
         );
     }
 
-    /**
-     * Safely transfers a Non-Fungible Token (ERC721-compatible).
-     * @dev See {IERC1155721Inventory-safeTransferFrom(address,address,uint256,bytes)}.
-     */
+    /// @inheritdoc IERC1155721Inventory
     function safeTransferFrom(
         address from,
         address to,
@@ -149,10 +158,7 @@ abstract contract ERC1155721Inventory is IERC1155721Inventory, IERC721Metadata, 
         );
     }
 
-    /**
-     * Unsafely transfers a batch of Non-Fungible Tokens (ERC721-compatible).
-     * @dev See {IERC1155721BatchTransfer-batchTransferFrom(address,address,uint256[])}.
-     */
+    /// @inheritdoc IERC1155721Inventory
     function batchTransferFrom(
         address from,
         address to,
@@ -198,25 +204,16 @@ abstract contract ERC1155721Inventory is IERC1155721Inventory, IERC721Metadata, 
         }
     }
 
-    /// @dev See {IERC721Metadata-tokenURI(uint256)}.
-    function tokenURI(uint256 nftId) external view virtual override returns (string memory) {
-        require(address(uint160(_owners[nftId])) != address(0), "Inventory: non-existing NFT");
-        return uri(nftId);
-    }
+    //======================================================= ERC1155 =======================================================//
 
-    //================================== ERC1155 =======================================/
-
-    /**
-     * Safely transfers some token (ERC1155-compatible).
-     * @dev See {IERC1155721Inventory-safeTransferFrom(address,address,uint256,uint256,bytes)}.
-     */
+    /// @inheritdoc IERC1155721Inventory
     function safeTransferFrom(
         address from,
         address to,
         uint256 id,
         uint256 value,
         bytes memory data
-    ) public virtual override {
+    ) public virtual override(IERC1155Inventory, IERC1155721Inventory) {
         address sender = _msgSender();
         require(to != address(0), "Inventory: transfer to zero");
         bool operatable = _isOperatable(from, sender);
@@ -236,27 +233,43 @@ abstract contract ERC1155721Inventory is IERC1155721Inventory, IERC721Metadata, 
         }
     }
 
-    /**
-     * Safely transfers a batch of tokens (ERC1155-compatible).
-     * @dev See {IERC1155721Inventory-safeBatchTransferFrom(address,address,uint256[],uint256[],bytes)}.
-     */
+    /// @inheritdoc IERC1155721Inventory
     function safeBatchTransferFrom(
         address from,
         address to,
         uint256[] memory ids,
         uint256[] memory values,
         bytes memory data
-    ) public virtual override {
-        // internal function to avoid stack too deep error
+    ) public virtual override(IERC1155Inventory, IERC1155721Inventory) {
         _safeBatchTransferFrom(from, to, ids, values, data);
     }
 
-    //================================== ERC1155MetadataURI =======================================/
+    //================================================== ERC721 && ERC1155 ==================================================//
 
-    /// @dev See {IERC1155MetadataURI-uri(uint256)}.
-    function uri(uint256) public view virtual override returns (string memory);
+    /// @inheritdoc IERC1155721Inventory
+    function setApprovalForAll(address operator, bool approved) public virtual override(IERC1155721Inventory, ERC1155InventoryBase) {
+        super.setApprovalForAll(operator, approved);
+    }
 
-    //================================== ABI-level Internal Functions =======================================/
+    /// @inheritdoc IERC1155721Inventory
+    function isApprovedForAll(address tokenOwner, address operator)
+        public
+        view
+        virtual
+        override(IERC1155721Inventory, ERC1155InventoryBase)
+        returns (bool)
+    {
+        return super.isApprovedForAll(tokenOwner, operator);
+    }
+
+    //============================================== ERC721 && ERC1155Inventory ===============================================//
+
+    /// @inheritdoc IERC1155721Inventory
+    function ownerOf(uint256 nftId) public view virtual override(IERC1155721Inventory, ERC1155InventoryBase) returns (address) {
+        return super.ownerOf(nftId);
+    }
+
+    //============================================ High-level Internal Functions ============================================//
 
     /**
      * Safely or unsafely transfers some token (ERC721-compatible).
@@ -503,21 +516,7 @@ abstract contract ERC1155721Inventory is IERC1155721Inventory, IERC721Metadata, 
 
     /**
      * Safely mints some tokens to a list of recipients.
-     * @dev Reverts if `recipients`, `ids` and `values` have different lengths.
-     * @dev Reverts if one of `recipients` is the zero address.
-     * @dev Reverts if one of `ids` is not a token.
-     * @dev Reverts if one of `ids` represents a non-fungible token and its `value` is not 1.
-     * @dev Reverts if one of `ids` represents a non-fungible token which has already been minted.
-     * @dev Reverts if one of `ids` represents a fungible token and its `value` is 0.
-     * @dev Reverts if one of `ids` represents a fungible token and there is an overflow of supply.
-     * @dev Reverts if one of `recipients` is a contract and the call to {IERC1155TokenReceiver-onERC1155Received}
-     *  or {IERC721Receiver-onERC721Received} fails or is refused.
-     * @dev Emits an {IERC721-Transfer} event from the zero address for each `id` representing a non-fungible token.
-     * @dev Emits an {IERC1155-TransferSingle} event from the zero address.
-     * @param recipients Addresses of the new token owners.
-     * @param ids Identifiers of the tokens to mint.
-     * @param values Amounts of tokens to mint.
-     * @param data Optional data to send along to the receiver contract(s), if any. All receivers receive the same data.
+     * @dev See {IERC1155721Deliverable-safeDeliver(address[],uint256[],uint256[],bytes)}.
      */
     function _safeDeliver(
         address[] calldata recipients,
@@ -557,7 +556,7 @@ abstract contract ERC1155721Inventory is IERC1155721Inventory, IERC721Metadata, 
         }
     }
 
-    //============================== Internal Helper Functions =======================================/
+    //============================================== Helper Internal Functions ==============================================//
 
     function _mintFungible(
         address to,
@@ -586,7 +585,7 @@ abstract contract ERC1155721Inventory is IERC1155721Inventory, IERC721Metadata, 
 
         if (!isBatch) {
             uint256 collectionId = id.getNonFungibleCollection();
-            // it is virtually impossible that a non-fungible collection supply
+            // it is virtually impossible that a Non-Fungible Collection supply
             // overflows due to the cost of minting individual tokens
             ++_supplies[collectionId];
             ++_balances[collectionId][to];
@@ -659,8 +658,6 @@ abstract contract ERC1155721Inventory is IERC1155721Inventory, IERC721Metadata, 
             _balances[collectionId][to] += amount;
         }
     }
-
-    ///////////////////////////////////// Receiver Calls Internal /////////////////////////////////////
 
     /**
      * Queries whether a contract implements ERC1155TokenReceiver.

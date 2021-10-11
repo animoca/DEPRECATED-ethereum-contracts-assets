@@ -3,9 +3,9 @@
 pragma solidity >=0.7.6 <0.8.0;
 
 /**
- * @title ERC20 Token Standard, basic interface
+ * @title ERC20 Token Standard, basic interface.
  * @dev See https://eips.ethereum.org/EIPS/eip-20
- * Note: The ERC-165 identifier for this interface is 0x36372b07.
+ * @dev Note: The ERC-165 identifier for this interface is 0x36372b07.
  */
 interface IERC20 {
     /**
@@ -50,10 +50,10 @@ interface IERC20 {
     function transfer(address to, uint256 value) external returns (bool);
 
     /**
-     * @notice Transfers `value` amount of tokens from address `from` to address `to` via the approval mechanism.
+     * @notice Transfers `value` amount of tokens from address `from` to address `to`.
      * @dev Reverts if `to` is the zero address.
-     * @dev Reverts if the sender is not `from` and has not been approved by `from` for at least `value`.
      * @dev Reverts if `from` does not have at least `value` of balance.
+     * @dev Reverts if the sender is not `from` and has not been approved by `from` for at least `value`.
      * @dev Emits an {IERC20-Transfer} event.
      * @dev Transfers of 0 values are treated as normal transfers and fire the {IERC20-Transfer} event.
      * @param from The emitter account.

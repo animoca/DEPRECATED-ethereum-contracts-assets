@@ -203,7 +203,7 @@ function shouldBehaveLikeERC20Allowance(implementation) {
       });
     });
 
-    behaviors.shouldSupportInterfaces([interfaces20.ERC20Allowance_Experimental]);
+    behaviors.shouldSupportInterfaces([interfaces20.ERC20Allowance]);
   });
 }
 

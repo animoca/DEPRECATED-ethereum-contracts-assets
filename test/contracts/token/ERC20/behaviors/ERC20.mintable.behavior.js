@@ -38,6 +38,10 @@ function shouldBehaveLikeERC20Mintable(implementation) {
         return;
       }
 
+      it('reverts if sent by a non-minter', async function () {
+        await expectRevert(mint(this.token, recipient1, One, {from: recipient1}), revertMessages.NotMinter);
+      });
+
       it('reverts if minted to the zero address', async function () {
         await expectRevert(mint(this.token, ZeroAddress, One, {from: deployer}), revertMessages.MintToZero);
       });
@@ -94,6 +98,10 @@ function shouldBehaveLikeERC20Mintable(implementation) {
       if (batchMint === undefined) {
         return;
       }
+
+      it('reverts if sent by a non-minter', async function () {
+        await expectRevert(batchMint(this.token, [recipient1], [One], {from: recipient1}), revertMessages.NotMinter);
+      });
 
       it('reverts with inconsistent arrays', async function () {
         await expectRevert(batchMint(this.token, [recipient1, recipient2], [One], {from: deployer}), revertMessages.InconsistentArrays);

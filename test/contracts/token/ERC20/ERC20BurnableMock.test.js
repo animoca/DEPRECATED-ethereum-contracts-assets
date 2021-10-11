@@ -12,31 +12,47 @@ const implementation = {
   decimals: new BN(18),
   tokenURI: 'uri',
   revertMessages: {
+    // ERC20
     ApproveToZero: 'ERC20: zero address spender',
     TransferExceedsBalance: 'ERC20: insufficient balance',
     TransferToZero: 'ERC20: to zero address',
     TransferExceedsAllowance: 'ERC20: insufficient allowance',
     TransferFromZero: 'ERC20: insufficient balance',
-    BatchTransferValuesOverflow: 'ERC20: values overflow',
-    BatchTransferFromZero: 'ERC20: insufficient balance',
+    InconsistentArrays: 'ERC20: inconsistent arrays',
+    SupplyOverflow: 'ERC20: supply overflow',
+
+    // ERC20Allowance
     AllowanceUnderflow: 'ERC20: insufficient allowance',
     AllowanceOverflow: 'ERC20: allowance overflow',
-    InconsistentArrays: 'ERC20: inconsistent arrays',
+
+    // ERC20BatchTransfers
+    BatchTransferValuesOverflow: 'ERC20: values overflow',
+    BatchTransferFromZero: 'ERC20: insufficient balance',
+
+    // ERC20SafeTransfers
     TransferRefused: 'ERC20: transfer refused',
+
+    // ERC2612
+    PermitFromZero: 'ERC20: zero address owner',
+    PermitExpired: 'ERC20: expired permit',
+    PermitInvalid: 'ERC20: invalid permit',
+
+    // ERC20Mintable
     MintToZero: 'ERC20: zero address',
     BatchMintValuesOverflow: 'ERC20: values overflow',
+
+    // ERC20Burnable
     BurnFromZero: 'ERC20: insufficient balance',
     BurnExceedsBalance: 'ERC20: insufficient balance',
     BurnExceedsAllowance: 'ERC20: insufficient allowance',
     BatchBurnValuesOverflow: 'ERC20: insufficient balance',
-    SupplyOverflow: 'ERC20: supply overflow',
-    PermitFromZero: 'ERC20: zero address owner',
-    PermitExpired: 'ERC20: expired permit',
-    PermitInvalid: 'ERC20: invalid permit',
-    BurnExceedsBalance: 'ERC20: insufficient balance',
-    BurnFromZero: 'ERC20: insufficient balance',
-    BurnExceedsAllowance: 'ERC20: insufficient allowance',
-    NonMinter: 'Ownable: not the owner',
+
+    // ERC20Receiver
+    DirectReceiverCall: 'ChildERC20: wrong sender',
+
+    // Admin
+    NotMinter: 'MinterRole: not a Minter',
+    NotContractOwner: 'Ownable: not the owner',
   },
   features: {
     ERC165: true,
@@ -75,14 +91,14 @@ const implementation = {
   deploy: async function (initialHolders, initialBalances, deployer) {
     const registry = await artifacts.require('ForwarderRegistry').new({from: deployer});
     const forwarder = await artifacts.require('UniversalForwarder').new({from: deployer});
-    return artifacts.require('ERC20BurnableMock').new(initialHolders, initialBalances, registry.address, forwarder.address, {from: deployer});
+    return artifacts.require('ERC20BurnableMock').new(initialHolders, initialBalances, registry.address, ZeroAddress, {from: deployer});
   },
 };
 
+const [deployer, other] = accounts;
+
 describe('ERC20BurnableMock', function () {
   this.timeout(0);
-
-  const [deployer, other] = accounts;
 
   context('constructor', function () {
     it('it reverts with inconsistent arrays', async function () {
@@ -91,32 +107,10 @@ describe('ERC20BurnableMock', function () {
     });
   });
 
-  context('minting', function () {
-    const fixtureLoader = createFixtureLoader(accounts, web3.eth.currentProvider);
-
-    const fixture = async function () {
-      this.token = await implementation.deploy([], [], deployer);
-    };
-
-    beforeEach(async function () {
-      await fixtureLoader(fixture, this);
-    });
-    context('mint(address,uint256)', function () {
-      it('reverts if the sender is not a minter', async function () {
-        await expectRevert(
-          implementation.methods['mint(address,uint256)'](this.token, other, One, {from: other}),
-          implementation.revertMessages.NonMinter
-        );
-      });
-    });
-
-    context('batchMint(address[],uint256[]', function () {
-      it('reverts if the sender is not a minter', async function () {
-        await expectRevert(
-          implementation.methods['batchMint(address[],uint256[])'](this.token, [], [], {from: other}),
-          implementation.revertMessages.NonMinter
-        );
-      });
+  context('_msgData()', function () {
+    it('it is called for 100% coverage', async function () {
+      const token = await implementation.deploy([], [], deployer);
+      await token.msgData();
     });
   });
 

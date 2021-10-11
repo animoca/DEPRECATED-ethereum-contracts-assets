@@ -2,30 +2,26 @@
 
 pragma solidity >=0.7.6 <0.8.0;
 
-import {ERC1155InventoryIdentifiersLib, ERC1155Inventory} from "./ERC1155Inventory.sol";
 import {IERC1155InventoryBurnable} from "./IERC1155InventoryBurnable.sol";
+import {IERC165, IERC1155, IERC1155MetadataURI, ERC1155InventoryIdentifiersLib, ERC1155Inventory} from "./ERC1155Inventory.sol";
 
 /**
- * @title ERC1155InventoryBurnable, a burnable ERC1155Inventory
+ * @title ERC1155Inventory, burnable version.
+ * @dev The function `uri(uint256)` needs to be implemented by a child contract, for example with the help of `BaseMetadataURI`.
  */
 abstract contract ERC1155InventoryBurnable is IERC1155InventoryBurnable, ERC1155Inventory {
     using ERC1155InventoryIdentifiersLib for uint256;
 
-    //================================== ERC165 =======================================/
+    //======================================================= ERC165 ========================================================//
 
-    /**
-     * @dev See {IERC165-supportsInterface}.
-     */
+    /// @inheritdoc IERC165
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
         return interfaceId == type(IERC1155InventoryBurnable).interfaceId || super.supportsInterface(interfaceId);
     }
 
-    //================================== ERC1155InventoryBurnable =======================================/
+    //============================================== ERC1155InventoryBurnable ===============================================//
 
-    /**
-     * Burns some token.
-     * @dev See {IERC1155InventoryBurnable-burnFrom(address,uint256,uint256)}.
-     */
+    /// @inheritdoc IERC1155InventoryBurnable
     function burnFrom(
         address from,
         uint256 id,
@@ -45,10 +41,7 @@ abstract contract ERC1155InventoryBurnable is IERC1155InventoryBurnable, ERC1155
         emit TransferSingle(sender, from, address(0), id, value);
     }
 
-    /**
-     * Burns a batch of tokens.
-     * @dev See {IERC1155InventoryBurnable-batchBurnFrom(address,uint256[],uint256[])}.
-     */
+    /// @inheritdoc IERC1155InventoryBurnable
     function batchBurnFrom(
         address from,
         uint256[] memory ids,
@@ -96,7 +89,7 @@ abstract contract ERC1155InventoryBurnable is IERC1155InventoryBurnable, ERC1155
         emit TransferBatch(sender, from, address(0), ids, values);
     }
 
-    //================================== Internal Helper Functions =======================================/
+    //============================================== Helper Internal Functions ==============================================//
 
     function _burnFungible(
         address from,

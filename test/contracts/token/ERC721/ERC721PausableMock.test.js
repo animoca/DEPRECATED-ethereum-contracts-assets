@@ -1,4 +1,6 @@
-const {artifacts} = require('hardhat');
+const {artifacts, accounts} = require('hardhat');
+const {constants} = require('@animoca/ethereum-contracts-core');
+const {ZeroAddress} = constants;
 const {shouldBehaveLikeERC721} = require('./behaviors/ERC721.behavior');
 
 const implementation = {
@@ -18,14 +20,18 @@ const implementation = {
     NonExistingNFT: 'ERC721: non-existing NFT',
     NonOwnedNFT: 'ERC721: non-owned NFT',
     ExistingOrBurntNFT: 'ERC721: existing/burnt NFT',
-    NotMinter: 'MinterRole: not a Minter',
 
     // Pausable
     AlreadyPaused: 'Pausable: paused',
     AlreadyUnpaused: 'Pausable: not paused',
+
+    // Admin
     NotPauser: 'Ownable: not the owner',
+    NotMinter: 'MinterRole: not a Minter',
+    NotContractOwner: 'Ownable: not the owner',
   },
   interfaces: {ERC721: true, ERC721Metadata: true, ERC721BatchTransfer: true, ERC721Burnable: true, Pausable: true},
+  features: {BaseMetadataURI: true},
   methods: {
     'batchTransferFrom(address,address,uint256[])': async function (contract, from, to, tokenIds, overrides) {
       return contract.batchTransferFrom(from, to, tokenIds, overrides);
@@ -49,14 +55,26 @@ const implementation = {
     },
   },
   deploy: async function (deployer) {
-    return artifacts.require('ERC721PausableMock').new({from: deployer});
+    const registry = await artifacts.require('ForwarderRegistry').new({from: deployer});
+    const forwarder = await artifacts.require('UniversalForwarder').new({from: deployer});
+    return artifacts.require('ERC721PausableMock').new(registry.address, ZeroAddress, {from: deployer});
   },
   mint: async function (contract, to, id, _value, overrides) {
     return contract.methods['safeMint(address,uint256,bytes)'](to, id, '0x', overrides);
   },
 };
 
+const [deployer] = accounts;
+
 describe('ERC721PausableMock', function () {
   this.timeout(0);
+
+  context('_msgData()', function () {
+    it('it is called for 100% coverage', async function () {
+      const token = await implementation.deploy(deployer);
+      await token.msgData();
+    });
+  });
+
   shouldBehaveLikeERC721(implementation);
 });

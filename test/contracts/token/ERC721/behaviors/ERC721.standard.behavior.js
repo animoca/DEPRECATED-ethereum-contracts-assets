@@ -48,10 +48,12 @@ function shouldBehaveLikeERC721Standard({nfMaskLength, contractName, revertMessa
       await this.token.approve(approved, nft2, {from: owner});
       await this.token.approve(approved, nftOtherCollection, {from: owner});
       await this.token.setApprovalForAll(operator, true, {from: owner});
-      this.receiver721 = await ERC721ReceiverMock.new(true);
-      this.refusingReceiver721 = await ERC721ReceiverMock.new(false);
-      this.receiver1155 = await ERC1155TokenReceiverMock.new(true);
-      this.refusingReceiver1155 = await ERC1155TokenReceiverMock.new(false);
+      this.receiver721 = await ERC721ReceiverMock.new(true, this.token.address);
+      this.refusingReceiver721 = await ERC721ReceiverMock.new(false, this.token.address);
+      this.wrongTokenReceiver721 = await ERC721ReceiverMock.new(false, ZeroAddress);
+      this.receiver1155 = await ERC1155TokenReceiverMock.new(true, this.token.address);
+      this.refusingReceiver1155 = await ERC1155TokenReceiverMock.new(false, this.token.address);
+      this.wrongTokenReceiver1155 = await ERC1155TokenReceiverMock.new(false, ZeroAddress);
 
       // pre-transfer state
       this.nftBalance = await this.token.balanceOf(owner);
@@ -262,18 +264,6 @@ function shouldBehaveLikeERC721Standard({nfMaskLength, contractName, revertMessa
           transferWasSuccessful(ids, data, options, safe, receiverType, selfTransfer);
         });
 
-        if (interfaces.Pausable) {
-          context('[Pausable] when called after unpausing', function () {
-            const options = {from: owner};
-            beforeEach(async function () {
-              await this.token.pause({from: deployer});
-              await this.token.unpause({from: deployer});
-              receipt = await transferFunction.call(this, owner, this.toWhom, ids, data, options);
-            });
-            transferWasSuccessful(ids, data, options, safe, receiverType, selfTransfer);
-          });
-        }
-
         context('when called by a wallet with single token approval', function () {
           const options = {from: approved};
           beforeEach(async function () {
@@ -340,6 +330,13 @@ function shouldBehaveLikeERC721Standard({nfMaskLength, contractName, revertMessa
                 revertMessages.TransferRejected
               );
             });
+            it('reverts when sent to an ERC721Receiver which accepts another token', async function () {
+              await expectRevert.unspecified(
+                transferFunction.call(this, owner, this.wrongTokenReceiver721.address, nft1, data, {
+                  from: owner,
+                })
+              );
+            });
             if (interfaces.ERC1155) {
               it('[ERC1155] reverts when sent to an ERC1155TokenReceiver which refuses the transfer', async function () {
                 await expectRevert(
@@ -347,6 +344,13 @@ function shouldBehaveLikeERC721Standard({nfMaskLength, contractName, revertMessa
                     from: owner,
                   }),
                   revertMessages.TransferRejected
+                );
+              });
+              it('[ERC1155] reverts when sent to an ERC1155TokenReceiver which accepts another token', async function () {
+                await expectRevert.unspecified(
+                  transferFunction.call(this, owner, this.wrongTokenReceiver1155.address, nft1, data, {
+                    from: owner,
+                  })
                 );
               });
             } else {

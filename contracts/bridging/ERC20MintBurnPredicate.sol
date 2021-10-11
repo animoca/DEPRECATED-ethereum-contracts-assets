@@ -2,15 +2,20 @@
 
 pragma solidity >=0.7.6 <0.8.0;
 
-import {ERC20BasePredicate} from "./ERC20BasePredicate.sol";
 import {ManagedIdentity} from "@animoca/ethereum-contracts-core-1.1.2/contracts/metatx/ManagedIdentity.sol";
+import {ERC20BasePredicate} from "./ERC20BasePredicate.sol";
 
 /**
- * Polygon (MATIC) bridging ERC20 minting/burning predicate to be deployed on the root chain (Ethereum mainnet).
- * This predicate must be used for mintable/burnable tokens.
+ * @title ERC20 Mint/Burn Predicate (for Polygon).
+ * Polygon bridging ERC20 minting/burning predicate which works with a `Withdrawn(address account, uint256 value)` event.
+ * @dev This contract should be deployed on the Root Chain (Ethereum).
+ * @dev Warning: this predicate must be used only for mintable and burnable tokens.
  */
-contract ERC20MintBurnPredicate is ERC20BasePredicate, ManagedIdentity {
+contract ERC20MintBurnPredicate is ManagedIdentity, ERC20BasePredicate {
+    // @inheritdoc ERC20BasePredicate
     constructor(address rootChainManager_) ERC20BasePredicate(rootChainManager_) {}
+
+    //==================================================== TokenPredicate ===================================================//
 
     /**
      * Burns ERC20 tokens for deposit.

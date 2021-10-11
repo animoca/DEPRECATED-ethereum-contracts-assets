@@ -14,16 +14,11 @@ describe('ERC20MintBurnPredicate', function () {
   const fixtureLoader = createFixtureLoader(accounts, web3.eth.currentProvider);
 
   const fixture = async function () {
-    // const rootChainManager = await artifacts.require('RootChainManager').new();
-    // const rootChainManagerProxy = await artifacts.require('RootChainManagerProxy').new('0x0000000000000000000000000000000000000000');
-    // await rootChainManagerProxy.updateAndCall(rootChainManager.address, rootChainManager.contract.methods.initialize(accounts[0]).encodeABI());
-    // this.rootChainManager = await artifacts.require('RootChainManager').at(rootChainManagerProxy.address);
-    // this.predicate = await artifacts.require('ERC20EscrowPredicate').new(this.rootChainManager.address, {from: deployer});
     this.predicate = await artifacts.require('ERC20MintBurnPredicate').new(rootChainManager, {from: deployer});
 
     const forwarder = await artifacts.require('UniversalForwarder').new();
     const registry = await artifacts.require('ForwarderRegistry').new();
-    this.token = await artifacts.require('ERC20BurnableMock').new([holder], [One], registry.address, forwarder.address, {from: deployer});
+    this.token = await artifacts.require('ERC20BurnableMock').new([holder], [One], registry.address, ZeroAddress, {from: deployer});
   };
 
   beforeEach(async function () {
@@ -85,7 +80,7 @@ describe('ERC20MintBurnPredicate', function () {
     });
 
     it('reverts if the predicate is not a minter', async function () {
-      await expectRevert(this.predicate.exitTokens(ZeroAddress, this.token.address, eventLog, {from: rootChainManager}), 'Ownable: not the owner');
+      await expectRevert(this.predicate.exitTokens(ZeroAddress, this.token.address, eventLog, {from: rootChainManager}), 'MinterRole: not a Minter');
     });
 
     it('reverts if the event log is wrong', async function () {
@@ -103,7 +98,7 @@ describe('ERC20MintBurnPredicate', function () {
 
     context('when successful', function () {
       beforeEach(async function () {
-        await this.token.transferOwnership(this.predicate.address);
+        await this.token.addMinter(this.predicate.address, {from: deployer});
         await this.token.approve(this.predicate.address, Two, {from: holder});
         const depositData = abi.encode(['uint256'], ['1']);
         await this.predicate.lockTokens(holder, holder, this.token.address, depositData, {from: rootChainManager});

@@ -3,8 +3,9 @@
 pragma solidity >=0.7.6 <0.8.0;
 
 /**
- * @title ERC20 Token Standard, optional extension: Safe Transfers
- * Note: the ERC-165 identifier for this interface is 0x53f41a97.
+ * @title ERC20 Token Standard, optional extension: Safe Transfers.
+ * @dev See https://eips.ethereum.org/EIPS/eip-20
+ * @dev Note: the ERC-165 identifier for this interface is 0x53f41a97.
  */
 interface IERC20SafeTransfers {
     /**

@@ -12,31 +12,52 @@ const implementation = {
   decimals: new BN(18),
   tokenURI: 'uri',
   revertMessages: {
+    // ERC20
     ApproveToZero: 'ERC20: zero address spender',
     TransferExceedsBalance: 'ERC20: insufficient balance',
     TransferToZero: 'ERC20: to zero address',
     TransferExceedsAllowance: 'ERC20: insufficient allowance',
     TransferFromZero: 'ERC20: insufficient balance',
-    BatchTransferValuesOverflow: 'ERC20: values overflow',
-    BatchTransferFromZero: 'ERC20: insufficient balance',
+    InconsistentArrays: 'ERC20: inconsistent arrays',
+    SupplyOverflow: 'ERC20: supply overflow',
+
+    // ERC20Allowance
     AllowanceUnderflow: 'ERC20: insufficient allowance',
     AllowanceOverflow: 'ERC20: allowance overflow',
-    InconsistentArrays: 'ERC20: inconsistent arrays',
+
+    // ERC20BatchTransfers
+    BatchTransferValuesOverflow: 'ERC20: values overflow',
+    BatchTransferFromZero: 'ERC20: insufficient balance',
+
+    // ERC20SafeTransfers
     TransferRefused: 'ERC20: transfer refused',
-    MintToZero: 'ERC20: zero address',
-    BatchMintValuesOverflow: 'ERC20: values overflow',
-    SupplyOverflow: 'ERC20: supply overflow',
+
+    // ERC2612
     PermitFromZero: 'ERC20: zero address owner',
     PermitExpired: 'ERC20: expired permit',
     PermitInvalid: 'ERC20: invalid permit',
-    NonMinter: 'Ownable: not the owner',
-    NonDepositor: 'ChildERC20: only depositor',
+
+    // ERC20Mintable
+    MintToZero: 'ERC20: zero address',
+    BatchMintValuesOverflow: 'ERC20: values overflow',
+
+    // ERC20Receiver
     DirectReceiverCall: 'ChildERC20: wrong sender',
+
+    // Recoverable
+    RecovInconsistentArrays: 'Recov: inconsistent arrays',
+    RecovInsufficientBalance: 'Recov: insufficient balance',
+
+    // Admin
+    NonDepositor: 'ChildERC20: only depositor',
+    NotMinter: 'MinterRole: not a Minter',
+    NotContractOwner: 'Ownable: not the owner',
   },
   features: {
     ERC165: true,
     EIP717: true, // unlimited approval
     AllowanceTracking: true,
+    Recoverable: true,
   },
   interfaces: {
     ERC20: true,
@@ -63,14 +84,14 @@ const implementation = {
     const childChainManager = deployer;
     return artifacts
       .require('ChildERC20Mock')
-      .new(initialHolders, initialBalances, childChainManager, registry.address, forwarder.address, {from: deployer});
+      .new(initialHolders, initialBalances, childChainManager, registry.address, ZeroAddress, {from: deployer});
   },
 };
 
+const [deployer, other] = accounts;
+
 describe('ChildERC20Mock', function () {
   this.timeout(0);
-
-  const [deployer, other] = accounts;
 
   context('constructor', function () {
     it('it reverts with inconsistent arrays', async function () {
@@ -79,32 +100,10 @@ describe('ChildERC20Mock', function () {
     });
   });
 
-  context('minting', function () {
-    const fixtureLoader = createFixtureLoader(accounts, web3.eth.currentProvider);
-
-    const fixture = async function () {
-      this.token = await implementation.deploy([], [], deployer);
-    };
-
-    beforeEach(async function () {
-      await fixtureLoader(fixture, this);
-    });
-    context('mint(address,uint256)', function () {
-      it('reverts if the sender is not a minter', async function () {
-        await expectRevert(
-          implementation.methods['mint(address,uint256)'](this.token, other, One, {from: other}),
-          implementation.revertMessages.NonMinter
-        );
-      });
-    });
-
-    context('batchMint(address[],uint256[]', function () {
-      it('reverts if the sender is not a minter', async function () {
-        await expectRevert(
-          implementation.methods['batchMint(address[],uint256[])'](this.token, [], [], {from: other}),
-          implementation.revertMessages.NonMinter
-        );
-      });
+  context('_msgData()', function () {
+    it('it is called for 100% coverage', async function () {
+      const token = await implementation.deploy([], [], deployer);
+      await token.msgData();
     });
   });
 

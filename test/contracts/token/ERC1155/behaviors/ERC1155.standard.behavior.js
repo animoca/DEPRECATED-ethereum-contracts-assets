@@ -12,8 +12,9 @@ const {isFungible, isNonFungibleToken, makeFungibleCollectionId, makeNonFungible
   require('@animoca/blockchain-inventory_metadata').inventoryIds;
 const {Zero, One} = require('@animoca/ethereum-contracts-core/src/constants');
 
-const ERC1155TokenReceiverMock = artifacts.require('ERC1155TokenReceiverMock');
 const ERC721ReceiverMock = artifacts.require('ERC721ReceiverMock');
+const ERC1155TokenReceiverMock = artifacts.require('ERC1155TokenReceiverMock');
+const ERC1155721ReceiverMock = artifacts.require('ERC1155721ReceiverMock');
 
 function shouldBehaveLikeERC1155Standard({nfMaskLength, revertMessages, eventParamsOverrides, interfaces, deploy, mint}) {
   const [deployer, minter, owner, operator, approved, other] = accounts;
@@ -59,19 +60,23 @@ function shouldBehaveLikeERC1155Standard({nfMaskLength, revertMessages, eventPar
         await this.token.approve(approved, nft2, {from: owner});
         await this.token.approve(approved, nftOtherCollection, {from: owner});
       }
-      this.receiver721 = await ERC721ReceiverMock.new(true);
-      this.receiver1155 = await ERC1155TokenReceiverMock.new(true);
-      this.refusingReceiver1155 = await ERC1155TokenReceiverMock.new(false);
+      this.receiver721 = await ERC721ReceiverMock.new(true, this.token.address);
+      this.receiver1155 = await ERC1155TokenReceiverMock.new(true, this.token.address);
+      this.refusingReceiver1155 = await ERC1155TokenReceiverMock.new(false, this.token.address);
+      this.wrongTokenReceiver1155 = await ERC1155TokenReceiverMock.new(false, ZeroAddress);
+      this.receiver1155721 = await ERC1155721ReceiverMock.new(true, true, this.token.address);
 
       // pre-transfer state
       if (interfaces.ERC721) {
         this.nftBalance = await this.token.balanceOf(owner);
       }
       if (interfaces.ERC1155Inventory) {
-        this.nfcSupply = await this.token.totalSupply(nfCollection);
-        this.otherNFCSupply = await this.token.totalSupply(nfCollectionOther);
         this.nfcBalance = await this.token.balanceOf(owner, nfCollection);
         this.otherNFCBalance = await this.token.balanceOf(owner, nfCollectionOther);
+        if (interfaces.ERC1155InventoryTotalSupply) {
+          this.nfcSupply = await this.token.totalSupply(nfCollection);
+          this.otherNFCSupply = await this.token.totalSupply(nfCollectionOther);
+        }
       }
     };
 
@@ -293,8 +298,8 @@ function shouldBehaveLikeERC1155Standard({nfMaskLength, revertMessages, eventPar
             });
           }
 
-          if (interfaces.ERC1155Inventory) {
-            it('[ERC1155Inventory] does not affect the token(s) total supply', async function () {
+          if (interfaces.ERC1155InventoryTotalSupply) {
+            it('[ERC1155InventoryTotalSupply] does not affect the token(s) total supply', async function () {
               for (const [id, _value] of tokens) {
                 let supply;
                 if (isNonFungibleToken(id, nfMaskLength)) {
@@ -351,10 +356,12 @@ function shouldBehaveLikeERC1155Standard({nfMaskLength, revertMessages, eventPar
                 });
               }
 
-              it('[ERC1155Inventory] does not affect the Non-Fungible Collection(s) total supply', async function () {
-                (await this.token.totalSupply(nfCollection)).should.be.bignumber.equal(this.nfcSupply);
-                (await this.token.totalSupply(nfCollectionOther)).should.be.bignumber.equal(this.otherNFCSupply);
-              });
+              if (interfaces.ERC1155InventoryTotalSupply) {
+                it('[ERC1155InventoryTotalSupply] does not affect the Non-Fungible Collection(s) total supply', async function () {
+                  (await this.token.totalSupply(nfCollection)).should.be.bignumber.equal(this.nfcSupply);
+                  (await this.token.totalSupply(nfCollectionOther)).should.be.bignumber.equal(this.otherNFCSupply);
+                });
+              }
             }
 
             if (interfaces.ERC721) {
@@ -436,7 +443,7 @@ function shouldBehaveLikeERC1155Standard({nfMaskLength, revertMessages, eventPar
           });
         }
 
-        if (receiverType == ReceiverType.ERC1155_RECEIVER) {
+        if (receiverType == ReceiverType.ERC1155_RECEIVER || receiverType == ReceiverType.ERC1155721_RECEIVER) {
           if (Array.isArray(tokenIds)) {
             it('[ERC1155] should call onERC1155BatchReceived', async function () {
               await expectEvent.inTransaction(receipt.tx, ERC1155TokenReceiverMock, 'ReceivedBatch', {
@@ -469,18 +476,6 @@ function shouldBehaveLikeERC1155Standard({nfMaskLength, revertMessages, eventPar
           });
           transferWasSuccessful(tokenIds, values, data, options, receiverType, selfTransfer);
         });
-
-        if (interfaces.Pausable) {
-          context('[Pausable] when called after unpausing', function () {
-            const options = {from: owner};
-            beforeEach(async function () {
-              await this.token.pause({from: deployer});
-              await this.token.unpause({from: deployer});
-              receipt = await transferFunction.call(this, owner, this.toWhom, tokenIds, values, data, options);
-            });
-            transferWasSuccessful(tokenIds, values, data, options, receiverType, selfTransfer);
-          });
-        }
 
         context('when called by an operator', function () {
           const options = {from: operator};
@@ -571,6 +566,13 @@ function shouldBehaveLikeERC1155Standard({nfMaskLength, revertMessages, eventPar
               revertMessages.TransferRejected
             );
           });
+          it('reverts when sent to an ERC1155TokenReceiver which accepts another token', async function () {
+            await expectRevert.unspecified(
+              transferFunction.call(this, owner, this.wrongTokenReceiver1155.address, nft1, 1, data, {
+                from: owner,
+              })
+            );
+          });
         });
       };
 
@@ -595,6 +597,13 @@ function shouldBehaveLikeERC1155Standard({nfMaskLength, revertMessages, eventPar
             this.toWhom = this.receiver1155.address;
           });
           shouldTransferTokenBySender(transferFunction, ids, values, data, ReceiverType.ERC1155_RECEIVER);
+        });
+
+        context('when sent to an ERC1155721TokenReceiver contract', function () {
+          beforeEach(async function () {
+            this.toWhom = this.receiver1155721.address;
+          });
+          shouldTransferTokenBySender(transferFunction, ids, values, data, ReceiverType.ERC1155721_RECEIVER);
         });
       };
 

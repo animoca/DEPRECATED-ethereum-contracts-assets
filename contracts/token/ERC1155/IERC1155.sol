@@ -3,9 +3,9 @@
 pragma solidity >=0.7.6 <0.8.0;
 
 /**
- * @title ERC-1155 Multi Token Standard, basic interface
+ * @title ERC1155 Multi Token Standard, basic interface.
  * @dev See https://eips.ethereum.org/EIPS/eip-1155
- * Note: The ERC-165 identifier for this interface is 0xd9b67a26.
+ * @dev Note: The ERC-165 identifier for this interface is 0xd9b67a26.
  */
 interface IERC1155 {
     event TransferSingle(address indexed _operator, address indexed _from, address indexed _to, uint256 _id, uint256 _value);

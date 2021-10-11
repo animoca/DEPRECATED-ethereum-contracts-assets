@@ -1,8 +1,8 @@
 const {artifacts, accounts, web3} = require('hardhat');
 const {createFixtureLoader} = require('@animoca/ethereum-contracts-core/test/utils/fixture');
 const {constants} = require('@animoca/ethereum-contracts-core');
-const {expectRevert, expectEvent} = require('@openzeppelin/test-helpers');
 const {Zero, One, Two, MaxUInt256, ZeroAddress} = constants;
+const {expectRevert, expectEvent} = require('@openzeppelin/test-helpers');
 const {Withdrawn_EventSig} = require('../../../src/constants');
 const {AbiCoder, RLP} = require('ethers/utils');
 
@@ -14,16 +14,11 @@ describe('ERC20EscrowPredicate', function () {
   const fixtureLoader = createFixtureLoader(accounts, web3.eth.currentProvider);
 
   const fixture = async function () {
-    // const rootChainManager = await artifacts.require('RootChainManager').new();
-    // const rootChainManagerProxy = await artifacts.require('RootChainManagerProxy').new('0x0000000000000000000000000000000000000000');
-    // await rootChainManagerProxy.updateAndCall(rootChainManager.address, rootChainManager.contract.methods.initialize(accounts[0]).encodeABI());
-    // this.rootChainManager = await artifacts.require('RootChainManager').at(rootChainManagerProxy.address);
-    // this.predicate = await artifacts.require('ERC20EscrowPredicate').new(this.rootChainManager.address, {from: deployer});
     this.predicate = await artifacts.require('ERC20EscrowPredicate').new(rootChainManager, {from: deployer});
 
     const forwarder = await artifacts.require('UniversalForwarder').new();
     const registry = await artifacts.require('ForwarderRegistry').new();
-    this.token = await artifacts.require('ERC20Mock').new([holder], [One], registry.address, forwarder.address, {from: deployer});
+    this.token = await artifacts.require('ERC20Mock').new([holder], [One], registry.address, ZeroAddress, {from: deployer});
   };
 
   beforeEach(async function () {

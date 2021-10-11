@@ -60,9 +60,9 @@ function shouldBehaveLikeERC1155Mintable({contractName, nfMaskLength, revertMess
       this.token = await deploy(deployer);
       await this.token.addMinter(minter, {from: deployer});
       await mint(this.token, other, unknownFCollection.id, MaxUInt256, {from: minter});
-      this.receiver721 = await ERC721ReceiverMock.new(true);
-      this.receiver1155 = await ERC1155TokenReceiverMock.new(true);
-      this.refusingReceiver1155 = await ERC1155TokenReceiverMock.new(false);
+      this.receiver721 = await ERC721ReceiverMock.new(true, this.token.address);
+      this.receiver1155 = await ERC1155TokenReceiverMock.new(true, this.token.address);
+      this.refusingReceiver1155 = await ERC1155TokenReceiverMock.new(false, this.token.address);
     };
 
     beforeEach(async function () {
@@ -85,8 +85,8 @@ function shouldBehaveLikeERC1155Mintable({contractName, nfMaskLength, revertMess
           }
         });
 
-        if (interfaces.ERC1155Inventory) {
-          it('[ERC1155Inventory] increases the token(s) total supply', async function () {
+        if (interfaces.ERC1155InventoryTotalSupply) {
+          it('[ERC1155InventoryTotalSupply] increases the token(s) total supply', async function () {
             for (const [id, value] of tokens) {
               (await this.token.totalSupply(id)).should.be.bignumber.equal(new BN(value));
             }
@@ -109,16 +109,18 @@ function shouldBehaveLikeERC1155Mintable({contractName, nfMaskLength, revertMess
               (await this.token.balanceOf(this.toWhom, nfCollectionOther)).should.be.bignumber.equal(new BN(nbOtherCollectionNFTs));
             });
 
-            it('[ERC1155Inventory] increases the Non-Fungible Collection(s) total supply', async function () {
-              (await this.token.totalSupply(nfCollection)).should.be.bignumber.equal(new BN(nbCollectionNFTs));
-              (await this.token.totalSupply(nfCollectionOther)).should.be.bignumber.equal(new BN(nbOtherCollectionNFTs));
-            });
+            if (interfaces.ERC1155InventoryTotalSupply) {
+              it('[ERC1155InventoryTotalSupply] increases the Non-Fungible Collection(s) total supply', async function () {
+                (await this.token.totalSupply(nfCollection)).should.be.bignumber.equal(new BN(nbCollectionNFTs));
+                (await this.token.totalSupply(nfCollectionOther)).should.be.bignumber.equal(new BN(nbOtherCollectionNFTs));
+              });
 
-            it('[ERC1155Inventory] sets the Non-Fungible Token(s) total supply to 1', async function () {
-              for (const [id, _value] of nonFungibleTokens) {
-                (await this.token.totalSupply(id)).should.be.bignumber.equal('1');
-              }
-            });
+              it('[ERC1155InventoryTotalSupply] sets the Non-Fungible Token(s) total supply to 1', async function () {
+                for (const [id, _value] of nonFungibleTokens) {
+                  (await this.token.totalSupply(id)).should.be.bignumber.equal('1');
+                }
+              });
+            }
           }
           if (interfaces.ERC721) {
             it('[ERC721] sets an empty approval for the Non-Fungible Token(s)', async function () {
@@ -280,18 +282,6 @@ function shouldBehaveLikeERC1155Mintable({contractName, nfMaskLength, revertMess
         });
         mintWasSuccessful(ids, values, data, options, ReceiverType.ERC1155_RECEIVER);
       });
-
-      if (interfaces.Pausable) {
-        context('[Pausable] when called after unpausing', function () {
-          beforeEach(async function () {
-            await this.token.pause({from: deployer});
-            await this.token.unpause({from: deployer});
-            this.toWhom = owner;
-            receipt = await mintFunction.call(this, this.toWhom, ids, values, data, options);
-          });
-          mintWasSuccessful(ids, values, data, options, ReceiverType.WALLET);
-        });
-      }
     };
 
     describe('safeMint(address,uint256,uint256,bytes)', function () {

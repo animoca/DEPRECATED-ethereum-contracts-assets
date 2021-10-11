@@ -310,7 +310,7 @@ function shouldBehaveLikeERC20BatchTransfers(implementation) {
     });
 
     if (features.ERC165) {
-      behaviors.shouldSupportInterfaces([interfaces20.ERC20BatchTransfers_Experimental]);
+      behaviors.shouldSupportInterfaces([interfaces20.ERC20BatchTransfers]);
     }
   });
 }

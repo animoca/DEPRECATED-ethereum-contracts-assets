@@ -1,6 +1,7 @@
-const {artifacts} = require('hardhat');
-const {shouldBehaveLikeERC721} = require('../ERC721/behaviors/ERC721.behavior');
-const {shouldBehaveLikeERC1155} = require('../ERC1155/behaviors/ERC1155.behavior');
+const {artifacts, accounts} = require('hardhat');
+const {constants} = require('@animoca/ethereum-contracts-core');
+const {ZeroAddress} = constants;
+const {shouldBehaveLikeERC1155721} = require('./behaviors/ERC1155721.behavior');
 
 const implementation = {
   contractName: 'ERC1155721InventoryPausableMock',
@@ -37,7 +38,11 @@ const implementation = {
     // Pausable
     AlreadyPaused: 'Pausable: paused',
     AlreadyUnpaused: 'Pausable: not paused',
+
+    // Admin
     NotPauser: 'Ownable: not the owner',
+    NotMinter: 'MinterRole: not a Minter',
+    NotContractOwner: 'Ownable: not the owner',
   },
   interfaces: {
     ERC721: true,
@@ -45,9 +50,12 @@ const implementation = {
     ERC1155: true,
     ERC1155MetadataURI: true,
     ERC1155Inventory: true,
+    ERC1155InventoryTotalSupply: true,
     ERC1155InventoryCreator: true,
+    ERC1155721InventoryBurnable: true,
     Pausable: true,
   },
+  features: {BaseMetadataURI: true},
   methods: {
     // ERC721
     'batchTransferFrom(address,address,uint256[])': async function (contract, from, to, nftIds, overrides) {
@@ -84,17 +92,33 @@ const implementation = {
     'createCollection(uint256)': async function (contract, collectionId, overrides) {
       return contract.createCollection(collectionId, overrides);
     },
+
+    // ERC1155721Deliverable
+    'safeDeliver(address[],uint256[],uint256[],bytes)': async function (contract, tos, ids, values, data, overrides) {
+      return contract.safeDeliver(tos, ids, values, data, overrides);
+    },
   },
   deploy: async function (deployer) {
-    return artifacts.require('ERC1155721InventoryPausableMock').new({from: deployer});
+    const registry = await artifacts.require('ForwarderRegistry').new({from: deployer});
+    const forwarder = await artifacts.require('UniversalForwarder').new({from: deployer});
+    return artifacts.require('ERC1155721InventoryPausableMock').new(registry.address, ZeroAddress, {from: deployer});
   },
   mint: async function (contract, to, id, value, overrides) {
     return contract.methods['safeMint(address,uint256,uint256,bytes)'](to, id, value, '0x', overrides);
   },
 };
 
+const [deployer] = accounts;
+
 describe('ERC1155721InventoryPausableMock', function () {
   this.timeout(0);
-  shouldBehaveLikeERC721(implementation);
-  shouldBehaveLikeERC1155(implementation);
+
+  context('_msgData()', function () {
+    it('it is called for 100% coverage', async function () {
+      const token = await implementation.deploy(deployer);
+      await token.msgData();
+    });
+  });
+
+  shouldBehaveLikeERC1155721(implementation);
 });
