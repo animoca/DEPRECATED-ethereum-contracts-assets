@@ -24,8 +24,12 @@ contract ERC1155721InventoryMock is
     BaseMetadataURI,
     MinterRole
 {
-    constructor(IForwarderRegistry forwarderRegistry, address universalForwarder)
-        ERC1155721Inventory("ERC1155721InventoryMock", "INV")
+    constructor(
+        IForwarderRegistry forwarderRegistry,
+        address universalForwarder,
+        uint256 collectionMaskLength
+    )
+        ERC1155721Inventory("ERC1155721InventoryMock", "INV", collectionMaskLength)
         UsingUniversalForwarding(forwarderRegistry, universalForwarder)
         MinterRole(msg.sender)
     {}

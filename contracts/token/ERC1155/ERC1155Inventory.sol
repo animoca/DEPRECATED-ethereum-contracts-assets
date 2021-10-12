@@ -30,7 +30,7 @@ abstract contract ERC1155Inventory is ERC1155InventoryBase {
 
         if (id.isFungibleToken()) {
             _transferFungible(from, to, id, value);
-        } else if (id.isNonFungibleToken()) {
+        } else if (id.isNonFungibleToken(_collectionMaskLength)) {
             _transferNFT(from, to, id, value, false);
         } else {
             revert("Inventory: not a token id");
@@ -76,9 +76,9 @@ abstract contract ERC1155Inventory is ERC1155InventoryBase {
             uint256 value = values[i];
             if (id.isFungibleToken()) {
                 _transferFungible(from, to, id, value);
-            } else if (id.isNonFungibleToken()) {
+            } else if (id.isNonFungibleToken(_collectionMaskLength)) {
                 _transferNFT(from, to, id, value, true);
-                uint256 nextCollectionId = id.getNonFungibleCollection();
+                uint256 nextCollectionId = id.getNonFungibleCollection(_collectionMaskLength);
                 if (nfCollectionId == 0) {
                     nfCollectionId = nextCollectionId;
                     nfCollectionCount = 1;
@@ -116,7 +116,7 @@ abstract contract ERC1155Inventory is ERC1155InventoryBase {
 
         if (id.isFungibleToken()) {
             _mintFungible(to, id, value);
-        } else if (id.isNonFungibleToken()) {
+        } else if (id.isNonFungibleToken(_collectionMaskLength)) {
             _mintNFT(to, id, value, false);
         } else {
             revert("Inventory: not a token id");
@@ -145,9 +145,9 @@ abstract contract ERC1155Inventory is ERC1155InventoryBase {
             uint256 value = values[i];
             if (id.isFungibleToken()) {
                 _mintFungible(to, id, value);
-            } else if (id.isNonFungibleToken()) {
+            } else if (id.isNonFungibleToken(_collectionMaskLength)) {
                 _mintNFT(to, id, value, true);
-                uint256 nextCollectionId = id.getNonFungibleCollection();
+                uint256 nextCollectionId = id.getNonFungibleCollection(_collectionMaskLength);
                 if (nfCollectionId == 0) {
                     nfCollectionId = nextCollectionId;
                     nfCollectionCount = 1;
@@ -205,7 +205,7 @@ abstract contract ERC1155Inventory is ERC1155InventoryBase {
         _owners[id] = uint256(uint160(to));
 
         if (!isBatch) {
-            uint256 collectionId = id.getNonFungibleCollection();
+            uint256 collectionId = id.getNonFungibleCollection(_collectionMaskLength);
             // it is virtually impossible that a Non-Fungible Collection supply
             // overflows due to the cost of minting individual tokens
             ++_supplies[collectionId];
@@ -241,7 +241,7 @@ abstract contract ERC1155Inventory is ERC1155InventoryBase {
         require(from == address(uint160(_owners[id])), "Inventory: non-owned NFT");
         _owners[id] = uint256(uint160(to));
         if (!isBatch) {
-            uint256 collectionId = id.getNonFungibleCollection();
+            uint256 collectionId = id.getNonFungibleCollection(_collectionMaskLength);
             // cannot underflow as balance is verified through ownership
             _balances[collectionId][from] -= 1;
             // cannot overflow as supply cannot overflow

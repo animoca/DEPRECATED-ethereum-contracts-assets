@@ -20,7 +20,7 @@ describe('ERC1155VouchersRedeemer', function () {
     this.token = await artifacts
       .require('ERC20Mock')
       .new([tokenHolder], [tokenTotalSupply], this.forwarderRegistry.address, ZeroAddress, {from: deployer});
-    this.vouchers = await artifacts.require('ERC1155InventoryBurnableMock').new(this.forwarderRegistry.address, ZeroAddress, {from: deployer});
+    this.vouchers = await artifacts.require('ERC1155InventoryBurnableMock').new(this.forwarderRegistry.address, ZeroAddress, 32, {from: deployer});
     await this.vouchers.createCollection(voucherId, {from: deployer});
     await this.vouchers.safeMint(purchaser, voucherId, voucherTotalSupply, EmptyByte);
     this.redeemer = await artifacts.require('ERC1155VouchersRedeemerMock').new(this.vouchers.address, this.token.address, tokenHolder);
@@ -35,7 +35,7 @@ describe('ERC1155VouchersRedeemer', function () {
     it('reverts when the sender is not the registered vouchers contract', async function () {
       const vouchersOther = await artifacts
         .require('ERC1155InventoryBurnableMock')
-        .new(this.forwarderRegistry.address, ZeroAddress, {from: deployer});
+        .new(this.forwarderRegistry.address, ZeroAddress, 32, {from: deployer});
       await vouchersOther.createCollection(voucherId, {from: deployer});
       await vouchersOther.safeMint(purchaser, voucherId, voucherTotalSupply, EmptyByte);
       await expectRevert(
@@ -109,7 +109,7 @@ describe('ERC1155VouchersRedeemer', function () {
     it('reverts when the sender is not the registered vouchers contract', async function () {
       const vouchersOther = await artifacts
         .require('ERC1155InventoryBurnableMock')
-        .new(this.forwarderRegistry.address, ZeroAddress, {from: deployer});
+        .new(this.forwarderRegistry.address, ZeroAddress, 32, {from: deployer});
       await vouchersOther.createCollection(voucherId, {from: deployer});
       await vouchersOther.safeMint(purchaser, voucherId, voucherTotalSupply, EmptyByte);
       await expectRevert(

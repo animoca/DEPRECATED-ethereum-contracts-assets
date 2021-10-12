@@ -32,7 +32,7 @@ abstract contract ERC1155721InventoryBurnable is IERC1155721InventoryBurnable, E
 
         if (id.isFungibleToken()) {
             _burnFungible(from, id, value, operatable);
-        } else if (id.isNonFungibleToken()) {
+        } else if (id.isNonFungibleToken(_collectionMaskLength)) {
             _burnNFT(from, id, value, operatable, false);
             emit Transfer(from, address(0), id);
         } else {
@@ -61,10 +61,10 @@ abstract contract ERC1155721InventoryBurnable is IERC1155721InventoryBurnable, E
             uint256 id = ids[i];
             if (id.isFungibleToken()) {
                 _burnFungible(from, id, values[i], operatable);
-            } else if (id.isNonFungibleToken()) {
+            } else if (id.isNonFungibleToken(_collectionMaskLength)) {
                 _burnNFT(from, id, values[i], operatable, true);
                 emit Transfer(from, address(0), id);
-                uint256 nextCollectionId = id.getNonFungibleCollection();
+                uint256 nextCollectionId = id.getNonFungibleCollection(_collectionMaskLength);
                 if (nfCollectionId == 0) {
                     nfCollectionId = nextCollectionId;
                     nfCollectionCount = 1;
@@ -108,7 +108,7 @@ abstract contract ERC1155721InventoryBurnable is IERC1155721InventoryBurnable, E
             values[i] = 1;
             _burnNFT(from, nftId, values[i], operatable, true);
             emit Transfer(from, address(0), nftId);
-            uint256 nextCollectionId = nftId.getNonFungibleCollection();
+            uint256 nextCollectionId = nftId.getNonFungibleCollection(_collectionMaskLength);
             if (nfCollectionId == 0) {
                 nfCollectionId = nextCollectionId;
                 nfCollectionCount = 1;
@@ -164,7 +164,7 @@ abstract contract ERC1155721InventoryBurnable is IERC1155721InventoryBurnable, E
         _owners[id] = _BURNT_NFT_OWNER;
 
         if (!isBatch) {
-            _burnNFTUpdateCollection(from, id.getNonFungibleCollection(), 1);
+            _burnNFTUpdateCollection(from, id.getNonFungibleCollection(_collectionMaskLength), 1);
 
             // cannot underflow as balance is verified through NFT ownership
             --_nftBalances[from];

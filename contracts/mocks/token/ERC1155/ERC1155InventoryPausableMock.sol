@@ -11,10 +11,11 @@ import {Pausable} from "@animoca/ethereum-contracts-core-1.1.2/contracts/lifecyc
  * @dev The minting functions are usable while paused as it can be useful for contract maintenance such as contract migration.
  */
 contract ERC1155InventoryPausableMock is Pausable, ERC1155InventoryBurnableMock {
-    constructor(IForwarderRegistry forwarderRegistry, address universalForwarder)
-        ERC1155InventoryBurnableMock(forwarderRegistry, universalForwarder)
-        Pausable(false)
-    {}
+    constructor(
+        IForwarderRegistry forwarderRegistry,
+        address universalForwarder,
+        uint256 collectionMaskLength
+    ) ERC1155InventoryBurnableMock(forwarderRegistry, universalForwarder, collectionMaskLength) Pausable(false) {}
 
     //================================================== Pausable (admin) ===================================================//
 

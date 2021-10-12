@@ -28,7 +28,11 @@ abstract contract ERC1155721Inventory is IERC1155721Inventory, IERC721Metadata, 
     /* NFT ID => operator */
     mapping(uint256 => address) internal _nftApprovals;
 
-    constructor(string memory name_, string memory symbol_) {
+    constructor(
+        string memory name_,
+        string memory symbol_,
+        uint256 collectionMaskLength
+    ) ERC1155InventoryBase(collectionMaskLength) {
         _name = name_;
         _symbol = symbol_;
     }
@@ -178,7 +182,7 @@ abstract contract ERC1155721Inventory is IERC1155721Inventory, IERC721Metadata, 
             values[i] = 1;
             _transferNFT(from, to, nftId, 1, operatable, true);
             emit Transfer(from, to, nftId);
-            uint256 nextCollectionId = nftId.getNonFungibleCollection();
+            uint256 nextCollectionId = nftId.getNonFungibleCollection(_collectionMaskLength);
             if (nfCollectionId == 0) {
                 nfCollectionId = nextCollectionId;
                 nfCollectionCount = 1;
@@ -220,7 +224,7 @@ abstract contract ERC1155721Inventory is IERC1155721Inventory, IERC721Metadata, 
 
         if (id.isFungibleToken()) {
             _transferFungible(from, to, id, value, operatable);
-        } else if (id.isNonFungibleToken()) {
+        } else if (id.isNonFungibleToken(_collectionMaskLength)) {
             _transferNFT(from, to, id, value, operatable, false);
             emit Transfer(from, to, id);
         } else {
@@ -324,10 +328,10 @@ abstract contract ERC1155721Inventory is IERC1155721Inventory, IERC721Metadata, 
             uint256 id = ids[i];
             if (id.isFungibleToken()) {
                 _transferFungible(from, to, id, values[i], operatable);
-            } else if (id.isNonFungibleToken()) {
+            } else if (id.isNonFungibleToken(_collectionMaskLength)) {
                 _transferNFT(from, to, id, values[i], operatable, true);
                 emit Transfer(from, to, id);
-                uint256 nextCollectionId = id.getNonFungibleCollection();
+                uint256 nextCollectionId = id.getNonFungibleCollection(_collectionMaskLength);
                 if (nfCollectionId == 0) {
                     nfCollectionId = nextCollectionId;
                     nfCollectionCount = 1;
@@ -370,7 +374,7 @@ abstract contract ERC1155721Inventory is IERC1155721Inventory, IERC721Metadata, 
         bool safe
     ) internal {
         require(to != address(0), "Inventory: mint to zero");
-        require(nftId.isNonFungibleToken(), "Inventory: not an NFT");
+        require(nftId.isNonFungibleToken(_collectionMaskLength), "Inventory: not an NFT");
 
         _mintNFT(to, nftId, 1, false);
 
@@ -399,11 +403,11 @@ abstract contract ERC1155721Inventory is IERC1155721Inventory, IERC721Metadata, 
         uint256 nfCollectionCount;
         for (uint256 i; i != length; ++i) {
             uint256 nftId = nftIds[i];
-            require(nftId.isNonFungibleToken(), "Inventory: not an NFT");
+            require(nftId.isNonFungibleToken(_collectionMaskLength), "Inventory: not an NFT");
             values[i] = 1;
             _mintNFT(to, nftId, 1, true);
             emit Transfer(address(0), to, nftId);
-            uint256 nextCollectionId = nftId.getNonFungibleCollection();
+            uint256 nextCollectionId = nftId.getNonFungibleCollection(_collectionMaskLength);
             if (nfCollectionId == 0) {
                 nfCollectionId = nextCollectionId;
                 nfCollectionCount = 1;
@@ -443,7 +447,7 @@ abstract contract ERC1155721Inventory is IERC1155721Inventory, IERC721Metadata, 
         address sender = _msgSender();
         if (id.isFungibleToken()) {
             _mintFungible(to, id, value);
-        } else if (id.isNonFungibleToken()) {
+        } else if (id.isNonFungibleToken(_collectionMaskLength)) {
             _mintNFT(to, id, value, false);
             emit Transfer(address(0), to, id);
         } else {
@@ -478,10 +482,10 @@ abstract contract ERC1155721Inventory is IERC1155721Inventory, IERC721Metadata, 
             uint256 value = values[i];
             if (id.isFungibleToken()) {
                 _mintFungible(to, id, value);
-            } else if (id.isNonFungibleToken()) {
+            } else if (id.isNonFungibleToken(_collectionMaskLength)) {
                 _mintNFT(to, id, value, true);
                 emit Transfer(address(0), to, id);
-                uint256 nextCollectionId = id.getNonFungibleCollection();
+                uint256 nextCollectionId = id.getNonFungibleCollection(_collectionMaskLength);
                 if (nfCollectionId == 0) {
                     nfCollectionId = nextCollectionId;
                     nfCollectionCount = 1;
@@ -539,7 +543,7 @@ abstract contract ERC1155721Inventory is IERC1155721Inventory, IERC721Metadata, 
                 if (to.isContract()) {
                     _callOnERC1155Received(address(0), to, id, value, data);
                 }
-            } else if (id.isNonFungibleToken()) {
+            } else if (id.isNonFungibleToken(_collectionMaskLength)) {
                 _mintNFT(to, id, value, false);
                 emit Transfer(address(0), to, id);
                 emit TransferSingle(sender, address(0), to, id, 1);
@@ -584,7 +588,7 @@ abstract contract ERC1155721Inventory is IERC1155721Inventory, IERC721Metadata, 
         _owners[id] = uint256(uint160(to));
 
         if (!isBatch) {
-            uint256 collectionId = id.getNonFungibleCollection();
+            uint256 collectionId = id.getNonFungibleCollection(_collectionMaskLength);
             // it is virtually impossible that a Non-Fungible Collection supply
             // overflows due to the cost of minting individual tokens
             ++_supplies[collectionId];
@@ -628,7 +632,7 @@ abstract contract ERC1155721Inventory is IERC1155721Inventory, IERC721Metadata, 
         _owners[id] = uint256(uint160(to));
         if (!isBatch) {
             _transferNFTUpdateBalances(from, to, 1);
-            _transferNFTUpdateCollection(from, to, id.getNonFungibleCollection(), 1);
+            _transferNFTUpdateCollection(from, to, id.getNonFungibleCollection(_collectionMaskLength), 1);
         }
     }
 

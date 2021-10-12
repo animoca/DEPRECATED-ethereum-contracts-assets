@@ -48,6 +48,13 @@ function shouldBehaveLikeERC1155Inventory({nfMaskLength, revertMessages, interfa
     });
 
     describe('like an ERC1155Inventory', function () {
+      context('constructor', function () {
+        it('it reverts with a wrong collection mask length', async function () {
+          await expectRevert(deploy(deployer, 0), revertMessages.WrongCollectionMaskLength);
+          await expectRevert(deploy(deployer, 256), revertMessages.WrongCollectionMaskLength);
+        });
+      });
+
       describe('isFungible(uint256)', function () {
         context('when id is a Fungible Token', function () {
           it('returns true', async function () {

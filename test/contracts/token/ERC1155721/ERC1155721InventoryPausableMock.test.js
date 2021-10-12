@@ -13,6 +13,7 @@ const implementation = {
     SelfApproval: 'Inventory: self-approval',
 
     // ERC1155
+    WrongCollectionMaskLength: 'Inventory: wrong mask length',
     SelfApprovalForAll: 'Inventory: self-approval',
     ZeroAddress: 'Inventory: zero address',
     NonApproved: 'Inventory: non-approved sender',
@@ -98,10 +99,10 @@ const implementation = {
       return contract.safeDeliver(tos, ids, values, data, overrides);
     },
   },
-  deploy: async function (deployer) {
+  deploy: async function (deployer, collectionMaskLength = 32) {
     const registry = await artifacts.require('ForwarderRegistry').new({from: deployer});
     const forwarder = await artifacts.require('UniversalForwarder').new({from: deployer});
-    return artifacts.require('ERC1155721InventoryPausableMock').new(registry.address, ZeroAddress, {from: deployer});
+    return artifacts.require('ERC1155721InventoryPausableMock').new(registry.address, ZeroAddress, collectionMaskLength, {from: deployer});
   },
   mint: async function (contract, to, id, value, overrides) {
     return contract.methods['safeMint(address,uint256,uint256,bytes)'](to, id, value, '0x', overrides);

@@ -5,7 +5,7 @@ pragma solidity >=0.7.6 <0.8.0;
 import {ManagedIdentity, Recoverable} from "@animoca/ethereum-contracts-core-1.1.2/contracts/utils/Recoverable.sol";
 import {IForwarderRegistry, UsingUniversalForwarding} from "ethereum-universal-forwarder-1.0.0/src/solc_0.7/ERC2771/UsingUniversalForwarding.sol";
 // solhint-disable-next-line max-line-length
-import {IERC165, IERC1155, IERC1155MetadataURI, IERC1155InventoryBurnable, ERC1155InventoryBurnable} from "../../../token/ERC1155/ERC1155InventoryBurnable.sol";
+import {IERC165, IERC1155, IERC1155MetadataURI, IERC1155InventoryBurnable, ERC1155InventoryBase, ERC1155InventoryBurnable} from "../../../token/ERC1155/ERC1155InventoryBurnable.sol";
 import {IERC1155InventoryMintable} from "../../../token/ERC1155/IERC1155InventoryMintable.sol";
 import {IERC1155InventoryCreator} from "../../../token/ERC1155/IERC1155InventoryCreator.sol";
 import {BaseMetadataURI} from "../../../metadata/BaseMetadataURI.sol";
@@ -23,10 +23,11 @@ contract ERC1155InventoryBurnableMock is
     BaseMetadataURI,
     MinterRole
 {
-    constructor(IForwarderRegistry forwarderRegistry, address universalForwarder)
-        UsingUniversalForwarding(forwarderRegistry, universalForwarder)
-        MinterRole(msg.sender)
-    {}
+    constructor(
+        IForwarderRegistry forwarderRegistry,
+        address universalForwarder,
+        uint256 collectionMaskLength
+    ) ERC1155InventoryBase(collectionMaskLength) UsingUniversalForwarding(forwarderRegistry, universalForwarder) MinterRole(msg.sender) {}
 
     //======================================================= ERC165 ========================================================//
 
