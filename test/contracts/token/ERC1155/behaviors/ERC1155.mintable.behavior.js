@@ -13,7 +13,7 @@ const ERC1155TokenReceiverMock = artifacts.require('ERC1155TokenReceiverMock');
 const ERC721ReceiverMock = artifacts.require('ERC721ReceiverMock');
 
 function shouldBehaveLikeERC1155Mintable({contractName, nfMaskLength, revertMessages, eventParamsOverrides, interfaces, methods, deploy, mint}) {
-  const [deployer, minter, owner, _operator, _approved, other] = accounts;
+  const [deployer, owner, _operator, _approved, other] = accounts;
 
   const {'safeMint(address,uint256,uint256,bytes)': safeMint, 'safeBatchMint(address,uint256[],uint256[],bytes)': safeBatchMint} = methods;
 
@@ -58,8 +58,7 @@ function shouldBehaveLikeERC1155Mintable({contractName, nfMaskLength, revertMess
     const fixtureLoader = createFixtureLoader(accounts, web3.eth.currentProvider);
     const fixture = async function () {
       this.token = await deploy(deployer);
-      await this.token.addMinter(minter, {from: deployer});
-      await mint(this.token, other, unknownFCollection.id, MaxUInt256, {from: minter});
+      await mint(this.token, other, unknownFCollection.id, MaxUInt256, {from: deployer});
       this.receiver721 = await ERC721ReceiverMock.new(true, this.token.address);
       this.receiver1155 = await ERC1155TokenReceiverMock.new(true, this.token.address);
       this.refusingReceiver1155 = await ERC1155TokenReceiverMock.new(false, this.token.address);
@@ -218,7 +217,7 @@ function shouldBehaveLikeERC1155Mintable({contractName, nfMaskLength, revertMess
 
     const shouldRevertOnPreconditions = function (mintFunction) {
       const data = '0x42';
-      const options = {from: minter};
+      const options = {from: deployer};
       describe('Pre-conditions', function () {
         it('reverts if the sender is not a Minter', async function () {
           await expectRevert(mintFunction.call(this, owner, nft1, 1, data, {from: other}), revertMessages.NotMinter);
@@ -265,7 +264,7 @@ function shouldBehaveLikeERC1155Mintable({contractName, nfMaskLength, revertMess
     };
 
     const shouldMintTokenToRecipient = function (mintFunction, ids, values, data) {
-      const options = {from: minter};
+      const options = {from: deployer};
 
       context('when sent to a wallet', function () {
         beforeEach(async function () {
@@ -312,7 +311,7 @@ function shouldBehaveLikeERC1155Mintable({contractName, nfMaskLength, revertMess
       };
       shouldRevertOnPreconditions(mintFn);
       it('reverts with inconsistent arrays', async function () {
-        await expectRevert(mintFn.call(this, owner, [nft1, nft2], [1], '0x42', {from: minter}), revertMessages.InconsistentArrays);
+        await expectRevert(mintFn.call(this, owner, [nft1, nft2], [1], '0x42', {from: deployer}), revertMessages.InconsistentArrays);
       });
       context('with an empty list of tokens', function () {
         shouldMintTokenToRecipient(mintFn, [], [], '0x42');

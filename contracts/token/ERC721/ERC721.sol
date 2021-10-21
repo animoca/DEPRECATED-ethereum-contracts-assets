@@ -2,18 +2,19 @@
 
 pragma solidity >=0.7.6 <0.8.0;
 
-import {AddressIsContract} from "@animoca/ethereum-contracts-core-1.1.2/contracts/utils/types/AddressIsContract.sol";
-import {ManagedIdentity} from "@animoca/ethereum-contracts-core-1.1.2/contracts/metatx/ManagedIdentity.sol";
-import {IERC165} from "@animoca/ethereum-contracts-core-1.1.2/contracts/introspection/IERC165.sol";
-import {IERC721} from "./IERC721.sol";
-import {IERC721Events} from "./IERC721Events.sol";
-import {IERC721Receiver} from "./IERC721Receiver.sol";
-import {IERC721Metadata} from "./IERC721Metadata.sol";
-import {IERC721BatchTransfer} from "./IERC721BatchTransfer.sol";
+import {AddressIsContract} from "@animoca/ethereum-contracts-core/contracts/utils/types/AddressIsContract.sol";
+import {IERC165} from "@animoca/ethereum-contracts-core/contracts/introspection/IERC165.sol";
+import {IERC721} from "./interfaces/IERC721.sol";
+import {IERC721Events} from "./interfaces/IERC721Events.sol";
+import {IERC721Receiver} from "./interfaces/IERC721Receiver.sol";
+import {IERC721Metadata} from "./interfaces/IERC721Metadata.sol";
+import {IERC721BatchTransfer} from "./interfaces/IERC721BatchTransfer.sol";
+import {ManagedIdentity} from "@animoca/ethereum-contracts-core/contracts/metatx/ManagedIdentity.sol";
+import {ERC721Simple} from "./ERC721Simple.sol";
 
 /**
  * @title ERC721 Non Fungible Token Contract.
- * @dev The function `tokenURI(uint256)` needs to be implemented by a child contract, for example with the help of `BaseMetadataURI`.
+ * @dev The function `tokenURI(uint256)` needs to be implemented by a child contract, for example with the help of `NFTBaseMetadataURI`.
  */
 abstract contract ERC721 is ManagedIdentity, IERC165, IERC721, IERC721Events, IERC721Metadata, IERC721BatchTransfer {
     using AddressIsContract for address;
@@ -210,11 +211,6 @@ abstract contract ERC721 is ManagedIdentity, IERC165, IERC721, IERC721Events, IE
 
     //============================================ High-level Internal Functions ============================================//
 
-    /**
-     * Safely or unsafely mints some token (ERC721-compatible).
-     * @dev For `safe` mint, see {IERC721Mintable-mint(address,uint256)}.
-     * @dev For un`safe` mint, see {IERC721Mintable-safeMint(address,uint256,bytes)}.
-     */
     function _mint(
         address to,
         uint256 tokenId,
@@ -231,10 +227,6 @@ abstract contract ERC721 is ManagedIdentity, IERC165, IERC721, IERC721Events, IE
         }
     }
 
-    /**
-     * Unsafely mints a batch of Non-Fungible Tokens (ERC721-compatible).
-     * @dev See {IERC721Mintable-batchMint(address,uint256[])}.
-     */
     function _batchMint(address to, uint256[] memory tokenIds) internal {
         require(to != address(0), "ERC721: mint to zero");
 
@@ -248,11 +240,6 @@ abstract contract ERC721 is ManagedIdentity, IERC165, IERC721, IERC721Events, IE
         _nftBalances[to] += length;
     }
 
-    /**
-     * Safely or unsafely transfers some token.
-     * @dev For `safe` transfer, see {IERC721-transferFrom(address,address,uint256)}.
-     * @dev For un`safe` transfer, see {IERC721-safeTransferFrom(address,address,uint256,bytes)}.
-     */
     function _transferFrom(
         address from,
         address to,

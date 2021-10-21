@@ -13,7 +13,7 @@ const ERC721ReceiverMock = artifacts.require('ERC721ReceiverMock');
 const ERC1155TokenReceiverMock = artifacts.require('ERC1155TokenReceiverMock');
 
 function shouldBehaveLikeERC721Mintable({nfMaskLength, contractName, revertMessages, eventParamsOverrides, interfaces, methods, deploy}) {
-  const [deployer, minter, owner] = accounts;
+  const [deployer, owner] = accounts;
 
   const {
     'mint(address,uint256)': mint_ERC721,
@@ -51,7 +51,6 @@ function shouldBehaveLikeERC721Mintable({nfMaskLength, contractName, revertMessa
     const fixtureLoader = createFixtureLoader(accounts, web3.eth.currentProvider);
     const fixture = async function () {
       this.token = await deploy(deployer);
-      await this.token.addMinter(minter, {from: deployer});
       this.receiver721 = await ERC721ReceiverMock.new(true, this.token.address);
       this.refusingReceiver721 = await ERC721ReceiverMock.new(false, this.token.address);
       this.wrongTokenReceiver721 = await ERC721ReceiverMock.new(false, ZeroAddress);
@@ -186,7 +185,7 @@ function shouldBehaveLikeERC721Mintable({nfMaskLength, contractName, revertMessa
     const shouldRevertOnPreconditions = function (mintFunction, safe) {
       describe('Pre-conditions', function () {
         const data = '0x42';
-        const options = {from: minter};
+        const options = {from: deployer};
         it('reverts if minted to the zero address', async function () {
           await expectRevert(mintFunction.call(this, ZeroAddress, nft1, data, options), revertMessages.MintToZero);
         });
@@ -239,7 +238,7 @@ function shouldBehaveLikeERC721Mintable({nfMaskLength, contractName, revertMessa
     };
 
     const shouldMintTokenToRecipient = function (mintFunction, ids, data, safe) {
-      const options = {from: minter};
+      const options = {from: deployer};
 
       context('when sent to a wallet', function () {
         beforeEach(async function () {

@@ -2,16 +2,22 @@
 
 pragma solidity >=0.7.6 <0.8.0;
 
-import {IERC1155Inventory, IERC721, IERC721BatchTransfer, IERC1155721Inventory} from "./IERC1155721Inventory.sol";
-// solhint-disable-next-line max-line-length
-import {IERC165, IERC1155MetadataURI, IERC1155TokenReceiver, ERC1155InventoryIdentifiersLib, ERC1155InventoryBase} from "./../ERC1155/ERC1155InventoryBase.sol";
-import {IERC721Metadata} from "./../ERC721/IERC721Metadata.sol";
-import {IERC721Receiver} from "./../ERC721/IERC721Receiver.sol";
-import {AddressIsContract} from "@animoca/ethereum-contracts-core-1.1.2/contracts/utils/types/AddressIsContract.sol";
+import {AddressIsContract} from "@animoca/ethereum-contracts-core/contracts/utils/types/AddressIsContract.sol";
+import {ERC1155InventoryIdentifiersLib} from "./../ERC1155/ERC1155InventoryIdentifiersLib.sol";
+import {IERC165} from "@animoca/ethereum-contracts-core/contracts/introspection/IERC165.sol";
+import {IERC721} from "./../ERC721/interfaces/IERC721.sol";
+import {IERC721Metadata} from "./../ERC721/interfaces/IERC721Metadata.sol";
+import {IERC721BatchTransfer} from "./../ERC721/interfaces/IERC721BatchTransfer.sol";
+import {IERC721Receiver} from "./../ERC721/interfaces/IERC721Receiver.sol";
+import {IERC1155MetadataURI} from "./../ERC1155/interfaces/IERC1155MetadataURI.sol";
+import {IERC1155TokenReceiver} from "./../ERC1155/interfaces/IERC1155TokenReceiver.sol";
+import {IERC1155Inventory} from "./../ERC1155/interfaces/IERC1155Inventory.sol";
+import {IERC1155721Inventory} from "./interfaces/IERC1155721Inventory.sol";
+import {ERC1155InventoryBase} from "./../ERC1155/ERC1155InventoryBase.sol";
 
 /**
  * @title ERC1155721Inventory, an ERC1155Inventory with additional support for ERC721.
- * @dev The function `uri(uint256)` needs to be implemented by a child contract, for example with the help of `BaseMetadataURI`.
+ * @dev The function `uri(uint256)` needs to be implemented by a child contract, for example with the help of `NFTBaseMetadataURI`.
  */
 abstract contract ERC1155721Inventory is IERC1155721Inventory, IERC721Metadata, ERC1155InventoryBase {
     using ERC1155InventoryIdentifiersLib for uint256;

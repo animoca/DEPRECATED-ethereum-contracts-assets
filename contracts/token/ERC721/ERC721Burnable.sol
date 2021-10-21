@@ -2,14 +2,17 @@
 
 pragma solidity >=0.7.6 <0.8.0;
 
-import {IERC721Burnable} from "./IERC721Burnable.sol";
-import {IERC165, IERC721, IERC721Metadata, IERC721BatchTransfer, ERC721} from "./ERC721.sol";
+import {IERC165} from "@animoca/ethereum-contracts-core/contracts/introspection/IERC165.sol";
+import {IERC721Burnable} from "./interfaces/IERC721Burnable.sol";
+import {ERC721} from "./ERC721.sol";
 
 /**
  * @title ERC721 Non Fungible Token Contract, burnable version.
- * @dev The function `tokenURI(uin256)` needs to be implemented by a child contract, for example with the help of `BaseMetadataURI`.
+ * @dev The function `tokenURI(uin256)` needs to be implemented by a child contract, for example with the help of `NFTBaseMetadataURI`.
  */
 abstract contract ERC721Burnable is IERC721Burnable, ERC721 {
+    constructor(string memory name_, string memory symbol_) ERC721(name_, symbol_) {}
+
     //======================================================= ERC165 ========================================================//
 
     /// @inheritdoc IERC165

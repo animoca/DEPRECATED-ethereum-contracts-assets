@@ -22,7 +22,7 @@ function shouldBehaveLikeERC1155721Deliverable({
   deploy,
   mint,
 }) {
-  const [deployer, minter, owner, _operator, _approved, other] = accounts;
+  const [deployer, owner, _operator, _approved, other] = accounts;
 
   const {'safeDeliver(address[],uint256[],uint256[],bytes)': safeDeliver} = methods;
 
@@ -61,8 +61,7 @@ function shouldBehaveLikeERC1155721Deliverable({
     const fixtureLoader = createFixtureLoader(accounts, web3.eth.currentProvider);
     const fixture = async function () {
       this.token = await deploy(deployer);
-      await this.token.addMinter(minter, {from: deployer});
-      await mint(this.token, other, unknownFCollection.id, MaxUInt256, {from: minter});
+      await mint(this.token, other, unknownFCollection.id, MaxUInt256, {from: deployer});
       this.receiver721 = await ERC721ReceiverMock.new(true, this.token.address);
       this.receiver1155 = await ERC1155TokenReceiverMock.new(true, this.token.address);
       this.refusingReceiver1155 = await ERC1155TokenReceiverMock.new(false, this.token.address);
@@ -272,16 +271,16 @@ function shouldBehaveLikeERC1155721Deliverable({
       }
 
       const data = '0x42';
-      const options = {from: minter};
+      const options = {from: deployer};
       describe('Pre-conditions', function () {
         it('reverts if the sender is not a Minter', async function () {
           await expectRevert(safeDeliver(this.token, [owner], [nft1], [1], data, {from: other}), revertMessages.NotMinter);
         });
 
         it('reverts with inconsistent arrays', async function () {
-          await expectRevert(safeDeliver(this.token, [owner], [nft1, nft2], [1, 1], data, {from: minter}), revertMessages.InconsistentArrays);
-          await expectRevert(safeDeliver(this.token, [owner, owner], [nft1, nft2], [1], data, {from: minter}), revertMessages.InconsistentArrays);
-          await expectRevert(safeDeliver(this.token, [owner, owner], [nft1], [1], data, {from: minter}), revertMessages.InconsistentArrays);
+          await expectRevert(safeDeliver(this.token, [owner], [nft1, nft2], [1, 1], data, {from: deployer}), revertMessages.InconsistentArrays);
+          await expectRevert(safeDeliver(this.token, [owner, owner], [nft1, nft2], [1], data, {from: deployer}), revertMessages.InconsistentArrays);
+          await expectRevert(safeDeliver(this.token, [owner, owner], [nft1], [1], data, {from: deployer}), revertMessages.InconsistentArrays);
         });
 
         it('reverts if transferred to the zero address', async function () {

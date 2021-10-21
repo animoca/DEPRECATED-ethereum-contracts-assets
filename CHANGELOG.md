@@ -5,6 +5,17 @@
 ### Breaking Changes
 
 - `ERC1155InventoryBase.sol` and derived contracts have an additional constructor parameter for the Non-Fungible Collection mask length.
+- Reorganised folders structures.
+- Removed usage of version-specific dependencies.
+- Renamed Polygon-related contracts to include `Polygon`.
+
+### New Features
+
+- Added `ERC721Simple.sol`, a straight ERC721 implementation without extensions and which can mint burnt tokens.
+
+### Bugfixes
+
+- Removed usage of non-standard functions in test behaviors.
 
 ## 2.0.0
 

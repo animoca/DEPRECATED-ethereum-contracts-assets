@@ -16,7 +16,7 @@ const ERC721ReceiverMock = artifacts.require('ERC721ReceiverMock');
 const ERC1155TokenReceiverMock = artifacts.require('ERC1155TokenReceiverMock');
 
 function shouldBehaveLikeERC721Standard({nfMaskLength, contractName, revertMessages, eventParamsOverrides, interfaces, methods, deploy, mint}) {
-  const [deployer, minter, owner, approved, anotherApproved, operator, other] = accounts;
+  const [deployer, owner, approved, anotherApproved, operator, other] = accounts;
 
   const {'batchTransferFrom(address,address,uint256[])': batchTransferFrom_ERC721} = methods;
 
@@ -38,12 +38,11 @@ function shouldBehaveLikeERC721Standard({nfMaskLength, contractName, revertMessa
     const fixtureLoader = createFixtureLoader(accounts, web3.eth.currentProvider);
     const fixture = async function () {
       this.token = await deploy(deployer);
-      await this.token.addMinter(minter, {from: deployer});
-      await mint(this.token, owner, fungibleToken, 1, {from: minter});
-      await mint(this.token, owner, nft1, 1, {from: minter});
-      await mint(this.token, owner, nft2, 1, {from: minter});
-      await mint(this.token, owner, nft3, 1, {from: minter});
-      await mint(this.token, owner, nftOtherCollection, 1, {from: minter});
+      await mint(this.token, owner, fungibleToken, 1, {from: deployer});
+      await mint(this.token, owner, nft1, 1, {from: deployer});
+      await mint(this.token, owner, nft2, 1, {from: deployer});
+      await mint(this.token, owner, nft3, 1, {from: deployer});
+      await mint(this.token, owner, nftOtherCollection, 1, {from: deployer});
       await this.token.approve(approved, nft1, {from: owner});
       await this.token.approve(approved, nft2, {from: owner});
       await this.token.approve(approved, nftOtherCollection, {from: owner});

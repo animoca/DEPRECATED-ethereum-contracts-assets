@@ -17,7 +17,7 @@ const ERC1155TokenReceiverMock = artifacts.require('ERC1155TokenReceiverMock');
 const ERC1155721ReceiverMock = artifacts.require('ERC1155721ReceiverMock');
 
 function shouldBehaveLikeERC1155Standard({nfMaskLength, revertMessages, eventParamsOverrides, interfaces, deploy, mint}) {
-  const [deployer, minter, owner, operator, approved, other] = accounts;
+  const [deployer, owner, operator, approved, other] = accounts;
 
   const fCollection1 = {
     id: makeFungibleCollectionId(1),
@@ -47,13 +47,12 @@ function shouldBehaveLikeERC1155Standard({nfMaskLength, revertMessages, eventPar
     const fixtureLoader = createFixtureLoader(accounts, web3.eth.currentProvider);
     const fixture = async function () {
       this.token = await deploy(deployer);
-      await this.token.addMinter(minter, {from: deployer});
-      await mint(this.token, owner, fCollection1.id, fCollection1.supply, {from: minter});
-      await mint(this.token, owner, fCollection2.id, fCollection2.supply, {from: minter});
-      await mint(this.token, owner, fCollection3.id, fCollection3.supply, {from: minter});
-      await mint(this.token, owner, nft1, 1, {from: minter});
-      await mint(this.token, owner, nft2, 1, {from: minter});
-      await mint(this.token, owner, nftOtherCollection, 1, {from: minter});
+      await mint(this.token, owner, fCollection1.id, fCollection1.supply, {from: deployer});
+      await mint(this.token, owner, fCollection2.id, fCollection2.supply, {from: deployer});
+      await mint(this.token, owner, fCollection3.id, fCollection3.supply, {from: deployer});
+      await mint(this.token, owner, nft1, 1, {from: deployer});
+      await mint(this.token, owner, nft2, 1, {from: deployer});
+      await mint(this.token, owner, nftOtherCollection, 1, {from: deployer});
       await this.token.setApprovalForAll(operator, true, {from: owner});
       if (interfaces.ERC721) {
         await this.token.approve(approved, nft1, {from: owner});

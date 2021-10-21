@@ -2,17 +2,20 @@
 
 pragma solidity >=0.7.6 <0.8.0;
 
-import {AddressIsContract} from "@animoca/ethereum-contracts-core-1.1.2/contracts/utils/types/AddressIsContract.sol";
-// solhint-disable-next-line max-line-length
-import {IERC165, IERC1155, IERC1155Inventory, IERC1155MetadataURI, ERC1155InventoryIdentifiersLib, ERC1155InventoryBase} from "./ERC1155InventoryBase.sol";
+import {AddressIsContract} from "@animoca/ethereum-contracts-core/contracts/utils/types/AddressIsContract.sol";
+import {ERC1155InventoryIdentifiersLib} from "./ERC1155InventoryIdentifiersLib.sol";
+import {IERC1155Inventory} from "./interfaces/IERC1155Inventory.sol";
+import {ERC1155InventoryBase} from "./ERC1155InventoryBase.sol";
 
 /**
  * @title ERC1155Inventory, a contract which manages up to multiple Collections of Fungible and Non-Fungible Tokens.
- * @dev The function `uri(uint256)` needs to be implemented by a child contract, for example with the help of `BaseMetadataURI`.
+ * @dev The function `uri(uint256)` needs to be implemented by a child contract, for example with the help of `NFTBaseMetadataURI`.
  */
 abstract contract ERC1155Inventory is ERC1155InventoryBase {
     using AddressIsContract for address;
     using ERC1155InventoryIdentifiersLib for uint256;
+
+    constructor(uint256 collectionMaskLength) ERC1155InventoryBase(collectionMaskLength) {}
 
     //======================================================= ERC1155 =======================================================//
 

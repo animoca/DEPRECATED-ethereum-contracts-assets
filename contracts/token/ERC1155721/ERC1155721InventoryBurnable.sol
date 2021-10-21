@@ -2,15 +2,23 @@
 
 pragma solidity >=0.7.6 <0.8.0;
 
-import {IERC1155721InventoryBurnable} from "./IERC1155721InventoryBurnable.sol";
-import {IERC165, IERC1155721Inventory, IERC1155MetadataURI, ERC1155InventoryIdentifiersLib, ERC1155721Inventory} from "./ERC1155721Inventory.sol";
+import {ERC1155InventoryIdentifiersLib} from "./../ERC1155/ERC1155InventoryIdentifiersLib.sol";
+import {IERC165} from "@animoca/ethereum-contracts-core/contracts/introspection/IERC165.sol";
+import {IERC1155721InventoryBurnable} from "./interfaces/IERC1155721InventoryBurnable.sol";
+import {ERC1155721Inventory} from "./ERC1155721Inventory.sol";
 
 /**
  * @title ERC1155721Inventory, an ERC1155Inventory with additional support for ERC721, burnable version.
- * @dev The function `uri(uint256)` needs to be implemented by a child contract, for example with the help of `BaseMetadataURI`.
+ * @dev The function `uri(uint256)` needs to be implemented by a child contract, for example with the help of `NFTBaseMetadataURI`.
  */
 abstract contract ERC1155721InventoryBurnable is IERC1155721InventoryBurnable, ERC1155721Inventory {
     using ERC1155InventoryIdentifiersLib for uint256;
+
+    constructor(
+        string memory name_,
+        string memory symbol_,
+        uint256 collectionMaskLength
+    ) ERC1155721Inventory(name_, symbol_, collectionMaskLength) {}
 
     //======================================================= ERC165 ========================================================//
 

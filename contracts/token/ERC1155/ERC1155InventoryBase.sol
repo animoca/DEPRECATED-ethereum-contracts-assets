@@ -3,18 +3,20 @@
 pragma solidity >=0.7.6 <0.8.0;
 
 import {ERC1155InventoryIdentifiersLib} from "./ERC1155InventoryIdentifiersLib.sol";
-import {ManagedIdentity} from "@animoca/ethereum-contracts-core-1.1.2/contracts/metatx/ManagedIdentity.sol";
-import {IERC165} from "@animoca/ethereum-contracts-core-1.1.2/contracts/introspection/IERC165.sol";
-import {IERC1155, IERC1155InventoryFunctions, IERC1155Inventory} from "./IERC1155Inventory.sol";
-import {IERC1155MetadataURI} from "./../ERC1155/IERC1155MetadataURI.sol";
-import {IERC1155InventoryTotalSupply} from "./../ERC1155/IERC1155InventoryTotalSupply.sol";
-import {IERC1155TokenReceiver} from "./../ERC1155/IERC1155TokenReceiver.sol";
+import {IERC165} from "@animoca/ethereum-contracts-core/contracts/introspection/IERC165.sol";
+import {IERC1155} from "./interfaces/IERC1155.sol";
+import {IERC1155InventoryFunctions} from "./interfaces/IERC1155InventoryFunctions.sol";
+import {IERC1155Inventory} from "./interfaces/IERC1155Inventory.sol";
+import {IERC1155MetadataURI} from "./interfaces/IERC1155MetadataURI.sol";
+import {IERC1155InventoryTotalSupply} from "./interfaces/IERC1155InventoryTotalSupply.sol";
+import {IERC1155TokenReceiver} from "./interfaces/IERC1155TokenReceiver.sol";
+import {ManagedIdentity} from "@animoca/ethereum-contracts-core/contracts/metatx/ManagedIdentity.sol";
 
 /**
  * @title ERC1155 Inventory Base.
  * @dev The functions `safeTransferFrom(address,address,uint256,uint256,bytes)`
  *  and `safeBatchTransferFrom(address,address,uint256[],uint256[],bytes)` need to be implemented by a child contract.
- * @dev The function `uri(uint256)` needs to be implemented by a child contract, for example with the help of `BaseMetadataURI`.
+ * @dev The function `uri(uint256)` needs to be implemented by a child contract, for example with the help of `NFTBaseMetadataURI`.
  */
 abstract contract ERC1155InventoryBase is ManagedIdentity, IERC165, IERC1155Inventory, IERC1155MetadataURI, IERC1155InventoryTotalSupply {
     using ERC1155InventoryIdentifiersLib for uint256;
