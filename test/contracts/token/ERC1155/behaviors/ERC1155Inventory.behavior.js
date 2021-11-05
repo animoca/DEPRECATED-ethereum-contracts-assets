@@ -8,7 +8,7 @@ const {makeFungibleCollectionId, makeNonFungibleCollectionId, makeNonFungibleTok
   require('@animoca/blockchain-inventory_metadata').inventoryIds;
 
 function shouldBehaveLikeERC1155Inventory({nfMaskLength, revertMessages, interfaces, deploy, mint}) {
-  const [deployer, minter, owner, operator, approved, other] = accounts;
+  const [deployer, owner] = accounts;
 
   const fCollection1 = {
     id: makeFungibleCollectionId(1),
@@ -34,13 +34,12 @@ function shouldBehaveLikeERC1155Inventory({nfMaskLength, revertMessages, interfa
     const fixtureLoader = createFixtureLoader(accounts, web3.eth.currentProvider);
     const fixture = async function () {
       this.token = await deploy(deployer);
-      await this.token.addMinter(minter, {from: deployer});
-      await mint(this.token, owner, fCollection1.id, fCollection1.supply, {from: minter});
-      await mint(this.token, owner, fCollection2.id, fCollection2.supply, {from: minter});
-      await mint(this.token, owner, fCollection3.id, fCollection3.supply, {from: minter});
-      await mint(this.token, owner, nft1, 1, {from: minter});
-      await mint(this.token, owner, nft2, 1, {from: minter});
-      await mint(this.token, owner, nftOtherCollection, 1, {from: minter});
+      await mint(this.token, owner, fCollection1.id, fCollection1.supply, {from: deployer});
+      await mint(this.token, owner, fCollection2.id, fCollection2.supply, {from: deployer});
+      await mint(this.token, owner, fCollection3.id, fCollection3.supply, {from: deployer});
+      await mint(this.token, owner, nft1, 1, {from: deployer});
+      await mint(this.token, owner, nft2, 1, {from: deployer});
+      await mint(this.token, owner, nftOtherCollection, 1, {from: deployer});
     };
 
     beforeEach(async function () {
@@ -48,6 +47,13 @@ function shouldBehaveLikeERC1155Inventory({nfMaskLength, revertMessages, interfa
     });
 
     describe('like an ERC1155Inventory', function () {
+      context('constructor', function () {
+        it('it reverts with a wrong collection mask length', async function () {
+          await expectRevert(deploy(deployer, 0), revertMessages.WrongCollectionMaskLength);
+          await expectRevert(deploy(deployer, 256), revertMessages.WrongCollectionMaskLength);
+        });
+      });
+
       describe('isFungible(uint256)', function () {
         context('when id is a Fungible Token', function () {
           it('returns true', async function () {

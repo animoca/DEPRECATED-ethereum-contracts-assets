@@ -23,6 +23,19 @@
       "type": "event"
     },
     {
+      "inputs": [],
+      "name": "deliverable",
+      "outputs": [
+        {
+          "internalType": "contract IWrappedERC20",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
       "inputs": [
         {
           "internalType": "address",
@@ -193,19 +206,6 @@
     },
     {
       "inputs": [],
-      "name": "tokenContract",
-      "outputs": [
-        {
-          "internalType": "contract IWrappedERC20",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
       "name": "tokenHolder",
       "outputs": [
         {
@@ -232,7 +232,7 @@
     },
     {
       "inputs": [],
-      "name": "vouchersContract",
+      "name": "vouchers",
       "outputs": [
         {
           "internalType": "contract IERC1155InventoryBurnable",

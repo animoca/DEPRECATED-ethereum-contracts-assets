@@ -1,8 +1,23 @@
 # Changelog
 
-## 2.0.0
+## 3.0.0
 
 ### Breaking Changes
+
+- `ERC1155InventoryBase.sol` and derived contracts have an additional constructor parameter for the Non-Fungible Collection mask length.
+- Reorganised folders structures.
+- Removed usage of version-specific dependencies.
+- Renamed Polygon-related contracts to include `Polygon`.
+
+### New Features
+
+- Added `ERC721Simple.sol`, a straight ERC721 implementation without extensions and which can mint burnt tokens.
+
+### Bugfixes
+
+- Removed usage of non-standard functions in test behaviors.
+
+## 2.0.0
 
 - Removed unused contract `IERC721Enumerable.sol`, `IERC721Exists.sol` and `PausableCollections.sol`.
 - Extracted out events from `IERC721.sol` to `IERC721Events.sol` to allow proper interface inheritance between `IERC721` and `IERC1155`.
@@ -10,7 +25,7 @@
 - Added inherited `IERC1155` functions which carry documentation changes in `IERC1155Inventory.sol` to properly use `@inheritdoc`.
 - Removed `IERC1155721.sol` and `IERC1155721BatchTransfer.sol`.
 - Changed `IERC1155721Inventory.sol` inheritance so that it contains functions which carry documentation changes to properly use `@inheritdoc`.
-- Extracted out `ERC1155InventoryIdentifiersLib` from `ERC1155InventoryBase.sol`  to be new file `ERC1155InventoryIdentifiersLib.sol`.
+- Extracted out `ERC1155InventoryIdentifiersLib` from `ERC1155InventoryBase.sol` to be new file `ERC1155InventoryIdentifiersLib.sol`.
 - Removed the `tokenURI` argument from the `ERC20` constructor to avoid "stack too deep" errors in the constructor when building a full-featured contract.
 - Added `Recoverable` and `UsingUniversalForwarding` features to mocks based on ERC721 and ERC1155.
 - Added `MinterRole` feature to mocks based on ERC20.

@@ -2,8 +2,9 @@
 
 pragma solidity >=0.7.6 <0.8.0;
 
-import {IERC165, ERC20} from "./ERC20.sol";
-import {IERC20Burnable} from "./IERC20Burnable.sol";
+import {IERC165} from "@animoca/ethereum-contracts-core/contracts/introspection/IERC165.sol";
+import {IERC20Burnable} from "./interfaces/IERC20Burnable.sol";
+import {ERC20} from "./ERC20.sol";
 
 /**
  * @title ERC20 Fungible Token Contract, Burnable version.

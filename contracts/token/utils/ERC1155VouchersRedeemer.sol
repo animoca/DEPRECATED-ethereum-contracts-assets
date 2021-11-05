@@ -2,10 +2,12 @@
 
 pragma solidity >=0.7.6 <0.8.0;
 
-import {IERC1155TokenReceiver, ERC1155TokenReceiver} from "../ERC1155/ERC1155TokenReceiver.sol";
-import {IERC1155InventoryBurnable} from "../ERC1155/IERC1155InventoryBurnable.sol";
-import {IWrappedERC20, ERC20Wrapper} from "@animoca/ethereum-contracts-core-1.1.2/contracts/utils/ERC20Wrapper.sol";
-import {Ownable, Recoverable} from "@animoca/ethereum-contracts-core-1.1.2/contracts/utils/Recoverable.sol";
+import {IWrappedERC20, ERC20Wrapper} from "@animoca/ethereum-contracts-core/contracts/utils/ERC20Wrapper.sol";
+import {IERC1155TokenReceiver} from "./../ERC1155/interfaces/IERC1155TokenReceiver.sol";
+import {IERC1155InventoryBurnable} from "./../ERC1155/interfaces/IERC1155InventoryBurnable.sol";
+import {Ownable} from "@animoca/ethereum-contracts-core/contracts/access/Ownable.sol";
+import {Recoverable} from "@animoca/ethereum-contracts-core/contracts/utils/Recoverable.sol";
+import {ERC1155TokenReceiver} from "./../ERC1155/ERC1155TokenReceiver.sol";
 
 /**
  * @title ERC1155 Vouchers Redeemer.
@@ -15,23 +17,23 @@ import {Ownable, Recoverable} from "@animoca/ethereum-contracts-core-1.1.2/contr
 abstract contract ERC1155VouchersRedeemer is ERC1155TokenReceiver, Recoverable {
     using ERC20Wrapper for IWrappedERC20;
 
-    IERC1155InventoryBurnable public immutable vouchersContract;
-    IWrappedERC20 public immutable tokenContract;
+    IERC1155InventoryBurnable public immutable vouchers;
+    IWrappedERC20 public immutable deliverable;
     address public tokenHolder;
 
     /**
      * Constructor.
-     * @param vouchersContract_ the address of the vouchers contract.
-     * @param tokenContract_ the address of the ERC20 token contract.
+     * @param vouchers_ the address of the vouchers contract.
+     * @param deliverable_ the address of the ERC20 token contract.
      * @param tokenHolder_ the address of the ERC20 token holder.
      */
     constructor(
-        IERC1155InventoryBurnable vouchersContract_,
-        IWrappedERC20 tokenContract_,
+        IERC1155InventoryBurnable vouchers_,
+        IWrappedERC20 deliverable_,
         address tokenHolder_
     ) Ownable(msg.sender) {
-        vouchersContract = vouchersContract_;
-        tokenContract = tokenContract_;
+        vouchers = vouchers_;
+        deliverable = deliverable_;
         tokenHolder = tokenHolder_;
     }
 
@@ -52,12 +54,12 @@ abstract contract ERC1155VouchersRedeemer is ERC1155TokenReceiver, Recoverable {
         uint256 value,
         bytes calldata /*data*/
     ) external virtual override returns (bytes4) {
-        require(msg.sender == address(vouchersContract), "Redeemer: wrong sender");
-        vouchersContract.burnFrom(address(this), id, value);
+        require(msg.sender == address(vouchers), "Redeemer: wrong sender");
+        vouchers.burnFrom(address(this), id, value);
         uint256 voucherValue = _voucherValue(id);
         uint256 tokenAmount = voucherValue * value;
         require(tokenAmount / voucherValue == value, "Redeemer: amount overflow");
-        tokenContract.wrappedTransferFrom(tokenHolder, from, tokenAmount);
+        deliverable.wrappedTransferFrom(tokenHolder, from, tokenAmount);
         return _ERC1155_RECEIVED;
     }
 
@@ -79,8 +81,8 @@ abstract contract ERC1155VouchersRedeemer is ERC1155TokenReceiver, Recoverable {
         uint256[] calldata values,
         bytes calldata /*data*/
     ) external virtual override returns (bytes4) {
-        require(msg.sender == address(vouchersContract), "Redeemer: wrong sender");
-        vouchersContract.batchBurnFrom(address(this), ids, values);
+        require(msg.sender == address(vouchers), "Redeemer: wrong sender");
+        vouchers.batchBurnFrom(address(this), ids, values);
         uint256 tokenAmount;
         for (uint256 i; i != ids.length; ++i) {
             uint256 id = ids[i];
@@ -92,7 +94,7 @@ abstract contract ERC1155VouchersRedeemer is ERC1155TokenReceiver, Recoverable {
             require(newAmount >= tokenAmount, "Redeemer: amount overflow");
             tokenAmount = newAmount;
         }
-        tokenContract.wrappedTransferFrom(tokenHolder, from, tokenAmount);
+        deliverable.wrappedTransferFrom(tokenHolder, from, tokenAmount);
         return _ERC1155_BATCH_RECEIVED;
     }
 

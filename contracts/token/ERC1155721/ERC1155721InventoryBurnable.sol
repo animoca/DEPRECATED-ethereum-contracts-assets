@@ -2,15 +2,23 @@
 
 pragma solidity >=0.7.6 <0.8.0;
 
-import {IERC1155721InventoryBurnable} from "./IERC1155721InventoryBurnable.sol";
-import {IERC165, IERC1155721Inventory, IERC1155MetadataURI, ERC1155InventoryIdentifiersLib, ERC1155721Inventory} from "./ERC1155721Inventory.sol";
+import {ERC1155InventoryIdentifiersLib} from "./../ERC1155/ERC1155InventoryIdentifiersLib.sol";
+import {IERC165} from "@animoca/ethereum-contracts-core/contracts/introspection/IERC165.sol";
+import {IERC1155721InventoryBurnable} from "./interfaces/IERC1155721InventoryBurnable.sol";
+import {ERC1155721Inventory} from "./ERC1155721Inventory.sol";
 
 /**
  * @title ERC1155721Inventory, an ERC1155Inventory with additional support for ERC721, burnable version.
- * @dev The function `uri(uint256)` needs to be implemented by a child contract, for example with the help of `BaseMetadataURI`.
+ * @dev The function `uri(uint256)` needs to be implemented by a child contract, for example with the help of `NFTBaseMetadataURI`.
  */
 abstract contract ERC1155721InventoryBurnable is IERC1155721InventoryBurnable, ERC1155721Inventory {
     using ERC1155InventoryIdentifiersLib for uint256;
+
+    constructor(
+        string memory name_,
+        string memory symbol_,
+        uint256 collectionMaskLength
+    ) ERC1155721Inventory(name_, symbol_, collectionMaskLength) {}
 
     //======================================================= ERC165 ========================================================//
 
@@ -32,7 +40,7 @@ abstract contract ERC1155721InventoryBurnable is IERC1155721InventoryBurnable, E
 
         if (id.isFungibleToken()) {
             _burnFungible(from, id, value, operatable);
-        } else if (id.isNonFungibleToken()) {
+        } else if (id.isNonFungibleToken(_collectionMaskLength)) {
             _burnNFT(from, id, value, operatable, false);
             emit Transfer(from, address(0), id);
         } else {
@@ -61,10 +69,10 @@ abstract contract ERC1155721InventoryBurnable is IERC1155721InventoryBurnable, E
             uint256 id = ids[i];
             if (id.isFungibleToken()) {
                 _burnFungible(from, id, values[i], operatable);
-            } else if (id.isNonFungibleToken()) {
+            } else if (id.isNonFungibleToken(_collectionMaskLength)) {
                 _burnNFT(from, id, values[i], operatable, true);
                 emit Transfer(from, address(0), id);
-                uint256 nextCollectionId = id.getNonFungibleCollection();
+                uint256 nextCollectionId = id.getNonFungibleCollection(_collectionMaskLength);
                 if (nfCollectionId == 0) {
                     nfCollectionId = nextCollectionId;
                     nfCollectionCount = 1;
@@ -108,7 +116,7 @@ abstract contract ERC1155721InventoryBurnable is IERC1155721InventoryBurnable, E
             values[i] = 1;
             _burnNFT(from, nftId, values[i], operatable, true);
             emit Transfer(from, address(0), nftId);
-            uint256 nextCollectionId = nftId.getNonFungibleCollection();
+            uint256 nextCollectionId = nftId.getNonFungibleCollection(_collectionMaskLength);
             if (nfCollectionId == 0) {
                 nfCollectionId = nextCollectionId;
                 nfCollectionCount = 1;
@@ -164,7 +172,7 @@ abstract contract ERC1155721InventoryBurnable is IERC1155721InventoryBurnable, E
         _owners[id] = _BURNT_NFT_OWNER;
 
         if (!isBatch) {
-            _burnNFTUpdateCollection(from, id.getNonFungibleCollection(), 1);
+            _burnNFTUpdateCollection(from, id.getNonFungibleCollection(_collectionMaskLength), 1);
 
             // cannot underflow as balance is verified through NFT ownership
             --_nftBalances[from];

@@ -2,8 +2,8 @@
 
 pragma solidity >=0.7.6 <0.8.0;
 
-import {IERC165} from "@animoca/ethereum-contracts-core-1.1.2/contracts/introspection/IERC165.sol";
-import {IERC20Receiver} from "./IERC20Receiver.sol";
+import {IERC165} from "@animoca/ethereum-contracts-core/contracts/introspection/IERC165.sol";
+import {IERC20Receiver} from "./interfaces/IERC20Receiver.sol";
 
 /**
  * @title ERC20 Safe Transfers Receiver Contract.

@@ -3,21 +3,25 @@
 pragma solidity >=0.7.6 <0.8.0;
 
 import {ERC1155InventoryIdentifiersLib} from "./ERC1155InventoryIdentifiersLib.sol";
-import {ManagedIdentity} from "@animoca/ethereum-contracts-core-1.1.2/contracts/metatx/ManagedIdentity.sol";
-import {IERC165} from "@animoca/ethereum-contracts-core-1.1.2/contracts/introspection/IERC165.sol";
-import {IERC1155, IERC1155InventoryFunctions, IERC1155Inventory} from "./IERC1155Inventory.sol";
-import {IERC1155MetadataURI} from "./../ERC1155/IERC1155MetadataURI.sol";
-import {IERC1155InventoryTotalSupply} from "./../ERC1155/IERC1155InventoryTotalSupply.sol";
-import {IERC1155TokenReceiver} from "./../ERC1155/IERC1155TokenReceiver.sol";
+import {IERC165} from "@animoca/ethereum-contracts-core/contracts/introspection/IERC165.sol";
+import {IERC1155} from "./interfaces/IERC1155.sol";
+import {IERC1155InventoryFunctions} from "./interfaces/IERC1155InventoryFunctions.sol";
+import {IERC1155Inventory} from "./interfaces/IERC1155Inventory.sol";
+import {IERC1155MetadataURI} from "./interfaces/IERC1155MetadataURI.sol";
+import {IERC1155InventoryTotalSupply} from "./interfaces/IERC1155InventoryTotalSupply.sol";
+import {IERC1155TokenReceiver} from "./interfaces/IERC1155TokenReceiver.sol";
+import {ManagedIdentity} from "@animoca/ethereum-contracts-core/contracts/metatx/ManagedIdentity.sol";
 
 /**
  * @title ERC1155 Inventory Base.
  * @dev The functions `safeTransferFrom(address,address,uint256,uint256,bytes)`
  *  and `safeBatchTransferFrom(address,address,uint256[],uint256[],bytes)` need to be implemented by a child contract.
- * @dev The function `uri(uint256)` needs to be implemented by a child contract, for example with the help of `BaseMetadataURI`.
+ * @dev The function `uri(uint256)` needs to be implemented by a child contract, for example with the help of `NFTBaseMetadataURI`.
  */
 abstract contract ERC1155InventoryBase is ManagedIdentity, IERC165, IERC1155Inventory, IERC1155MetadataURI, IERC1155InventoryTotalSupply {
     using ERC1155InventoryIdentifiersLib for uint256;
+
+    uint256 internal immutable _collectionMaskLength;
 
     // bytes4(keccak256("onERC1155Received(address,address,uint256,uint256,bytes)"))
     bytes4 internal constant _ERC1155_RECEIVED = 0xf23a6e61;
@@ -43,6 +47,11 @@ abstract contract ERC1155InventoryBase is ManagedIdentity, IERC165, IERC1155Inve
     /* collection ID => creator */
     mapping(uint256 => address) internal _creators;
 
+    constructor(uint256 collectionMaskLength) {
+        require(collectionMaskLength != 0 && collectionMaskLength < 256, "Inventory: wrong mask length");
+        _collectionMaskLength = collectionMaskLength;
+    }
+
     //======================================================= ERC165 ========================================================//
 
     /// @inheritdoc IERC165
@@ -61,7 +70,7 @@ abstract contract ERC1155InventoryBase is ManagedIdentity, IERC165, IERC1155Inve
     function balanceOf(address owner, uint256 id) public view virtual override returns (uint256) {
         require(owner != address(0), "Inventory: zero address");
 
-        if (id.isNonFungibleToken()) {
+        if (id.isNonFungibleToken(_collectionMaskLength)) {
             return address(uint160(_owners[id])) == owner ? 1 : 0;
         }
 
@@ -102,9 +111,9 @@ abstract contract ERC1155InventoryBase is ManagedIdentity, IERC165, IERC1155Inve
     }
 
     /// @inheritdoc IERC1155Inventory
-    function collectionOf(uint256 nftId) external pure virtual override returns (uint256) {
-        require(nftId.isNonFungibleToken(), "Inventory: not an NFT");
-        return nftId.getNonFungibleCollection();
+    function collectionOf(uint256 nftId) external view virtual override returns (uint256) {
+        require(nftId.isNonFungibleToken(_collectionMaskLength), "Inventory: not an NFT");
+        return nftId.getNonFungibleCollection(_collectionMaskLength);
     }
 
     /// @inheritdoc IERC1155Inventory
@@ -118,7 +127,7 @@ abstract contract ERC1155InventoryBase is ManagedIdentity, IERC165, IERC1155Inve
 
     /// @inheritdoc IERC1155InventoryTotalSupply
     function totalSupply(uint256 id) external view virtual override returns (uint256) {
-        if (id.isNonFungibleToken()) {
+        if (id.isNonFungibleToken(_collectionMaskLength)) {
             return address(uint160(_owners[id])) == address(0) ? 0 : 1;
         } else {
             return _supplies[id];
@@ -135,14 +144,14 @@ abstract contract ERC1155InventoryBase is ManagedIdentity, IERC165, IERC1155Inve
      * @param collectionId Identifier of the collection.
      */
     function _createCollection(uint256 collectionId) internal virtual {
-        require(!collectionId.isNonFungibleToken(), "Inventory: not a collection");
+        require(!collectionId.isNonFungibleToken(_collectionMaskLength), "Inventory: not a collection");
         require(_creators[collectionId] == address(0), "Inventory: existing collection");
         _creators[collectionId] = _msgSender();
         emit CollectionCreated(collectionId, collectionId.isFungibleToken());
     }
 
     function _creator(uint256 collectionId) internal view virtual returns (address) {
-        require(!collectionId.isNonFungibleToken(), "Inventory: not a collection");
+        require(!collectionId.isNonFungibleToken(_collectionMaskLength), "Inventory: not a collection");
         return _creators[collectionId];
     }
 

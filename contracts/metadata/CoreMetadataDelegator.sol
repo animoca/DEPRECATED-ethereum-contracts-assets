@@ -2,7 +2,7 @@
 
 pragma solidity >=0.7.6 <0.8.0;
 
-// import "@animoca/ethereum-contracts-core-1.1.2/contracts/introspection/IERC165.sol";
+// import "@animoca/ethereum-contracts-core/contracts/introspection/IERC165.sol";
 // import "./ICoreMetadataDelegator.sol";
 // import "./ICoreMetadata.sol";
 

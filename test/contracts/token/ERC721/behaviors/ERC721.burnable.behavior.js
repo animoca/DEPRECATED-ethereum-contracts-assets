@@ -10,7 +10,7 @@ const {makeNonFungibleTokenId, makeNonFungibleCollectionId, makeFungibleCollecti
   require('@animoca/blockchain-inventory_metadata').inventoryIds;
 
 function shouldBehaveLikeERC721Burnable({nfMaskLength, contractName, revertMessages, eventParamsOverrides, interfaces, methods, deploy, mint}) {
-  const [deployer, minter, owner, other, approved, operator] = accounts;
+  const [deployer, owner, other, approved, operator] = accounts;
 
   const {'burnFrom(address,uint256)': burnFrom_ERC721, 'batchBurnFrom(address,uint256[])': batchBurnFrom_ERC721} = methods;
 
@@ -39,11 +39,10 @@ function shouldBehaveLikeERC721Burnable({nfMaskLength, contractName, revertMessa
     const fixtureLoader = createFixtureLoader(accounts, web3.eth.currentProvider);
     const fixture = async function () {
       this.token = await deploy(deployer);
-      await this.token.addMinter(minter, {from: deployer});
-      await mint(this.token, owner, fungibleToken, 1, {from: minter});
-      await mint(this.token, owner, nft1, 1, {from: minter});
-      await mint(this.token, owner, nft2, 1, {from: minter});
-      await mint(this.token, owner, nftOtherCollection, 1, {from: minter});
+      await mint(this.token, owner, fungibleToken, 1, {from: deployer});
+      await mint(this.token, owner, nft1, 1, {from: deployer});
+      await mint(this.token, owner, nft2, 1, {from: deployer});
+      await mint(this.token, owner, nftOtherCollection, 1, {from: deployer});
       await this.token.approve(approved, nft1, {from: owner});
       await this.token.approve(approved, nft2, {from: owner});
       await this.token.approve(approved, nftOtherCollection, {from: owner});

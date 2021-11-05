@@ -10,7 +10,7 @@ const interfaces1155721 = require('../../../../../src/interfaces/ERC165/ERC11557
 const {behaviors} = require('@animoca/ethereum-contracts-core');
 
 function shouldBehaveLikeERC1155Burnable({nfMaskLength, contractName, revertMessages, eventParamsOverrides, interfaces, methods, deploy, mint}) {
-  const [deployer, minter, owner, operator, approved, other] = accounts;
+  const [deployer, owner, operator, approved, other] = accounts;
 
   const {'burnFrom(address,uint256,uint256)': burnFrom_ERC1155, 'batchBurnFrom(address,uint256[],uint256[])': batchBurnFrom_ERC1155} = methods;
 
@@ -55,13 +55,12 @@ function shouldBehaveLikeERC1155Burnable({nfMaskLength, contractName, revertMess
     const fixtureLoader = createFixtureLoader(accounts, web3.eth.currentProvider);
     const fixture = async function () {
       this.token = await deploy(deployer);
-      await this.token.addMinter(minter, {from: deployer});
-      await mint(this.token, owner, fCollection1.id, fCollection1.supply, {from: minter});
-      await mint(this.token, owner, fCollection2.id, fCollection2.supply, {from: minter});
-      await mint(this.token, owner, fCollection3.id, fCollection3.supply, {from: minter});
-      await mint(this.token, owner, nft1, 1, {from: minter});
-      await mint(this.token, owner, nft2, 1, {from: minter});
-      await mint(this.token, owner, nftOtherCollection, 1, {from: minter});
+      await mint(this.token, owner, fCollection1.id, fCollection1.supply, {from: deployer});
+      await mint(this.token, owner, fCollection2.id, fCollection2.supply, {from: deployer});
+      await mint(this.token, owner, fCollection3.id, fCollection3.supply, {from: deployer});
+      await mint(this.token, owner, nft1, 1, {from: deployer});
+      await mint(this.token, owner, nft2, 1, {from: deployer});
+      await mint(this.token, owner, nftOtherCollection, 1, {from: deployer});
       await this.token.setApprovalForAll(operator, true, {from: owner});
       if (interfaces.ERC721) {
         await this.token.approve(approved, nft1, {from: owner});

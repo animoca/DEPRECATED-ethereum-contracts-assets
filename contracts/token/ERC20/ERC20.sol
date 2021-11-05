@@ -2,17 +2,17 @@
 
 pragma solidity >=0.7.6 <0.8.0;
 
-import {AddressIsContract} from "@animoca/ethereum-contracts-core-1.1.2/contracts/utils/types/AddressIsContract.sol";
-import {ManagedIdentity} from "@animoca/ethereum-contracts-core-1.1.2/contracts/metatx/ManagedIdentity.sol";
-import {IERC165} from "@animoca/ethereum-contracts-core-1.1.2/contracts/introspection/IERC165.sol";
-import {IERC20} from "./IERC20.sol";
-import {IERC20Detailed} from "./IERC20Detailed.sol";
-import {IERC20Allowance} from "./IERC20Allowance.sol";
-import {IERC20SafeTransfers} from "./IERC20SafeTransfers.sol";
-import {IERC20BatchTransfers} from "./IERC20BatchTransfers.sol";
-import {IERC20Metadata} from "./IERC20Metadata.sol";
-import {IERC20Permit} from "./IERC20Permit.sol";
-import {IERC20Receiver} from "./IERC20Receiver.sol";
+import {AddressIsContract} from "@animoca/ethereum-contracts-core/contracts/utils/types/AddressIsContract.sol";
+import {IERC165} from "@animoca/ethereum-contracts-core/contracts/introspection/IERC165.sol";
+import {IERC20} from "./interfaces/IERC20.sol";
+import {IERC20Detailed} from "./interfaces/IERC20Detailed.sol";
+import {IERC20Allowance} from "./interfaces/IERC20Allowance.sol";
+import {IERC20SafeTransfers} from "./interfaces/IERC20SafeTransfers.sol";
+import {IERC20BatchTransfers} from "./interfaces/IERC20BatchTransfers.sol";
+import {IERC20Metadata} from "./interfaces/IERC20Metadata.sol";
+import {IERC20Permit} from "./interfaces/IERC20Permit.sol";
+import {IERC20Receiver} from "./interfaces/IERC20Receiver.sol";
+import {ManagedIdentity} from "@animoca/ethereum-contracts-core/contracts/metatx/ManagedIdentity.sol";
 
 /**
  * @title ERC20 Fungible Token Contract.
@@ -473,7 +473,7 @@ contract ERC20 is
         return
             keccak256(
                 abi.encode(
-                    keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"), // todo
+                    keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
                     keccak256(name_),
                     keccak256("1"),
                     chainId,

@@ -2,16 +2,22 @@
 
 pragma solidity >=0.7.6 <0.8.0;
 
-import {IERC1155Inventory, IERC721, IERC721BatchTransfer, IERC1155721Inventory} from "./IERC1155721Inventory.sol";
-// solhint-disable-next-line max-line-length
-import {IERC165, IERC1155MetadataURI, IERC1155TokenReceiver, ERC1155InventoryIdentifiersLib, ERC1155InventoryBase} from "./../ERC1155/ERC1155InventoryBase.sol";
-import {IERC721Metadata} from "./../ERC721/IERC721Metadata.sol";
-import {IERC721Receiver} from "./../ERC721/IERC721Receiver.sol";
-import {AddressIsContract} from "@animoca/ethereum-contracts-core-1.1.2/contracts/utils/types/AddressIsContract.sol";
+import {AddressIsContract} from "@animoca/ethereum-contracts-core/contracts/utils/types/AddressIsContract.sol";
+import {ERC1155InventoryIdentifiersLib} from "./../ERC1155/ERC1155InventoryIdentifiersLib.sol";
+import {IERC165} from "@animoca/ethereum-contracts-core/contracts/introspection/IERC165.sol";
+import {IERC721} from "./../ERC721/interfaces/IERC721.sol";
+import {IERC721Metadata} from "./../ERC721/interfaces/IERC721Metadata.sol";
+import {IERC721BatchTransfer} from "./../ERC721/interfaces/IERC721BatchTransfer.sol";
+import {IERC721Receiver} from "./../ERC721/interfaces/IERC721Receiver.sol";
+import {IERC1155MetadataURI} from "./../ERC1155/interfaces/IERC1155MetadataURI.sol";
+import {IERC1155TokenReceiver} from "./../ERC1155/interfaces/IERC1155TokenReceiver.sol";
+import {IERC1155Inventory} from "./../ERC1155/interfaces/IERC1155Inventory.sol";
+import {IERC1155721Inventory} from "./interfaces/IERC1155721Inventory.sol";
+import {ERC1155InventoryBase} from "./../ERC1155/ERC1155InventoryBase.sol";
 
 /**
  * @title ERC1155721Inventory, an ERC1155Inventory with additional support for ERC721.
- * @dev The function `uri(uint256)` needs to be implemented by a child contract, for example with the help of `BaseMetadataURI`.
+ * @dev The function `uri(uint256)` needs to be implemented by a child contract, for example with the help of `NFTBaseMetadataURI`.
  */
 abstract contract ERC1155721Inventory is IERC1155721Inventory, IERC721Metadata, ERC1155InventoryBase {
     using ERC1155InventoryIdentifiersLib for uint256;
@@ -28,7 +34,11 @@ abstract contract ERC1155721Inventory is IERC1155721Inventory, IERC721Metadata, 
     /* NFT ID => operator */
     mapping(uint256 => address) internal _nftApprovals;
 
-    constructor(string memory name_, string memory symbol_) {
+    constructor(
+        string memory name_,
+        string memory symbol_,
+        uint256 collectionMaskLength
+    ) ERC1155InventoryBase(collectionMaskLength) {
         _name = name_;
         _symbol = symbol_;
     }
@@ -178,7 +188,7 @@ abstract contract ERC1155721Inventory is IERC1155721Inventory, IERC721Metadata, 
             values[i] = 1;
             _transferNFT(from, to, nftId, 1, operatable, true);
             emit Transfer(from, to, nftId);
-            uint256 nextCollectionId = nftId.getNonFungibleCollection();
+            uint256 nextCollectionId = nftId.getNonFungibleCollection(_collectionMaskLength);
             if (nfCollectionId == 0) {
                 nfCollectionId = nextCollectionId;
                 nfCollectionCount = 1;
@@ -220,7 +230,7 @@ abstract contract ERC1155721Inventory is IERC1155721Inventory, IERC721Metadata, 
 
         if (id.isFungibleToken()) {
             _transferFungible(from, to, id, value, operatable);
-        } else if (id.isNonFungibleToken()) {
+        } else if (id.isNonFungibleToken(_collectionMaskLength)) {
             _transferNFT(from, to, id, value, operatable, false);
             emit Transfer(from, to, id);
         } else {
@@ -324,10 +334,10 @@ abstract contract ERC1155721Inventory is IERC1155721Inventory, IERC721Metadata, 
             uint256 id = ids[i];
             if (id.isFungibleToken()) {
                 _transferFungible(from, to, id, values[i], operatable);
-            } else if (id.isNonFungibleToken()) {
+            } else if (id.isNonFungibleToken(_collectionMaskLength)) {
                 _transferNFT(from, to, id, values[i], operatable, true);
                 emit Transfer(from, to, id);
-                uint256 nextCollectionId = id.getNonFungibleCollection();
+                uint256 nextCollectionId = id.getNonFungibleCollection(_collectionMaskLength);
                 if (nfCollectionId == 0) {
                     nfCollectionId = nextCollectionId;
                     nfCollectionCount = 1;
@@ -370,7 +380,7 @@ abstract contract ERC1155721Inventory is IERC1155721Inventory, IERC721Metadata, 
         bool safe
     ) internal {
         require(to != address(0), "Inventory: mint to zero");
-        require(nftId.isNonFungibleToken(), "Inventory: not an NFT");
+        require(nftId.isNonFungibleToken(_collectionMaskLength), "Inventory: not an NFT");
 
         _mintNFT(to, nftId, 1, false);
 
@@ -399,11 +409,11 @@ abstract contract ERC1155721Inventory is IERC1155721Inventory, IERC721Metadata, 
         uint256 nfCollectionCount;
         for (uint256 i; i != length; ++i) {
             uint256 nftId = nftIds[i];
-            require(nftId.isNonFungibleToken(), "Inventory: not an NFT");
+            require(nftId.isNonFungibleToken(_collectionMaskLength), "Inventory: not an NFT");
             values[i] = 1;
             _mintNFT(to, nftId, 1, true);
             emit Transfer(address(0), to, nftId);
-            uint256 nextCollectionId = nftId.getNonFungibleCollection();
+            uint256 nextCollectionId = nftId.getNonFungibleCollection(_collectionMaskLength);
             if (nfCollectionId == 0) {
                 nfCollectionId = nextCollectionId;
                 nfCollectionCount = 1;
@@ -443,7 +453,7 @@ abstract contract ERC1155721Inventory is IERC1155721Inventory, IERC721Metadata, 
         address sender = _msgSender();
         if (id.isFungibleToken()) {
             _mintFungible(to, id, value);
-        } else if (id.isNonFungibleToken()) {
+        } else if (id.isNonFungibleToken(_collectionMaskLength)) {
             _mintNFT(to, id, value, false);
             emit Transfer(address(0), to, id);
         } else {
@@ -478,10 +488,10 @@ abstract contract ERC1155721Inventory is IERC1155721Inventory, IERC721Metadata, 
             uint256 value = values[i];
             if (id.isFungibleToken()) {
                 _mintFungible(to, id, value);
-            } else if (id.isNonFungibleToken()) {
+            } else if (id.isNonFungibleToken(_collectionMaskLength)) {
                 _mintNFT(to, id, value, true);
                 emit Transfer(address(0), to, id);
-                uint256 nextCollectionId = id.getNonFungibleCollection();
+                uint256 nextCollectionId = id.getNonFungibleCollection(_collectionMaskLength);
                 if (nfCollectionId == 0) {
                     nfCollectionId = nextCollectionId;
                     nfCollectionCount = 1;
@@ -539,7 +549,7 @@ abstract contract ERC1155721Inventory is IERC1155721Inventory, IERC721Metadata, 
                 if (to.isContract()) {
                     _callOnERC1155Received(address(0), to, id, value, data);
                 }
-            } else if (id.isNonFungibleToken()) {
+            } else if (id.isNonFungibleToken(_collectionMaskLength)) {
                 _mintNFT(to, id, value, false);
                 emit Transfer(address(0), to, id);
                 emit TransferSingle(sender, address(0), to, id, 1);
@@ -584,7 +594,7 @@ abstract contract ERC1155721Inventory is IERC1155721Inventory, IERC721Metadata, 
         _owners[id] = uint256(uint160(to));
 
         if (!isBatch) {
-            uint256 collectionId = id.getNonFungibleCollection();
+            uint256 collectionId = id.getNonFungibleCollection(_collectionMaskLength);
             // it is virtually impossible that a Non-Fungible Collection supply
             // overflows due to the cost of minting individual tokens
             ++_supplies[collectionId];
@@ -628,7 +638,7 @@ abstract contract ERC1155721Inventory is IERC1155721Inventory, IERC721Metadata, 
         _owners[id] = uint256(uint160(to));
         if (!isBatch) {
             _transferNFTUpdateBalances(from, to, 1);
-            _transferNFTUpdateCollection(from, to, id.getNonFungibleCollection(), 1);
+            _transferNFTUpdateCollection(from, to, id.getNonFungibleCollection(_collectionMaskLength), 1);
         }
     }
 
