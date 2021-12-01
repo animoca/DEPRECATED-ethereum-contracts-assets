@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.0.1
+
+### Bugfixes
+
+- Fix import path in `src/abis/ERC721/ERC721.js`.
+
 ## 3.0.0
 
 ### Breaking Changes
