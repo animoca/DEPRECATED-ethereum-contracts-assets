@@ -108,7 +108,7 @@ function shouldBehaveLikeERC20Burnable(implementation) {
 
       context('Pre-conditions', function () {
         it('reverts when from is the zero address', async function () {
-          await expectRevert(burnFrom(this.token, ZeroAddress, One, {from: spender}), revertMessages.BurnFromZero);
+          await expectRevert(burnFrom(this.token, ZeroAddress, One, {from: spender}), revertMessages.BurnExceedsAllowance);
         });
 
         it('reverts with an insufficient balance', async function () {
@@ -222,8 +222,8 @@ function shouldBehaveLikeERC20Burnable(implementation) {
         });
 
         it('reverts when one of the owners is the zero address', async function () {
-          await expectRevert(batchBurnFrom(this.token, [ZeroAddress], [One], {from: spender}), revertMessages.BurnFromZero);
-          await expectRevert(batchBurnFrom(this.token, [spender, ZeroAddress], [One, One], {from: spender}), revertMessages.BurnFromZero);
+          await expectRevert(batchBurnFrom(this.token, [ZeroAddress], [One], {from: spender}), revertMessages.BurnExceedsAllowance);
+          await expectRevert(batchBurnFrom(this.token, [owner, ZeroAddress], [One, One], {from: spender}), revertMessages.BurnExceedsAllowance);
         });
 
         it('reverts with an insufficient balance', async function () {
@@ -240,10 +240,6 @@ function shouldBehaveLikeERC20Burnable(implementation) {
         });
 
         it('reverts when values overflow', async function () {
-          await expectRevert(
-            batchBurnFrom(this.token, [owner, owner], [initialAllowance, MaxUInt256], {from: spender}),
-            revertMessages.BatchBurnValuesOverflow
-          );
           await expectRevert(
             batchBurnFrom(this.token, [owner, owner], [initialAllowance, MaxUInt256], {from: maxSpender}),
             revertMessages.BatchBurnValuesOverflow

@@ -3,6 +3,13 @@
 pragma solidity >=0.7.6 <0.8.0;
 
 import {IERC165} from "@animoca/ethereum-contracts-core/contracts/introspection/IERC165.sol";
+import {IERC20} from "./../../interfaces/IERC20.sol";
+import {IERC20Detailed} from "./../../interfaces/IERC20Detailed.sol";
+import {IERC20Allowance} from "./../../interfaces/IERC20Allowance.sol";
+import {IERC20SafeTransfers} from "./../../interfaces/IERC20SafeTransfers.sol";
+import {IERC20BatchTransfers} from "./../../interfaces/IERC20BatchTransfers.sol";
+import {IERC20Metadata} from "./../../interfaces/IERC20Metadata.sol";
+import {IERC20Permit} from "./../../interfaces/IERC20Permit.sol";
 import {IERC20Receiver} from "./../../interfaces/IERC20Receiver.sol";
 import {ERC20Receiver, PolygonChildERC20Base} from "./PolygonChildERC20Base.sol";
 import {ERC20} from "./../../ERC20.sol";
@@ -24,7 +31,16 @@ contract PolygonChildERC20 is ERC20, PolygonChildERC20Base {
 
     /// @inheritdoc IERC165
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC20, ERC20Receiver) returns (bool) {
-        return ERC20.supportsInterface(interfaceId) || ERC20Receiver.supportsInterface(interfaceId);
+        return
+            interfaceId == type(IERC165).interfaceId ||
+            interfaceId == type(IERC20).interfaceId ||
+            interfaceId == type(IERC20Detailed).interfaceId ||
+            interfaceId == type(IERC20Metadata).interfaceId ||
+            interfaceId == type(IERC20Allowance).interfaceId ||
+            interfaceId == type(IERC20BatchTransfers).interfaceId ||
+            interfaceId == type(IERC20SafeTransfers).interfaceId ||
+            interfaceId == type(IERC20Permit).interfaceId ||
+            interfaceId == type(IERC20Receiver).interfaceId;
     }
 
     //===================================================== ChildToken ======================================================//

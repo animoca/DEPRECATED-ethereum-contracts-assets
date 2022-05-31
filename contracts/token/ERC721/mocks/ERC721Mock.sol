@@ -36,7 +36,7 @@ contract ERC721Mock is Recoverable, UsingUniversalForwarding, ERC721, NFTBaseMet
     /// @dev Reverts if the sender is not a minter.
     function mint(address to, uint256 tokenId) external virtual override {
         _requireMinter(_msgSender());
-        _mint(to, tokenId, "", false);
+        _mint(to, tokenId);
     }
 
     /// @inheritdoc IERC721Mintable
@@ -46,6 +46,16 @@ contract ERC721Mock is Recoverable, UsingUniversalForwarding, ERC721, NFTBaseMet
         _batchMint(to, tokenIds);
     }
 
+    /// @dev Reverts if the sender is not a minter.
+    function safeMint(
+        address to,
+        uint256 tokenId
+    ) external virtual {
+        address operator = _msgSender();
+        _requireMinter(operator);
+        _safeMint(operator, to, tokenId);
+    }
+
     /// @inheritdoc IERC721Mintable
     /// @dev Reverts if the sender is not a minter.
     function safeMint(
@@ -53,8 +63,9 @@ contract ERC721Mock is Recoverable, UsingUniversalForwarding, ERC721, NFTBaseMet
         uint256 tokenId,
         bytes calldata data
     ) external virtual override {
-        _requireMinter(_msgSender());
-        _mint(to, tokenId, data, true);
+        address operator = _msgSender();
+        _requireMinter(operator);
+        _safeMint(operator, to, tokenId, data);
     }
 
     //======================================== Meta Transactions Internal Functions =========================================//

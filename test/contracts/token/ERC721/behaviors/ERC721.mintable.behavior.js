@@ -192,7 +192,7 @@ function shouldBehaveLikeERC721Mintable({nfMaskLength, contractName, revertMessa
 
         it('reverts if the token already exist', async function () {
           await mintFunction.call(this, owner, unknownNFT, data, options);
-          await expectRevert(mintFunction.call(this, owner, unknownNFT, data, options), revertMessages.ExistingOrBurntNFT);
+          await expectRevert(mintFunction.call(this, owner, unknownNFT, data, options), revertMessages.ExistingNFT);
         });
 
         it('reverts if sent by a non-minter', async function () {

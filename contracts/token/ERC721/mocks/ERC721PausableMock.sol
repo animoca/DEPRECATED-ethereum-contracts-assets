@@ -65,7 +65,7 @@ contract ERC721PausableMock is Pausable, ERC721BurnableMock {
         address from,
         address to,
         uint256 tokenId,
-        bytes memory data
+        bytes calldata data
     ) public virtual override {
         _requireNotPaused();
         super.safeTransferFrom(from, to, tokenId, data);
@@ -78,7 +78,7 @@ contract ERC721PausableMock is Pausable, ERC721BurnableMock {
     function batchTransferFrom(
         address from,
         address to,
-        uint256[] memory tokenIds
+        uint256[] calldata tokenIds
     ) public virtual override {
         _requireNotPaused();
         super.batchTransferFrom(from, to, tokenIds);
@@ -95,7 +95,7 @@ contract ERC721PausableMock is Pausable, ERC721BurnableMock {
 
     /// @inheritdoc IERC721Burnable
     /// @dev Reverts if the contract is paused.
-    function batchBurnFrom(address from, uint256[] memory tokenIds) public virtual override {
+    function batchBurnFrom(address from, uint256[] calldata tokenIds) public virtual override {
         _requireNotPaused();
         super.batchBurnFrom(from, tokenIds);
     }

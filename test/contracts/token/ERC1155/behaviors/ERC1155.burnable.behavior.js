@@ -4,15 +4,30 @@ const {expectEventWithParamsOverride} = require('@animoca/ethereum-contracts-cor
 const {BN, expectEvent, expectRevert} = require('@openzeppelin/test-helpers');
 const {makeFungibleCollectionId, makeNonFungibleCollectionId, makeNonFungibleTokenId, isNonFungibleToken, isFungible} =
   require('@animoca/blockchain-inventory_metadata').inventoryIds;
-const {Zero, One, ZeroAddress} = require('@animoca/ethereum-contracts-core').constants;
+const {Zero, One, ZeroAddress, EmptyByte} = require('@animoca/ethereum-contracts-core').constants;
 const interfaces1155 = require('../../../../../src/interfaces/ERC165/ERC1155');
 const interfaces1155721 = require('../../../../../src/interfaces/ERC165/ERC1155721');
 const {behaviors} = require('@animoca/ethereum-contracts-core');
 
-function shouldBehaveLikeERC1155Burnable({nfMaskLength, contractName, revertMessages, eventParamsOverrides, interfaces, methods, deploy, mint}) {
+function shouldBehaveLikeERC1155Burnable({
+  nfMaskLength,
+  contractName,
+  revertMessages,
+  eventParamsOverrides,
+  interfaces,
+  methods,
+  features,
+  deploy,
+  mint,
+}) {
   const [deployer, owner, operator, approved, other] = accounts;
 
-  const {'burnFrom(address,uint256,uint256)': burnFrom_ERC1155, 'batchBurnFrom(address,uint256[],uint256[])': batchBurnFrom_ERC1155} = methods;
+  const {
+    'burnFrom(address,uint256,uint256)': burnFrom_ERC1155,
+    'batchBurnFrom(address,uint256[],uint256[])': batchBurnFrom_ERC1155,
+    'safeMint(address,uint256,uint256,bytes)': safeMint,
+    'safeBatchMint(address,uint256[],uint256[],bytes)': safeBatchMint,
+  } = methods;
 
   if (burnFrom_ERC1155 === undefined) {
     console.log(
@@ -223,6 +238,36 @@ function shouldBehaveLikeERC1155Burnable({nfMaskLength, contractName, revertMess
           );
         });
       }
+
+      if (features.NonMintableBurntNFTs && nonFungibleTokens.length != 0) {
+        it('[NonMintableBurntNFTs] reverts when trying to mint a burnt token', async function () {
+          for (const [id, value] of nonFungibleTokens) {
+            await expectRevert(mint(this.token, owner, id, value, {from: deployer}), revertMessages.BurntNFT);
+          }
+        });
+        if (safeMint !== undefined) {
+          it('[NonMintableBurntNFTs] reverts when trying to mint a burnt token via mint(address,uint256)', async function () {
+            for (const [id, value] of nonFungibleTokens) {
+              await expectRevert(safeMint(this.token, owner, id, value, EmptyByte, {from: deployer}), revertMessages.BurntNFT);
+            }
+          });
+        }
+        if (safeBatchMint !== undefined) {
+          it('[NonMintableBurntNFTs] reverts when trying to mint a burnt token via safeMint(address,uint256,bytes)', async function () {
+            await expectRevert(
+              safeBatchMint(
+                this.token,
+                owner,
+                nonFungibleTokens.map(([id, _value]) => id),
+                nonFungibleTokens.map(([_id, value]) => value),
+                EmptyByte,
+                {from: deployer}
+              ),
+              revertMessages.BurntNFT
+            );
+          });
+        }
+      }
     };
 
     const shouldBurnTokenBySender = function (burnFunction, tokenIds, values) {
@@ -275,18 +320,20 @@ function shouldBehaveLikeERC1155Burnable({nfMaskLength, contractName, revertMess
           await expectRevert(burnFunction.call(this, owner, fCollection1.id, 0, {from: owner}), revertMessages.ZeroValue);
         });
 
-        it('reverts if a Non-Fungible Token has a value different from 1', async function () {
-          await expectRevert(burnFunction.call(this, owner, nft1, 0, {from: owner}), revertMessages.WrongNFTValue);
-          await expectRevert(burnFunction.call(this, owner, nft1, 2, {from: owner}), revertMessages.WrongNFTValue);
-        });
+        if (interfaces.ERC1155Inventory || interfaces.ERC721) {
+          it('[ERC721/ERC1155Inventory] reverts if a Non-Fungible Token has a value different from 1', async function () {
+            await expectRevert(burnFunction.call(this, owner, nft1, 0, {from: owner}), revertMessages.WrongNFTValue);
+            await expectRevert(burnFunction.call(this, owner, nft1, 2, {from: owner}), revertMessages.WrongNFTValue);
+          });
 
-        it('reverts with a non-existing Non-Fungible Token', async function () {
-          await expectRevert(burnFunction.call(this, owner, unknownNft, 1, {from: owner}), revertMessages.NonOwnedNFT);
-        });
+          it('[ERC721/ERC1155Inventory] reverts with a non-existing Non-Fungible Token', async function () {
+            await expectRevert(burnFunction.call(this, owner, unknownNft, 1, {from: owner}), revertMessages.NonOwnedNFT);
+          });
 
-        it('reverts if from is not the owner for a Non-Fungible Token', async function () {
-          await expectRevert(burnFunction.call(this, other, nft1, 1, {from: other}), revertMessages.NonOwnedNFT);
-        });
+          it('[ERC721/ERC1155Inventory] reverts if from is not the owner for a Non-Fungible Token', async function () {
+            await expectRevert(burnFunction.call(this, other, nft1, 1, {from: other}), revertMessages.NonOwnedNFT);
+          });
+        }
 
         it('reverts if from has insufficient balance for a Fungible Token', async function () {
           await expectRevert(burnFunction.call(this, other, fCollection1.id, 1, {from: other}), revertMessages.InsufficientBalance);

@@ -12,22 +12,12 @@ import {IERC20BatchTransfers} from "./interfaces/IERC20BatchTransfers.sol";
 import {IERC20Metadata} from "./interfaces/IERC20Metadata.sol";
 import {IERC20Permit} from "./interfaces/IERC20Permit.sol";
 import {IERC20Receiver} from "./interfaces/IERC20Receiver.sol";
-import {ManagedIdentity} from "@animoca/ethereum-contracts-core/contracts/metatx/ManagedIdentity.sol";
+import {ERC20Simple} from "./ERC20Simple.sol";
 
 /**
  * @title ERC20 Fungible Token Contract.
  */
-contract ERC20 is
-    ManagedIdentity,
-    IERC165,
-    IERC20,
-    IERC20Detailed,
-    IERC20Metadata,
-    IERC20Allowance,
-    IERC20BatchTransfers,
-    IERC20SafeTransfers,
-    IERC20Permit
-{
+contract ERC20 is IERC165, ERC20Simple, IERC20Detailed, IERC20Metadata, IERC20Allowance, IERC20BatchTransfers, IERC20SafeTransfers, IERC20Permit {
     using AddressIsContract for address;
 
     // keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)")
@@ -45,10 +35,6 @@ contract ERC20 is
     string internal _symbol;
     uint8 internal immutable _decimals;
     string internal _tokenURI;
-
-    mapping(address => uint256) internal _balances;
-    mapping(address => mapping(address => uint256)) internal _allowances;
-    uint256 internal _totalSupply;
 
     constructor(
         string memory name_,
@@ -80,45 +66,6 @@ contract ERC20 is
             interfaceId == type(IERC20BatchTransfers).interfaceId ||
             interfaceId == type(IERC20SafeTransfers).interfaceId ||
             interfaceId == type(IERC20Permit).interfaceId;
-    }
-
-    //======================================================== ERC20 ========================================================//
-
-    /// @inheritdoc IERC20
-    function totalSupply() external view override returns (uint256) {
-        return _totalSupply;
-    }
-
-    /// @inheritdoc IERC20
-    function balanceOf(address account) external view override returns (uint256) {
-        return _balances[account];
-    }
-
-    /// @inheritdoc IERC20
-    function allowance(address owner, address spender) public view virtual override returns (uint256) {
-        return _allowances[owner][spender];
-    }
-
-    /// @inheritdoc IERC20
-    function approve(address spender, uint256 value) external virtual override returns (bool) {
-        _approve(_msgSender(), spender, value);
-        return true;
-    }
-
-    /// @inheritdoc IERC20
-    function transfer(address to, uint256 value) external virtual override returns (bool) {
-        _transfer(_msgSender(), to, value);
-        return true;
-    }
-
-    /// @inheritdoc IERC20
-    function transferFrom(
-        address from,
-        address to,
-        uint256 value
-    ) external virtual override returns (bool) {
-        _transferFrom(_msgSender(), from, to, value);
-        return true;
     }
 
     //==================================================== ERC20Detailed ====================================================//
@@ -321,77 +268,6 @@ contract ERC20 is
 
     //============================================ High-level Internal Functions ============================================//
 
-    function _approve(
-        address owner,
-        address spender,
-        uint256 value
-    ) internal {
-        require(spender != address(0), "ERC20: zero address spender");
-        _allowances[owner][spender] = value;
-        emit Approval(owner, spender, value);
-    }
-
-    function _decreaseAllowance(
-        address owner,
-        address spender,
-        uint256 subtractedValue
-    ) internal {
-        uint256 allowance_ = _allowances[owner][spender];
-
-        if (allowance_ != type(uint256).max && subtractedValue != 0) {
-            // save gas when allowance is maximal by not reducing it (see https://github.com/ethereum/EIPs/issues/717)
-            uint256 newAllowance = allowance_ - subtractedValue;
-            require(newAllowance < allowance_, "ERC20: insufficient allowance");
-            _allowances[owner][spender] = newAllowance;
-            allowance_ = newAllowance;
-        }
-        emit Approval(owner, spender, allowance_);
-    }
-
-    function _transfer(
-        address from,
-        address to,
-        uint256 value
-    ) internal virtual {
-        require(to != address(0), "ERC20: to zero address");
-
-        if (value != 0) {
-            uint256 balance = _balances[from];
-            uint256 newBalance = balance - value;
-            require(newBalance < balance, "ERC20: insufficient balance");
-            if (from != to) {
-                _balances[from] = newBalance;
-                _balances[to] += value;
-            }
-        }
-
-        emit Transfer(from, to, value);
-    }
-
-    function _transferFrom(
-        address sender,
-        address from,
-        address to,
-        uint256 value
-    ) internal {
-        _transfer(from, to, value);
-        if (from != sender) {
-            _decreaseAllowance(from, sender, value);
-        }
-    }
-
-    function _mint(address to, uint256 value) internal virtual {
-        require(to != address(0), "ERC20: zero address");
-        uint256 supply = _totalSupply;
-        if (value != 0) {
-            uint256 newSupply = supply + value;
-            require(newSupply > supply, "ERC20: supply overflow");
-            _totalSupply = newSupply;
-            _balances[to] += value; // balance cannot overflow if supply does not
-        }
-        emit Transfer(address(0), to, value);
-    }
-
     function _batchMint(address[] memory recipients, uint256[] memory values) internal virtual {
         uint256 length = recipients.length;
         require(length == values.length, "ERC20: inconsistent arrays");
@@ -399,7 +275,7 @@ contract ERC20 is
         uint256 totalValue;
         for (uint256 i; i != length; ++i) {
             address to = recipients[i];
-            require(to != address(0), "ERC20: zero address");
+            require(to != address(0), "ERC20: mint to zero");
 
             uint256 value = values[i];
             if (value != 0) {
@@ -419,25 +295,6 @@ contract ERC20 is
         }
     }
 
-    function _burn(address from, uint256 value) internal virtual {
-        if (value != 0) {
-            uint256 balance = _balances[from];
-            uint256 newBalance = balance - value;
-            require(newBalance < balance, "ERC20: insufficient balance");
-            _balances[from] = newBalance;
-            _totalSupply -= value; // will not underflow if balance does not
-        }
-        emit Transfer(from, address(0), value);
-    }
-
-    function _burnFrom(address from, uint256 value) internal virtual {
-        _burn(from, value);
-        address sender = _msgSender();
-        if (from != sender) {
-            _decreaseAllowance(from, sender, value);
-        }
-    }
-
     function _batchBurnFrom(address[] memory owners, uint256[] memory values) internal virtual {
         uint256 length = owners.length;
         require(length == values.length, "ERC20: inconsistent arrays");
@@ -448,6 +305,11 @@ contract ERC20 is
         for (uint256 i; i != length; ++i) {
             address from = owners[i];
             uint256 value = values[i];
+
+            if (from != sender) {
+                _decreaseAllowance(from, sender, value);
+            }
+
             if (value != 0) {
                 uint256 balance = _balances[from];
                 uint256 newBalance = balance - value;
@@ -455,11 +317,8 @@ contract ERC20 is
                 _balances[from] = newBalance;
                 totalValue += value; // totalValue cannot overflow if the individual balances do not underflow
             }
-            emit Transfer(from, address(0), value);
 
-            if (from != sender) {
-                _decreaseAllowance(from, sender, value);
-            }
+            emit Transfer(from, address(0), value);
         }
 
         if (totalValue != 0) {

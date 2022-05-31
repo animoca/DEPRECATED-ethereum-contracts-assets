@@ -10,7 +10,7 @@ const ReceiverType = require('../../ReceiverType');
 
 const {isFungible, isNonFungibleToken, makeFungibleCollectionId, makeNonFungibleCollectionId, makeNonFungibleTokenId} =
   require('@animoca/blockchain-inventory_metadata').inventoryIds;
-const {Zero, One} = require('@animoca/ethereum-contracts-core/src/constants');
+const {Zero, One, MaxUInt256} = require('@animoca/ethereum-contracts-core/src/constants');
 
 const ERC721ReceiverMock = artifacts.require('ERC721ReceiverMock');
 const ERC1155TokenReceiverMock = artifacts.require('ERC1155TokenReceiverMock');
@@ -96,10 +96,12 @@ function shouldBehaveLikeERC1155Standard({nfMaskLength, revertMessages, eventPar
           (await this.token.balanceOf(owner, nftOtherCollection)).should.be.bignumber.equal('1');
         });
 
-        it('returns the balance of owned Non-Fungible Tokens by Non-Fungible Collection', async function () {
-          (await this.token.balanceOf(owner, nfCollection)).should.be.bignumber.equal('2');
-          (await this.token.balanceOf(owner, nfCollectionOther)).should.be.bignumber.equal('1');
-        });
+        if (interfaces.ERC1155Inventory) {
+          it('[ERC1155Inventory] returns the balance of owned Non-Fungible Tokens by Non-Fungible Collection', async function () {
+            (await this.token.balanceOf(owner, nfCollection)).should.be.bignumber.equal('2');
+            (await this.token.balanceOf(owner, nfCollectionOther)).should.be.bignumber.equal('1');
+          });
+        }
 
         it('returns the balance of Fungible Tokens owned by the given address', async function () {
           (await this.token.balanceOf(owner, fCollection1.id)).should.be.bignumber.equal(new BN(fCollection1.supply));
@@ -149,39 +151,41 @@ function shouldBehaveLikeERC1155Standard({nfMaskLength, revertMessages, eventPar
 
       context('when the given addresses own some tokens', function () {
         it('returns the amounts of tokens owned by the given addresses, case 1', async function () {
+          let owners = [owner, owner];
+          let ids = [fCollection1.id, fCollection2.id];
+          const balances = await this.token.balanceOfBatch(owners, ids);
+          balances.map((t) => t.toNumber()).should.have.members([fCollection1.supply, fCollection2.supply]);
+        });
+
+        it('returns the amounts of tokens owned by the given addresses, case 2', async function () {
           let owners = [owner, owner, owner, owner, owner];
           let ids = [nft1, nft2, nftOtherCollection, fCollection1.id, fCollection2.id];
           const balances = await this.token.balanceOfBatch(owners, ids);
           balances.map((t) => t.toNumber()).should.have.members([1, 1, 1, fCollection1.supply, fCollection2.supply]);
         });
 
-        it('returns the amounts of tokens owned by the given addresses, case 2', async function () {
-          let owners = [owner, owner, owner, owner];
-          let ids = [nft1, nfCollection, fCollection1.id, fCollection2.id];
-          const balances = await this.token.balanceOfBatch(owners, ids);
-          balances.map((t) => t.toNumber()).should.have.members([1, 2, fCollection1.supply, fCollection2.supply]);
-        });
+        if (interfaces.ERC1155Inventory) {
+          it('returns the amounts of tokens owned by the given addresses, case 3', async function () {
+            let owners = [owner, owner, owner, owner];
+            let ids = [nft1, nfCollection, fCollection1.id, fCollection2.id];
+            const balances = await this.token.balanceOfBatch(owners, ids);
+            balances.map((t) => t.toNumber()).should.have.members([1, 2, fCollection1.supply, fCollection2.supply]);
+          });
 
-        it('returns the amounts of tokens owned by the given addresses, case 3', async function () {
-          let owners = [owner, owner, owner, owner];
-          let ids = [nfCollection, nfCollectionOther, fCollection1.id, fCollection2.id];
-          const balances = await this.token.balanceOfBatch(owners, ids);
-          balances.map((t) => t.toNumber()).should.have.members([2, 1, fCollection1.supply, fCollection2.supply]);
-        });
+          it('[ERC1155Inventory] returns the amounts of tokens owned by the given addresses, case 4', async function () {
+            let owners = [owner, owner, owner, owner];
+            let ids = [nfCollection, nfCollectionOther, fCollection1.id, fCollection2.id];
+            const balances = await this.token.balanceOfBatch(owners, ids);
+            balances.map((t) => t.toNumber()).should.have.members([2, 1, fCollection1.supply, fCollection2.supply]);
+          });
 
-        it('returns the amounts of tokens owned by the given addresses, case 4', async function () {
-          let owners = [owner, owner, owner];
-          let ids = [nft1, nft2, nftOtherCollection];
-          const balances = await this.token.balanceOfBatch(owners, ids);
-          balances.map((t) => t.toNumber()).should.have.members([1, 1, 1]);
-        });
-
-        it('returns the amounts of tokens owned by the given addresses, case 5', async function () {
-          let owners = [owner, owner];
-          let ids = [fCollection1.id, fCollection2.id];
-          const balances = await this.token.balanceOfBatch(owners, ids);
-          balances.map((t) => t.toNumber()).should.have.members([fCollection1.supply, fCollection2.supply]);
-        });
+          it('[ERC1155Inventory] returns the amounts of tokens owned by the given addresses, case 5', async function () {
+            let owners = [owner, owner, owner];
+            let ids = [nft1, nft2, nftOtherCollection];
+            const balances = await this.token.balanceOfBatch(owners, ids);
+            balances.map((t) => t.toNumber()).should.have.members([1, 1, 1]);
+          });
+        }
       });
 
       context('when the given address does not own any tokens', function () {
@@ -190,10 +194,12 @@ function shouldBehaveLikeERC1155Standard({nfMaskLength, revertMessages, eventPar
           balances.map((t) => t.toNumber()).should.have.members([0]);
         });
 
-        it('returns 0 for a Non-Fungible Collection id', async function () {
-          const balances = await this.token.balanceOfBatch([other], [nfCollection]);
-          balances.map((t) => t.toNumber()).should.have.members([0]);
-        });
+        if (interfaces.ERC1155Inventory) {
+          it('returns 0 for a Non-Fungible Collection id', async function () {
+            const balances = await this.token.balanceOfBatch([other], [nfCollection]);
+            balances.map((t) => t.toNumber()).should.have.members([0]);
+          });
+        }
 
         it('returns 0 for a Fungible Token id', async function () {
           const balances = await this.token.balanceOfBatch([other], [fCollection1.id]);
@@ -519,18 +525,27 @@ function shouldBehaveLikeERC1155Standard({nfMaskLength, revertMessages, eventPar
             await expectRevert(transferFunction.call(this, owner, other, fCollection1.id, 0, data, {from: owner}), revertMessages.ZeroValue);
           });
 
-          it('reverts if a Non-Fungible Token has a value different from 1', async function () {
-            await expectRevert(transferFunction.call(this, owner, other, nft1, 0, data, {from: owner}), revertMessages.WrongNFTValue);
-            await expectRevert(transferFunction.call(this, owner, other, nft1, 2, data, {from: owner}), revertMessages.WrongNFTValue);
-          });
+          if (!interfaces.ERC1155InventoryTotalSupply) {
+            it('reverts in case of balance overflow', async function () {
+              await mint(this.token, other, fCollection1.id, MaxUInt256, {from: deployer});
+              await expectRevert(transferFunction.call(this, owner, other, fCollection1.id, 1, data, {from: owner}), revertMessages.BalanceOverflow);
+            });
+          }
 
-          it('reverts with a non-existing Non-Fungible Token', async function () {
-            await expectRevert(transferFunction.call(this, owner, other, unknownNft, 1, data, {from: owner}), revertMessages.NonOwnedNFT);
-          });
+          if (interfaces.ERC721 || interfaces.ERC1155Inventory) {
+            it('[ERC721/ERC1155Inventory] reverts if a Non-Fungible Token has a value different from 1', async function () {
+              await expectRevert(transferFunction.call(this, owner, other, nft1, 0, data, {from: owner}), revertMessages.WrongNFTValue);
+              await expectRevert(transferFunction.call(this, owner, other, nft1, 2, data, {from: owner}), revertMessages.WrongNFTValue);
+            });
 
-          it('reverts if from is not the owner for a Non-Fungible Token', async function () {
-            await expectRevert(transferFunction.call(this, other, approved, nft1, 1, data, {from: other}), revertMessages.NonOwnedNFT);
-          });
+            it('[ERC721/ERC1155Inventory] reverts with a non-existing Non-Fungible Token', async function () {
+              await expectRevert(transferFunction.call(this, owner, other, unknownNft, 1, data, {from: owner}), revertMessages.NonOwnedNFT);
+            });
+
+            it('[ERC721/ERC1155Inventory] reverts if from is not the owner for a Non-Fungible Token', async function () {
+              await expectRevert(transferFunction.call(this, other, approved, nft1, 1, data, {from: other}), revertMessages.NonOwnedNFT);
+            });
+          }
 
           it('reverts if from has insufficient balance for a Fungible Token', async function () {
             await expectRevert(

@@ -16,6 +16,7 @@ function shouldBehaveLikeERC721Metadata({nfMaskLength, name, symbol, revertMessa
     const fixtureLoader = createFixtureLoader(accounts, web3.eth.currentProvider);
     const fixture = async function () {
       this.token = await deploy(deployer);
+      await mint(this.token, owner, nft1, 1, {from: deployer});
     };
 
     beforeEach(async function () {
@@ -31,10 +32,6 @@ function shouldBehaveLikeERC721Metadata({nfMaskLength, name, symbol, revertMessa
     });
 
     describe('tokenURI', function () {
-      beforeEach(async function () {
-        await mint(this.token, owner, nft1, 1, {from: deployer});
-      });
-
       it('tokenURI()', async function () {
         await this.token.tokenURI(nft1);
         await expectRevert(this.token.tokenURI(nft2), revertMessages.NonExistingNFT);

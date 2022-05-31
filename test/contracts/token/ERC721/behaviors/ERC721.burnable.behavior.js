@@ -3,16 +3,32 @@ const {createFixtureLoader} = require('@animoca/ethereum-contracts-core/test/uti
 const {expectEventWithParamsOverride} = require('@animoca/ethereum-contracts-core/test/utils/events');
 const {BN, expectRevert} = require('@openzeppelin/test-helpers');
 const {behaviors, constants} = require('@animoca/ethereum-contracts-core');
-const {One, ZeroAddress} = constants;
+const {One, ZeroAddress, EmptyByte} = constants;
 const interfaces721 = require('../../../../../src/interfaces/ERC165/ERC721');
 
 const {makeNonFungibleTokenId, makeNonFungibleCollectionId, makeFungibleCollectionId} =
   require('@animoca/blockchain-inventory_metadata').inventoryIds;
 
-function shouldBehaveLikeERC721Burnable({nfMaskLength, contractName, revertMessages, eventParamsOverrides, interfaces, methods, deploy, mint}) {
+function shouldBehaveLikeERC721Burnable({
+  nfMaskLength,
+  contractName,
+  revertMessages,
+  eventParamsOverrides,
+  interfaces,
+  methods,
+  features,
+  deploy,
+  mint,
+}) {
   const [deployer, owner, other, approved, operator] = accounts;
 
-  const {'burnFrom(address,uint256)': burnFrom_ERC721, 'batchBurnFrom(address,uint256[])': batchBurnFrom_ERC721} = methods;
+  const {
+    'burnFrom(address,uint256)': burnFrom_ERC721,
+    'batchBurnFrom(address,uint256[])': batchBurnFrom_ERC721,
+    'mint(address,uint256)': mint_ERC721,
+    'batchMint(address,uint256[])': batchMint_ERC721,
+    'safeMint(address,uint256,bytes)': safeMint_ERC721,
+  } = methods;
 
   if (burnFrom_ERC721 === undefined) {
     console.log(
@@ -144,6 +160,33 @@ function shouldBehaveLikeERC721Burnable({nfMaskLength, contractName, revertMessa
           (await this.token.totalSupply(nfCollection)).should.be.bignumber.equal(this.nfcSupply.subn(nbCollectionNFTs));
           (await this.token.totalSupply(otherNFCollection)).should.be.bignumber.equal(this.otherNFCSupply.subn(nbOtherCollectionNFTs));
         });
+      }
+
+      if (features.NonMintableBurntNFTs && ids.length != 0) {
+        it('[NonMintableBurntNFTs] reverts when trying to mint a burnt token', async function () {
+          for (const id of ids) {
+            await expectRevert(mint(this.token, owner, id, 1, {from: deployer}), revertMessages.BurntNFT);
+          }
+        });
+        if (mint_ERC721 !== undefined) {
+          it('[NonMintableBurntNFTs] reverts when trying to mint a burnt token via mint(address,uint256)', async function () {
+            for (const id of ids) {
+              await expectRevert(mint_ERC721(this.token, owner, id, {from: deployer}), revertMessages.BurntNFT);
+            }
+          });
+        }
+        if (batchMint_ERC721 !== undefined) {
+          it('[NonMintableBurntNFTs] reverts when trying to mint a burnt token via batchMint(address,uint256)', async function () {
+            await expectRevert(batchMint_ERC721(this.token, owner, ids, {from: deployer}), revertMessages.BurntNFT);
+          });
+        }
+        if (safeMint_ERC721 !== undefined) {
+          it('[NonMintableBurntNFTs] reverts when trying to mint a burnt token via safeMint(address,uint256,bytes)', async function () {
+            for (const id of ids) {
+              await expectRevert(safeMint_ERC721(this.token, owner, id, EmptyByte, {from: deployer}), revertMessages.BurntNFT);
+            }
+          });
+        }
       }
     };
 

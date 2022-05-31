@@ -19,7 +19,7 @@ const implementation = {
     TransferRejected: 'ERC721: transfer refused',
     NonExistingNFT: 'ERC721: non-existing NFT',
     NonOwnedNFT: 'ERC721: non-owned NFT',
-    ExistingOrBurntNFT: 'ERC721: existing/burnt NFT',
+    ExistingNFT: 'ERC721: existing NFT',
 
     // Admin
     NotMinter: 'MinterRole: not a Minter',
@@ -43,7 +43,6 @@ const implementation = {
   },
   deploy: async function (deployer) {
     const registry = await artifacts.require('ForwarderRegistry').new({from: deployer});
-    const forwarder = await artifacts.require('UniversalForwarder').new({from: deployer});
     return artifacts.require('ERC721Mock').new(registry.address, ZeroAddress, {from: deployer});
   },
   mint: async function (contract, to, id, _value, overrides) {

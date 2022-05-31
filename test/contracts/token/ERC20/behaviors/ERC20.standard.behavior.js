@@ -191,7 +191,7 @@ function shouldBehaveLikeERC20Standard(implementation) {
     describe('transferFrom(address,address,uint256)', function () {
       context('Pre-conditions', function () {
         it('reverts when from is the zero address', async function () {
-          await expectRevert(this.token.transferFrom(ZeroAddress, recipient, One, {from: spender}), revertMessages.TransferExceedsBalance);
+          await expectRevert(this.token.transferFrom(ZeroAddress, recipient, One, {from: spender}), revertMessages.TransferExceedsAllowance);
         });
 
         it('reverts when sent to the zero address', async function () {

@@ -18,7 +18,7 @@ const implementation = {
     TransferRejected: 'ERC721: transfer refused',
     NonExistingNFT: 'ERC721: non-existing NFT',
     NonOwnedNFT: 'ERC721: non-owned NFT',
-    ExistingOrBurntNFT: 'ERC721: existing NFT',
+    ExistingNFT: 'ERC721: existing NFT',
 
     // Admin
     NotMinter: 'MinterRole: not a Minter',
@@ -29,6 +29,12 @@ const implementation = {
   methods: {
     'mint(address,uint256)': async function (contract, to, tokenId, overrides) {
       return contract.mint(to, tokenId, overrides);
+    },
+    'safeMint(address,uint256,bytes)': async function (contract, to, tokenId, data, overrides) {
+      return contract.safeMint(to, tokenId, data, overrides);
+    },
+    'burnFrom(address,uint256)': async function (contract, from, id, overrides) {
+      return contract.burnFrom(from, id, overrides);
     },
   },
   deploy: async function (deployer) {
@@ -52,28 +58,46 @@ describe('ERC721SimpleMock', function () {
     });
   });
 
-  describe('burn(uint256)', function () {
+  describe('burn(address,uint256)', function () {
     const tokenId = '1';
+    const otherTokenId = '2';
+
+    beforeEach(async function () {
+      this.token = await implementation.deploy(deployer);
+      await implementation.mint(this.token, other, tokenId, null, {from: deployer});
+    });
 
     it('reverts if not called by a minter', async function () {
-      const token = await implementation.deploy(deployer);
-      await implementation.mint(token, other, tokenId, null, {from: deployer});
-      await expectRevert(token.burn(tokenId, {from: other}), implementation.revertMessages.NotMinter);
+      await expectRevert(this.token.burn(other, tokenId, {from: other}), implementation.revertMessages.NotMinter);
     });
 
     it('reverts if the token does not exist', async function () {
-      const token = await implementation.deploy(deployer);
-      await expectRevert(token.burn(tokenId, {from: deployer}), implementation.revertMessages.NonExistingNFT);
+      await expectRevert(this.token.burn(ZeroAddress, otherTokenId, {from: deployer}), implementation.revertMessages.NonExistingNFT);
     });
 
-    it('emits a Transfer event', async function () {
-      const token = await implementation.deploy(deployer);
-      await implementation.mint(token, other, tokenId, null, {from: deployer});
-      const receipt = await token.burn(tokenId, {from: deployer});
-      expectEvent(receipt, 'Transfer', {
-        _from: other,
-        _to: ZeroAddress,
-        _tokenId: tokenId,
+    it('reverts if from is not the owner', async function () {
+      await expectRevert(this.token.burn(deployer, tokenId, {from: deployer}), implementation.revertMessages.NonOwnedNFT);
+    });
+
+    context('when successful', function () {
+      beforeEach(async function () {
+        this.receipt = await this.token.burn(other, tokenId, {from: deployer});
+      });
+
+      it('unsets the owner', async function () {
+        await expectRevert(this.token.ownerOf(tokenId), implementation.revertMessages.NonExistingNFT);
+      });
+
+      it('decreases the account balance', async function () {
+        (await this.token.balanceOf(other)).should.be.bignumber.equal('0');
+      });
+
+      it('emits a Transfer event', async function () {
+        expectEvent(this.receipt, 'Transfer', {
+          _from: other,
+          _to: ZeroAddress,
+          _tokenId: tokenId,
+        });
       });
     });
   });

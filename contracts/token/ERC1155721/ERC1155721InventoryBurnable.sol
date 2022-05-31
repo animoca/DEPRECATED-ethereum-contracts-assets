@@ -4,6 +4,14 @@ pragma solidity >=0.7.6 <0.8.0;
 
 import {ERC1155InventoryIdentifiersLib} from "./../ERC1155/ERC1155InventoryIdentifiersLib.sol";
 import {IERC165} from "@animoca/ethereum-contracts-core/contracts/introspection/IERC165.sol";
+import {IERC721} from "./../ERC721/interfaces/IERC721.sol";
+import {IERC721Metadata} from "./../ERC721/interfaces/IERC721Metadata.sol";
+import {IERC721BatchTransfer} from "./../ERC721/interfaces/IERC721BatchTransfer.sol";
+import {IERC1155} from "./../ERC1155/interfaces/IERC1155.sol";
+import {IERC1155Inventory} from "./../ERC1155/interfaces/IERC1155Inventory.sol";
+import {IERC1155MetadataURI} from "./../ERC1155/interfaces/IERC1155MetadataURI.sol";
+import {IERC1155InventoryFunctions} from "./../ERC1155/interfaces/IERC1155InventoryFunctions.sol";
+import {IERC1155InventoryTotalSupply} from "./../ERC1155/interfaces/IERC1155InventoryTotalSupply.sol";
 import {IERC1155721InventoryBurnable} from "./interfaces/IERC1155721InventoryBurnable.sol";
 import {ERC1155721Inventory} from "./ERC1155721Inventory.sol";
 
@@ -24,7 +32,16 @@ abstract contract ERC1155721InventoryBurnable is IERC1155721InventoryBurnable, E
 
     /// @inheritdoc IERC165
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
-        return interfaceId == type(IERC1155721InventoryBurnable).interfaceId || super.supportsInterface(interfaceId);
+        return
+            interfaceId == type(IERC165).interfaceId ||
+            interfaceId == type(IERC721).interfaceId ||
+            interfaceId == type(IERC721Metadata).interfaceId ||
+            interfaceId == type(IERC721BatchTransfer).interfaceId ||
+            interfaceId == type(IERC1155).interfaceId ||
+            interfaceId == type(IERC1155MetadataURI).interfaceId ||
+            interfaceId == type(IERC1155InventoryFunctions).interfaceId ||
+            interfaceId == type(IERC1155InventoryTotalSupply).interfaceId ||
+            interfaceId == type(IERC1155721InventoryBurnable).interfaceId;
     }
 
     //============================================= ERC1155721InventoryBurnable =============================================//

@@ -146,7 +146,10 @@ function shouldBehaveLikeERC20Safe(implementation) {
     describe('safeTransferFrom(address,address,uint256,bytes)', function () {
       context('Pre-conditions', function () {
         it('reverts when from is the zero address', async function () {
-          await expectRevert(this.token.safeTransferFrom(ZeroAddress, recipient, One, data, {from: spender}), revertMessages.TransferFromZero);
+          await expectRevert(
+            this.token.safeTransferFrom(ZeroAddress, recipient, One, data, {from: spender}),
+            revertMessages.TransferExceedsAllowance
+          );
         });
 
         it('reverts when sent to the zero address', async function () {

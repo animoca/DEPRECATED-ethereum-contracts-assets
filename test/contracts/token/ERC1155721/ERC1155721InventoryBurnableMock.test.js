@@ -27,7 +27,8 @@ const implementation = {
 
     // ERC1155Inventory
     ExistingCollection: 'Inventory: existing collection',
-    ExistingOrBurntNFT: 'Inventory: existing/burnt NFT',
+    ExistingNFT: 'Inventory: existing/burnt NFT',
+    BurntNFT: 'Inventory: existing/burnt NFT',
     NotCollection: 'Inventory: not a collection',
     NotToken: 'Inventory: not a token id',
     NonExistingNFT: 'Inventory: non-existing NFT',
@@ -49,7 +50,10 @@ const implementation = {
     ERC1155InventoryCreator: true,
     ERC1155721InventoryBurnable: true,
   },
-  features: {BaseMetadataURI: true},
+  features: {
+    BaseMetadataURI: true,
+    NonMintableBurntNFTs: true,
+  },
   methods: {
     // ERC721
     'batchTransferFrom(address,address,uint256[])': async function (contract, from, to, nftIds, overrides) {

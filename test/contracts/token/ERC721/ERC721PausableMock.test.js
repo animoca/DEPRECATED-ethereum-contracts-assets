@@ -19,7 +19,8 @@ const implementation = {
     TransferRejected: 'ERC721: transfer refused',
     NonExistingNFT: 'ERC721: non-existing NFT',
     NonOwnedNFT: 'ERC721: non-owned NFT',
-    ExistingOrBurntNFT: 'ERC721: existing/burnt NFT',
+    ExistingNFT: 'ERC721: existing NFT',
+    BurntNFT: 'ERC721: burnt NFT',
 
     // Pausable
     AlreadyPaused: 'Pausable: paused',
@@ -31,7 +32,10 @@ const implementation = {
     NotContractOwner: 'Ownable: not the owner',
   },
   interfaces: {ERC721: true, ERC721Metadata: true, ERC721BatchTransfer: true, ERC721Burnable: true, Pausable: true},
-  features: {BaseMetadataURI: true},
+  features: {
+    BaseMetadataURI: true,
+    NonMintableBurntNFTs: true,
+  },
   methods: {
     'batchTransferFrom(address,address,uint256[])': async function (contract, from, to, tokenIds, overrides) {
       return contract.batchTransferFrom(from, to, tokenIds, overrides);

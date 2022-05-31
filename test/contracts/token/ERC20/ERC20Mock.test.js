@@ -38,7 +38,7 @@ const implementation = {
     PermitInvalid: 'ERC20: invalid permit',
 
     // ERC20Mintable
-    MintToZero: 'ERC20: zero address',
+    MintToZero: 'ERC20: mint to zero',
     BatchMintValuesOverflow: 'ERC20: values overflow',
 
     // Admin

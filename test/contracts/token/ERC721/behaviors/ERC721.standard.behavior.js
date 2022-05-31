@@ -254,7 +254,8 @@ function shouldBehaveLikeERC721Standard({nfMaskLength, contractName, revertMessa
         }
       };
 
-      const shouldTransferTokenBySender = function (transferFunction, ids, data, safe, receiverType, selfTransfer = false) {
+      // eslint-disable-next-line max-params
+      const shouldTransferTokenBySender = function (transferFunction, ids, data, safe, receiverType, hasSingleApproval, selfTransfer = false) {
         context('when called by the owner', function () {
           const options = {from: owner};
           beforeEach(async function () {
@@ -263,13 +264,15 @@ function shouldBehaveLikeERC721Standard({nfMaskLength, contractName, revertMessa
           transferWasSuccessful(ids, data, options, safe, receiverType, selfTransfer);
         });
 
-        context('when called by a wallet with single token approval', function () {
-          const options = {from: approved};
-          beforeEach(async function () {
-            receipt = await transferFunction.call(this, owner, this.toWhom, ids, data, options);
+        if (hasSingleApproval) {
+          context('when called by a wallet with single token approval', function () {
+            const options = {from: approved};
+            beforeEach(async function () {
+              receipt = await transferFunction.call(this, owner, this.toWhom, ids, data, options);
+            });
+            transferWasSuccessful(ids, data, options, safe, receiverType, selfTransfer);
           });
-          transferWasSuccessful(ids, data, options, safe, receiverType, selfTransfer);
-        });
+        }
 
         context('when called by an operator', function () {
           const options = {from: operator};
@@ -298,7 +301,7 @@ function shouldBehaveLikeERC721Standard({nfMaskLength, contractName, revertMessa
           });
 
           it('reverts if `from` is not the token owner', async function () {
-            await expectRevert(transferFunction.call(this, other, other, nft1, data, {from: anotherApproved}), revertMessages.NonOwnedNFT);
+            await expectRevert(transferFunction.call(this, other, other, nft1, data, {from: other}), revertMessages.NonOwnedNFT);
           });
 
           it('reverts if the sender is not authorized for the token', async function () {
@@ -365,12 +368,12 @@ function shouldBehaveLikeERC721Standard({nfMaskLength, contractName, revertMessa
         });
       };
 
-      const shouldTransferTokenToRecipient = function (transferFunction, ids, data, safe) {
+      const shouldTransferTokenToRecipient = function (transferFunction, ids, data, safe, hasSingleApproval = true) {
         context('when sent to another wallet', function () {
           beforeEach(async function () {
             this.toWhom = other;
           });
-          shouldTransferTokenBySender(transferFunction, ids, data, safe, ReceiverType.WALLET);
+          shouldTransferTokenBySender(transferFunction, ids, data, safe, ReceiverType.WALLET, hasSingleApproval);
         });
 
         context('when sent to the same owner', function () {
@@ -378,14 +381,14 @@ function shouldBehaveLikeERC721Standard({nfMaskLength, contractName, revertMessa
             this.toWhom = owner;
           });
           const selfTransfer = true;
-          shouldTransferTokenBySender(transferFunction, ids, data, safe, ReceiverType.WALLET, selfTransfer);
+          shouldTransferTokenBySender(transferFunction, ids, data, safe, ReceiverType.WALLET, hasSingleApproval, selfTransfer);
         });
 
         context('when sent to an ERC721Receiver contract', function () {
           beforeEach(async function () {
             this.toWhom = this.receiver721.address;
           });
-          shouldTransferTokenBySender(transferFunction, ids, data, safe, ReceiverType.ERC721_RECEIVER);
+          shouldTransferTokenBySender(transferFunction, ids, data, safe, ReceiverType.ERC721_RECEIVER, hasSingleApproval);
         });
 
         if (interfaces.ERC1155) {
@@ -393,7 +396,7 @@ function shouldBehaveLikeERC721Standard({nfMaskLength, contractName, revertMessa
             beforeEach(async function () {
               this.toWhom = this.receiver1155.address;
             });
-            shouldTransferTokenBySender(transferFunction, ids, data, safe, ReceiverType.ERC1155_RECEIVER);
+            shouldTransferTokenBySender(transferFunction, ids, data, safe, ReceiverType.ERC1155_RECEIVER, hasSingleApproval);
           });
         }
       };
@@ -404,7 +407,13 @@ function shouldBehaveLikeERC721Standard({nfMaskLength, contractName, revertMessa
         };
         const safe = false;
         shouldRevertOnPreconditions(transferFn, safe);
-        shouldTransferTokenToRecipient(transferFn, nft1, undefined, safe);
+        context('for a token with single approval', function () {
+          shouldTransferTokenToRecipient(transferFn, nft1, undefined, safe);
+        });
+        context('for a token without single approval', function () {
+          const hasSingleApproval = false;
+          shouldTransferTokenToRecipient(transferFn, nft3, undefined, safe, hasSingleApproval);
+        });
       });
 
       describe('batchTransferFrom(address,address,uint256[])', function () {
@@ -421,8 +430,12 @@ function shouldBehaveLikeERC721Standard({nfMaskLength, contractName, revertMessa
         context('with an empty list of tokens', function () {
           shouldTransferTokenToRecipient(transferFn, [], undefined, safe);
         });
-        context('with a single token', function () {
+        context('with a single token with single approval', function () {
           shouldTransferTokenToRecipient(transferFn, [nft1], undefined, safe);
+        });
+        context('with a single token without single approval', function () {
+          const hasSingleApproval = false;
+          shouldTransferTokenToRecipient(transferFn, [nft3], undefined, safe, hasSingleApproval);
         });
         context('with a list of tokens from the same collection', function () {
           shouldTransferTokenToRecipient(transferFn, [nft1, nft2], undefined, safe);
@@ -443,7 +456,13 @@ function shouldBehaveLikeERC721Standard({nfMaskLength, contractName, revertMessa
         };
         const safe = true;
         shouldRevertOnPreconditions(transferFn, safe);
-        shouldTransferTokenToRecipient(transferFn, nft1, undefined, safe);
+        context('for a token with single approval', function () {
+          shouldTransferTokenToRecipient(transferFn, nft1, undefined, safe);
+        });
+        context('for a token without single approval', function () {
+          const hasSingleApproval = false;
+          shouldTransferTokenToRecipient(transferFn, nft3, undefined, safe, hasSingleApproval);
+        });
       });
 
       describe('safeTransferFrom(address,address,uint256,bytes)', function () {
@@ -452,7 +471,13 @@ function shouldBehaveLikeERC721Standard({nfMaskLength, contractName, revertMessa
         };
         const safe = true;
         shouldRevertOnPreconditions(transferFn, safe);
-        shouldTransferTokenToRecipient(transferFn, nft1, '0x42', safe);
+        context('for a token with single approval', function () {
+          shouldTransferTokenToRecipient(transferFn, nft1, '0x42', safe);
+        });
+        context('for a token without single approval', function () {
+          const hasSingleApproval = false;
+          shouldTransferTokenToRecipient(transferFn, nft3, '0x42', safe, hasSingleApproval);
+        });
       });
     });
 

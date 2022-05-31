@@ -10,7 +10,7 @@ import {MinterRole} from "@animoca/ethereum-contracts-core/contracts/access/Mint
 import {ERC721Simple} from "./../ERC721Simple.sol";
 
 /**
- * @title ERC721 Mock.
+ * @title ERC721 Simple Mock.
  */
 contract ERC721SimpleMock is Recoverable, UsingUniversalForwarding, ERC721Simple, MinterRole {
     constructor(IForwarderRegistry forwarderRegistry, address universalForwarder)
@@ -34,16 +34,32 @@ contract ERC721SimpleMock is Recoverable, UsingUniversalForwarding, ERC721Simple
         _mint(to, tokenId);
     }
 
-    /**
-     * Burns a token.
-     * @dev Reverts if the sender is not a minter.
-     * @dev Reverts if `tokenId` does not exist.
-     * @dev Emits an {IERC721-Transfer} event to the zero address.
-     * @param tokenId Identifier of the token to burn.
-     */
-    function burn(uint256 tokenId) external {
+    function safeMint(
+        address to,
+        uint256 tokenId
+    ) external {
+        address operator = _msgSender();
+        _requireMinter(operator);
+        _safeMint(operator, to, tokenId);
+    }
+
+    function safeMint(
+        address to,
+        uint256 tokenId,
+        bytes calldata data
+    ) external {
+        address operator = _msgSender();
+        _requireMinter(operator);
+        _safeMint(operator, to, tokenId, data);
+    }
+
+    function burn(address from, uint256 tokenId) external {
         _requireMinter(_msgSender());
-        _burn(tokenId);
+        _burnToken(ownerOf(tokenId), from, tokenId);
+    }
+
+    function burnFrom(address from, uint256 tokenId) external {
+        _burnFrom(from, tokenId);
     }
 
     //======================================== Meta Transactions Internal Functions =========================================//

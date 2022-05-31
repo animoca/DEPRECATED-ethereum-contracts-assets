@@ -22,7 +22,7 @@ const implementation = {
 
     // ERC1155Inventory
     ExistingCollection: 'Inventory: existing collection',
-    ExistingOrBurntNFT: 'Inventory: existing/burnt NFT',
+    ExistingNFT: 'Inventory: existing/burnt NFT',
     NotCollection: 'Inventory: not a collection',
     NotToken: 'Inventory: not a token id',
     NonExistingNFT: 'Inventory: non-existing NFT',

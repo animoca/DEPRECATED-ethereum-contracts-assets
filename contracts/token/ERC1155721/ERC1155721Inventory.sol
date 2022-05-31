@@ -9,7 +9,11 @@ import {IERC721} from "./../ERC721/interfaces/IERC721.sol";
 import {IERC721Metadata} from "./../ERC721/interfaces/IERC721Metadata.sol";
 import {IERC721BatchTransfer} from "./../ERC721/interfaces/IERC721BatchTransfer.sol";
 import {IERC721Receiver} from "./../ERC721/interfaces/IERC721Receiver.sol";
+import {IERC1155} from "./../ERC1155/interfaces/IERC1155.sol";
+import {IERC1155Inventory} from "./../ERC1155/interfaces/IERC1155Inventory.sol";
 import {IERC1155MetadataURI} from "./../ERC1155/interfaces/IERC1155MetadataURI.sol";
+import {IERC1155InventoryFunctions} from "./../ERC1155/interfaces/IERC1155InventoryFunctions.sol";
+import {IERC1155InventoryTotalSupply} from "./../ERC1155/interfaces/IERC1155InventoryTotalSupply.sol";
 import {IERC1155TokenReceiver} from "./../ERC1155/interfaces/IERC1155TokenReceiver.sol";
 import {IERC1155Inventory} from "./../ERC1155/interfaces/IERC1155Inventory.sol";
 import {IERC1155721Inventory} from "./interfaces/IERC1155721Inventory.sol";
@@ -48,10 +52,14 @@ abstract contract ERC1155721Inventory is IERC1155721Inventory, IERC721Metadata, 
     /// @inheritdoc IERC165
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
         return
+            interfaceId == type(IERC165).interfaceId ||
             interfaceId == type(IERC721).interfaceId ||
             interfaceId == type(IERC721Metadata).interfaceId ||
             interfaceId == type(IERC721BatchTransfer).interfaceId ||
-            super.supportsInterface(interfaceId);
+            interfaceId == type(IERC1155).interfaceId ||
+            interfaceId == type(IERC1155MetadataURI).interfaceId ||
+            interfaceId == type(IERC1155InventoryFunctions).interfaceId ||
+            interfaceId == type(IERC1155InventoryTotalSupply).interfaceId;
     }
 
     //=================================================== ERC721Metadata ====================================================//
@@ -672,12 +680,12 @@ abstract contract ERC1155721Inventory is IERC1155721Inventory, IERC721Metadata, 
     /**
      * Queries whether a contract implements ERC1155TokenReceiver.
      * @param _contract address of the contract.
-     * @return wheter the given contract implements ERC1155TokenReceiver.
+     * @return whether the given contract implements ERC1155TokenReceiver.
      */
     function _isERC1155TokenReceiver(address _contract) internal view returns (bool) {
         bool success;
         bool result;
-        bytes memory staticCallData = abi.encodeWithSelector(type(IERC165).interfaceId, type(IERC1155TokenReceiver).interfaceId);
+        bytes memory staticCallData = abi.encodeWithSelector(IERC165.supportsInterface.selector, type(IERC1155TokenReceiver).interfaceId);
         assembly {
             let call_ptr := add(0x20, staticCallData)
             let call_size := mload(staticCallData)
@@ -686,6 +694,7 @@ abstract contract ERC1155721Inventory is IERC1155721Inventory, IERC721Metadata, 
             success := staticcall(10000, _contract, call_ptr, call_size, output, 0x20) // 32 bytes
             result := mload(output)
         }
+        // https://medium.com/@wighawag/ethereum-the-concept-of-gas-and-its-dangers-28d0eb809bb2
         // (10000 / 63) "not enough for supportsInterface(...)" // consume all gas, so caller can potentially know that there was not enough gas
         assert(gasleft() > 158);
         return success && result;

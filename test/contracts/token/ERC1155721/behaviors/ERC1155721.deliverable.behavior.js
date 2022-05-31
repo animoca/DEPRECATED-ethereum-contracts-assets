@@ -302,7 +302,7 @@ function shouldBehaveLikeERC1155721Deliverable({
 
         it('reverts with an existing Non-Fungible Token', async function () {
           await safeDeliver(this.token, [owner], [unknownNft], [1], data, options);
-          await expectRevert(safeDeliver(this.token, [owner], [unknownNft], [1], data, options), revertMessages.ExistingOrBurntNFT);
+          await expectRevert(safeDeliver(this.token, [owner], [unknownNft], [1], data, options), revertMessages.ExistingNFT);
         });
 
         if (interfaces.ERC1155Inventory) {

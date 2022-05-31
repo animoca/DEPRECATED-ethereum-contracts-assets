@@ -37,11 +37,10 @@ const implementation = {
     PermitInvalid: 'ERC20: invalid permit',
 
     // ERC20Mintable
-    MintToZero: 'ERC20: zero address',
+    MintToZero: 'ERC20: mint to zero',
     BatchMintValuesOverflow: 'ERC20: values overflow',
 
     // ERC20Burnable
-    BurnFromZero: 'ERC20: insufficient balance',
     BurnExceedsBalance: 'ERC20: insufficient balance',
     BurnExceedsAllowance: 'ERC20: insufficient allowance',
     BatchBurnValuesOverflow: 'ERC20: insufficient balance',

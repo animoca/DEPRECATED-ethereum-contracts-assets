@@ -4,6 +4,10 @@ pragma solidity >=0.7.6 <0.8.0;
 
 import {ERC1155InventoryIdentifiersLib} from "./ERC1155InventoryIdentifiersLib.sol";
 import {IERC165} from "@animoca/ethereum-contracts-core/contracts/introspection/IERC165.sol";
+import {IERC1155} from "./interfaces/IERC1155.sol";
+import {IERC1155MetadataURI} from "./interfaces/IERC1155MetadataURI.sol";
+import {IERC1155InventoryFunctions} from "./interfaces/IERC1155InventoryFunctions.sol";
+import {IERC1155InventoryTotalSupply} from "./interfaces/IERC1155InventoryTotalSupply.sol";
 import {IERC1155InventoryBurnable} from "./interfaces/IERC1155InventoryBurnable.sol";
 import {ERC1155Inventory} from "./ERC1155Inventory.sol";
 
@@ -20,7 +24,13 @@ abstract contract ERC1155InventoryBurnable is IERC1155InventoryBurnable, ERC1155
 
     /// @inheritdoc IERC165
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
-        return interfaceId == type(IERC1155InventoryBurnable).interfaceId || super.supportsInterface(interfaceId);
+        return
+            interfaceId == type(IERC165).interfaceId ||
+            interfaceId == type(IERC1155).interfaceId ||
+            interfaceId == type(IERC1155MetadataURI).interfaceId ||
+            interfaceId == type(IERC1155InventoryFunctions).interfaceId ||
+            interfaceId == type(IERC1155InventoryTotalSupply).interfaceId ||
+            interfaceId == type(IERC1155InventoryBurnable).interfaceId;
     }
 
     //============================================== ERC1155InventoryBurnable ===============================================//

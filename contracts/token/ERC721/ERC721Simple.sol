@@ -15,21 +15,19 @@ import {ManagedIdentity} from "@animoca/ethereum-contracts-core/contracts/metatx
 contract ERC721Simple is ManagedIdentity, IERC165, IERC721, IERC721Events {
     using AddressIsContract for address;
 
-    bytes4 internal constant _ERC721_RECEIVED = type(IERC721Receiver).interfaceId;
-
     uint256 internal constant _APPROVAL_BIT_TOKEN_OWNER_ = 1 << 160;
 
     /* owner => operator => approved */
     mapping(address => mapping(address => bool)) internal _operators;
 
-    /* NFT ID => owner */
+    /* tokenId => owner */
     mapping(uint256 => uint256) internal _owners;
 
-    /* owner => NFT balance */
-    mapping(address => uint256) internal _nftBalances;
+    /* owner => balance */
+    mapping(address => uint256) internal _balances;
 
-    /* NFT ID => operator */
-    mapping(uint256 => address) internal _nftApprovals;
+    /* tokenId => operator */
+    mapping(uint256 => address) internal _approvals;
 
     //======================================================= ERC165 ========================================================//
 
@@ -43,7 +41,7 @@ contract ERC721Simple is ManagedIdentity, IERC165, IERC721, IERC721Events {
     /// @inheritdoc IERC721
     function balanceOf(address owner) public view virtual override returns (uint256) {
         require(owner != address(0), "ERC721: zero address");
-        return _nftBalances[owner];
+        return _balances[owner];
     }
 
     /// @inheritdoc IERC721
@@ -71,7 +69,7 @@ contract ERC721Simple is ManagedIdentity, IERC165, IERC721, IERC721Events {
                 // add the approval bit if it is not present
                 _owners[tokenId] = ownerWithApprovalBit;
             }
-            _nftApprovals[tokenId] = to;
+            _approvals[tokenId] = to;
         }
         emit Approval(ownerAddress, to, tokenId);
     }
@@ -81,7 +79,7 @@ contract ERC721Simple is ManagedIdentity, IERC165, IERC721, IERC721Events {
         uint256 owner = _owners[tokenId];
         require(address(uint160(owner)) != address(0), "ERC721: non-existing NFT");
         if (owner & _APPROVAL_BIT_TOKEN_OWNER_ != 0) {
-            return _nftApprovals[tokenId];
+            return _approvals[tokenId];
         } else {
             return address(0);
         }
@@ -106,14 +104,7 @@ contract ERC721Simple is ManagedIdentity, IERC165, IERC721, IERC721Events {
         address to,
         uint256 tokenId
     ) public virtual override {
-        _transferFrom(
-            from,
-            to,
-            tokenId,
-            "",
-            /* safe */
-            false
-        );
+        _transferFrom(_msgSender(), from, to, tokenId);
     }
 
     /// @inheritdoc IERC721
@@ -122,14 +113,14 @@ contract ERC721Simple is ManagedIdentity, IERC165, IERC721, IERC721Events {
         address to,
         uint256 tokenId
     ) public virtual override {
-        _transferFrom(
-            from,
-            to,
-            tokenId,
-            "",
-            /* safe */
-            true
-        );
+        address operator = _msgSender();
+        _transferFrom(operator, from, to, tokenId);
+        if (to.isContract()) {
+            require(
+                IERC721Receiver(to).onERC721Received(operator, from, tokenId, "") == IERC721Receiver.onERC721Received.selector,
+                "ERC721: transfer refused"
+            );
+        }
     }
 
     /// @inheritdoc IERC721
@@ -137,75 +128,97 @@ contract ERC721Simple is ManagedIdentity, IERC165, IERC721, IERC721Events {
         address from,
         address to,
         uint256 tokenId,
-        bytes memory data
+        bytes calldata data
     ) public virtual override {
-        _transferFrom(
-            from,
-            to,
-            tokenId,
-            data,
-            /* safe */
-            true
-        );
+        address operator = _msgSender();
+        _transferFrom(operator, from, to, tokenId);
+        if (to.isContract()) {
+            require(
+                IERC721Receiver(to).onERC721Received(operator, from, tokenId, data) == IERC721Receiver.onERC721Received.selector,
+                "ERC721: transfer refused"
+            );
+        }
     }
 
     //============================================ High-level Internal Functions ============================================//
 
     function _transferFrom(
+        address operator,
         address from,
         address to,
-        uint256 tokenId,
-        bytes memory data,
-        bool safe
+        uint256 tokenId
     ) internal virtual {
         require(to != address(0), "ERC721: transfer to zero");
-        address sender = _msgSender();
-        bool operatable = _isOperatable(from, sender);
 
         uint256 owner = _owners[tokenId];
-        require(from == address(uint160(owner)), "ERC721: non-owned NFT");
-        if (!operatable) {
-            require((owner & _APPROVAL_BIT_TOKEN_OWNER_ != 0) && _msgSender() == _nftApprovals[tokenId], "ERC721: non-approved sender");
+        if (!_isOperatable(from, operator)) {
+            require((owner & _APPROVAL_BIT_TOKEN_OWNER_ != 0) && operator == _approvals[tokenId], "ERC721: non-approved sender");
         }
-        _owners[tokenId] = uint256(uint160(to));
+
+        require(from == address(uint160(owner)), "ERC721: non-owned NFT");
 
         if (from != to) {
+            _owners[tokenId] = uint256(uint160(to));
             // cannot underflow as balance is verified through ownership
-            --_nftBalances[from];
-            //  cannot overflow as supply cannot overflow
-            ++_nftBalances[to];
+            --_balances[from];
+            // cannot overflow due to the cost of minting individual tokens
+            ++_balances[to];
+        } else if (owner & _APPROVAL_BIT_TOKEN_OWNER_ != 0) {
+            // reset the approval
+            _owners[tokenId] = uint256(uint160(to));
         }
 
         emit Transfer(from, to, tokenId);
-
-        if (safe && to.isContract()) {
-            require(IERC721Receiver(to).onERC721Received(_msgSender(), from, tokenId, data) == _ERC721_RECEIVED, "ERC721: transfer refused");
-        }
     }
 
     function _mint(address to, uint256 tokenId) internal virtual {
         require(to != address(0), "ERC721: mint to zero");
-        require(_owners[tokenId] == 0, "ERC721: existing NFT");
-
+        _requireMintable(tokenId);
         _owners[tokenId] = uint256(uint160(to));
 
         // cannot overflow due to the cost of minting individual tokens
-        ++_nftBalances[to];
+        ++_balances[to];
 
         emit Transfer(address(0), to, tokenId);
     }
 
-    function _burn(uint256 tokenId) internal virtual {
-        address owner = address(uint160(_owners[tokenId]));
+    function _safeMint(
+        address operator,
+        address to,
+        uint256 tokenId
+    ) internal virtual {
+        _mint(to, tokenId);
+        if (to.isContract()) {
+            require(
+                IERC721Receiver(to).onERC721Received(operator, address(0), tokenId, "") == IERC721Receiver.onERC721Received.selector,
+                "ERC721: transfer refused"
+            );
+        }
+    }
 
-        require(owner != address(0), "ERC721: non-existing NFT");
+    function _safeMint(
+        address operator,
+        address to,
+        uint256 tokenId,
+        bytes calldata data
+    ) internal virtual {
+        _mint(to, tokenId);
+        if (to.isContract()) {
+            require(
+                IERC721Receiver(to).onERC721Received(operator, address(0), tokenId, data) == IERC721Receiver.onERC721Received.selector,
+                "ERC721: transfer refused"
+            );
+        }
+    }
 
-        _owners[tokenId] = 0;
+    function _burnFrom(address from, uint256 tokenId) internal virtual {
+        uint256 owner = _owners[tokenId];
+        address operator = _msgSender();
+        if (!_isOperatable(from, operator)) {
+            require((owner & _APPROVAL_BIT_TOKEN_OWNER_ != 0) && operator == _approvals[tokenId], "ERC721: non-approved sender");
+        }
 
-        // cannot underflow as balance is verified through NFT ownership
-        --_nftBalances[owner];
-
-        emit Transfer(owner, address(0), tokenId);
+        _burnToken(address(uint160(owner)), from, tokenId);
     }
 
     //============================================== Internal Helper Functions ==============================================//
@@ -216,7 +229,29 @@ contract ERC721Simple is ManagedIdentity, IERC165, IERC721, IERC721Events {
      * @param sender The sender address.
      * @return True if sender is `from` or an operator for `from`, false otherwise.
      */
-    function _isOperatable(address from, address sender) internal view returns (bool) {
+    function _isOperatable(address from, address sender) internal view virtual returns (bool) {
         return (from == sender) || _operators[from][sender];
+    }
+
+    function _burnToken(
+        address owner,
+        address from,
+        uint256 tokenId
+    ) internal virtual {
+        require(from == owner, "ERC721: non-owned NFT");
+        _setBurntTokenOwner(tokenId);
+
+        // cannot underflow as balance is verified through NFT ownership
+        --_balances[from];
+
+        emit Transfer(from, address(0), tokenId);
+    }
+
+    function _requireMintable(uint256 tokenId) internal virtual {
+        require(_owners[tokenId] == 0, "ERC721: existing NFT");
+    }
+
+    function _setBurntTokenOwner(uint256 tokenId) internal virtual {
+        _owners[tokenId] = 0;
     }
 }

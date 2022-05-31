@@ -231,19 +231,27 @@ function shouldBehaveLikeERC1155Mintable({contractName, nfMaskLength, revertMess
           await expectRevert(mintFunction.call(this, other, fCollection1.id, 0, data, options), revertMessages.ZeroValue);
         });
 
-        it('reverts if a Fungible Token has an overflowing supply', async function () {
-          await expectRevert(mintFunction.call(this, other, unknownFCollection.id, 1, data, options), revertMessages.SupplyOverflow);
-        });
+        if (interfaces.ERC1155InventoryTotalSupply) {
+          it('[ERC1155InventoryTotalSupply] reverts if a Fungible Token has an overflowing supply', async function () {
+            await expectRevert(mintFunction.call(this, other, unknownFCollection.id, 1, data, options), revertMessages.SupplyOverflow);
+          });
+        } else {
+          it('reverts if a Fungible Token has an overflowing balance', async function () {
+            await expectRevert(mintFunction.call(this, other, unknownFCollection.id, 1, data, options), revertMessages.BalanceOverflow);
+          });
+        }
 
-        it('reverts if a Non-Fungible Token has a value different from 1', async function () {
-          await expectRevert(mintFunction.call(this, other, nft1, 0, data, options), revertMessages.WrongNFTValue);
-          await expectRevert(mintFunction.call(this, other, nft1, 2, data, options), revertMessages.WrongNFTValue);
-        });
+        if (interfaces.ERC1155Inventory || interfaces.ERC721) {
+          it('[ERC721/ERC1155Inventory] reverts if a Non-Fungible Token has a value different from 1', async function () {
+            await expectRevert(mintFunction.call(this, other, nft1, 0, data, options), revertMessages.WrongNFTValue);
+            await expectRevert(mintFunction.call(this, other, nft1, 2, data, options), revertMessages.WrongNFTValue);
+          });
 
-        it('reverts with an existing Non-Fungible Token', async function () {
-          await mintFunction.call(this, owner, unknownNft, 1, data, options);
-          await expectRevert(mintFunction.call(this, owner, unknownNft, 1, data, options), revertMessages.ExistingOrBurntNFT);
-        });
+          it('[ERC721/ERC1155Inventory] reverts with an existing Non-Fungible Token', async function () {
+            await mintFunction.call(this, owner, unknownNft, 1, data, options);
+            await expectRevert(mintFunction.call(this, owner, unknownNft, 1, data, options), revertMessages.ExistingNFT);
+          });
+        }
 
         if (interfaces.ERC1155Inventory) {
           it('[ERC1155Inventory] reverts if the id is a Non-Fungible Collection', async function () {
