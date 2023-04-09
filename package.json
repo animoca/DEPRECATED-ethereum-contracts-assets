@@ -16,7 +16,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git@github.com:animoca/ethereum-contracts-assets.git"
+    "url": "git@github.com:animoca/DEPRECATED-ethereum-contracts-assets.git"
   },
   "main": "src/index.js",
   "scripts": {

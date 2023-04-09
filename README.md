@@ -1,4 +1,14 @@
-# Solidity Assets
+# DEPRECATED - Solidity Assets
+
+## Deprecation notice
+
+This repository is now deprecated and not maintained any longer. Use the new Animoca's Solidity libraries instead:
+
+- Core contracts: <https://github.com/animoca/ethereum-contracts>
+- Assets bridging contracts: <https://github.com/animoca/ethereum-contracts-bridging>
+- Project template: <https://github.com/animoca/template-ethereum-contracts>
+
+## Introduction
 
 [![Coverage Status](https://codecov.io/gh/animoca/ethereum-contracts-assets/graph/badge.svg)](https://codecov.io/gh/animoca/ethereum-contracts-assets)
 
